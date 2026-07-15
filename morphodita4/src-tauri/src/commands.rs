@@ -1,5 +1,5 @@
+use crate::db::{self, DbState, MorphologicalData, Session};
 use tauri::State;
-use crate::db::{self, DbState, Session, MorphologicalData};
 
 #[tauri::command]
 pub fn create_session(
@@ -93,10 +93,7 @@ pub fn word_form_exists(
 }
 
 #[tauri::command]
-pub fn get_session(
-    state: State<'_, DbState>,
-    id: i64,
-) -> std::result::Result<Session, String> {
+pub fn get_session(state: State<'_, DbState>, id: i64) -> std::result::Result<Session, String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
         db::get_session(conn, id).map_err(|e| e.to_string())
@@ -106,10 +103,7 @@ pub fn get_session(
 }
 
 #[tauri::command]
-pub fn delete_session(
-    state: State<'_, DbState>,
-    id: i64,
-) -> std::result::Result<(), String> {
+pub fn delete_session(state: State<'_, DbState>, id: i64) -> std::result::Result<(), String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
         db::delete_session(conn, id).map_err(|e| e.to_string())
@@ -132,7 +126,10 @@ pub fn search_lemmas(
 }
 
 #[tauri::command]
-pub fn start_morphodita_server(model_dir: String, port: u16) -> std::result::Result<String, String> {
+pub fn start_morphodita_server(
+    model_dir: String,
+    port: u16,
+) -> std::result::Result<String, String> {
     Err("Sidecar managed from frontend".to_string())
 }
 

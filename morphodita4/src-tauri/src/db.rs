@@ -1,7 +1,7 @@
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
 use std::path::PathBuf;
+use std::sync::Mutex;
 use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,9 +37,12 @@ pub struct DbState {
 }
 
 pub fn init_db(app_handle: &tauri::AppHandle) -> Result<Connection> {
-    let app_dir = app_handle.path().app_data_dir().expect("failed to get app data dir");
+    let app_dir = app_handle
+        .path()
+        .app_data_dir()
+        .expect("failed to get app data dir");
     std::fs::create_dir_all(&app_dir).expect("failed to create app data dir");
-    
+
     let db_path: PathBuf = app_dir.join("morphodita.db");
     let conn = Connection::open(db_path)?;
 
@@ -78,11 +81,23 @@ pub fn init_db(app_handle: &tauri::AppHandle) -> Result<Connection> {
     )?;
 
     // Create indexes
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status)", [])?;
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at)", [])?;
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_model ON sessions(model)", [])?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sessions_model ON sessions(model)",
+        [],
+    )?;
     conn.execute("CREATE INDEX IF NOT EXISTS idx_morphological_data_session_id ON morphological_data(session_id)", [])?;
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma ON morphological_data(lemma)", [])?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma ON morphological_data(lemma)",
+        [],
+    )?;
     conn.execute("CREATE INDEX IF NOT EXISTS idx_morphological_data_source_type ON morphological_data(source_type)", [])?;
     conn.execute("CREATE INDEX IF NOT EXISTS idx_morphological_data_generated_form ON morphological_data(generated_form)", [])?;
     conn.execute("CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma_tag ON morphological_data(lemma, tag)", [])?;
@@ -142,16 +157,19 @@ pub fn update_session_status(
     Ok(())
 }
 
-pub fn insert_morphological_data(conn: &mut Connection, data: Vec<MorphologicalData>) -> Result<usize> {
+pub fn insert_morphological_data(
+    conn: &mut Connection,
+    data: Vec<MorphologicalData>,
+) -> Result<usize> {
     let tx = conn.transaction()?;
     let mut count = 0;
-    
+
     {
         let mut stmt = tx.prepare(
             "INSERT INTO morphological_data (source_type, original_form, lemma, tag, generated_form, probability, session_id) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
         )?;
-        
+
         for item in data {
             stmt.execute(params![
                 item.source_type,
@@ -165,17 +183,21 @@ pub fn insert_morphological_data(conn: &mut Connection, data: Vec<MorphologicalD
             count += 1;
         }
     }
-    
+
     tx.commit()?;
     Ok(count)
 }
 
-pub fn get_sessions(conn: &Connection, limit: Option<i32>, offset: Option<i32>) -> Result<Vec<Session>> {
+pub fn get_sessions(
+    conn: &Connection,
+    limit: Option<i32>,
+    offset: Option<i32>,
+) -> Result<Vec<Session>> {
     let mut stmt = conn.prepare("SELECT id, operation, model, input_text, parameters, result_count, processing_time, status, error_message, created_at, completed_at FROM sessions ORDER BY created_at DESC LIMIT ?1 OFFSET ?2")?;
-    
+
     let l = limit.unwrap_or(100);
     let o = offset.unwrap_or(0);
-    
+
     let session_iter = stmt.query_map(params![l, o], |row| {
         Ok(Session {
             id: row.get(0)?,
@@ -199,9 +221,12 @@ pub fn get_sessions(conn: &Connection, limit: Option<i32>, offset: Option<i32>) 
     Ok(sessions)
 }
 
-pub fn get_morphological_data(conn: &Connection, session_id: i64) -> Result<Vec<MorphologicalData>> {
+pub fn get_morphological_data(
+    conn: &Connection,
+    session_id: i64,
+) -> Result<Vec<MorphologicalData>> {
     let mut stmt = conn.prepare("SELECT id, source_type, original_form, lemma, tag, generated_form, probability, session_id, created_at FROM morphological_data WHERE session_id = ?1")?;
-    
+
     let data_iter = stmt.query_map(params![session_id], |row| {
         Ok(MorphologicalData {
             id: row.get(0)?,
@@ -227,7 +252,7 @@ pub fn word_form_exists(conn: &Connection, word: &str) -> Result<bool> {
     let mut stmt = conn.prepare(
         "SELECT 1 FROM morphological_data 
          WHERE original_form = ?1 OR generated_form = ?1 
-         LIMIT 1"
+         LIMIT 1",
     )?;
     let exists = stmt.exists(params![word])?;
     Ok(exists)
