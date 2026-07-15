@@ -5,19 +5,20 @@ import { useApiStore } from '../store/useApiStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/common';
 import { Sun, Moon, Monitor, Globe, Info } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import type { AppState } from '../types/common';
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { theme, setTheme, language, setLanguage, useOfflineMode, setUseOfflineMode, apiBatchSize, setApiBatchSize } = useAppStore();
 
-  const themeOptions = [
+  const themeOptions: Array<{ value: AppState['theme']; label: string; icon: React.ReactNode }> = [
     { value: 'light', label: t('settings.themes.light'), icon: <Sun className="w-4 h-4" /> },
     { value: 'dark', label: t('settings.themes.dark'), icon: <Moon className="w-4 h-4" /> },
     { value: 'system', label: t('settings.themes.system'), icon: <Monitor className="w-4 h-4" /> },
   ];
 
-  const languageOptions = [
+  const languageOptions: Array<{ value: AppState['language']; label: string }> = [
     { value: 'cs', label: 'Čeština' },
     { value: 'en', label: 'English' },
     { value: 'pl', label: 'Polski' },
@@ -41,7 +42,7 @@ export const SettingsPage: React.FC = () => {
                 {themeOptions.map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setTheme(option.value as any)}
+                    onClick={() => setTheme(option.value)}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
                       theme === option.value
                         ? 'bg-primary text-primary-foreground border-primary shadow-md'
@@ -68,7 +69,7 @@ export const SettingsPage: React.FC = () => {
                 {languageOptions.map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setLanguage(option.value as any)}
+                    onClick={() => setLanguage(option.value)}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
                       language === option.value
                         ? 'bg-primary text-primary-foreground border-primary shadow-md'
@@ -97,8 +98,7 @@ export const SettingsPage: React.FC = () => {
                     checked={useOfflineMode}
                     onChange={(e) => {
                       setUseOfflineMode(e.target.checked);
-                      const { setModels } = useApiStore.getState();
-                      setModels({});
+                      useApiStore.getState().invalidateModels();
                     }}
                     className="w-4 h-4 accent-primary"
                   />

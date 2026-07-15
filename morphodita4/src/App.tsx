@@ -9,7 +9,6 @@ import { AboutPage } from './pages/AboutPage';
 import { DatabaseEditorPage } from './pages/DatabaseEditorPage';
 import { useAppStore } from './store/useAppStore';
 import { useApiStore } from './store/useApiStore';
-import { MorphoDiTaAPI } from './services/api';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 // Simple Layout wrapper
@@ -40,24 +39,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   // Initial load effect
   useEffect(() => {
-    const checkModels = async () => {
-      const { models, setModels, setSelectedModel, selectedModel } = useApiStore.getState();
-      if (Object.keys(models).length === 0) {
-        try {
-          const response = await MorphoDiTaAPI.getModels();
-          setModels(response.models);
-          
-          const modelKeys = Object.keys(response.models);
-          if (modelKeys.length > 0 && !selectedModel) {
-            const czechModel = modelKeys.find(key => key.includes('czech'));
-            setSelectedModel(czechModel || modelKeys[0]);
-          }
-        } catch (err) {
-          console.error('Initial model fetch failed:', err);
-        }
-      }
-    };
-    checkModels();
+    const { models, refreshModels } = useApiStore.getState();
+    if (Object.keys(models).length === 0) void refreshModels();
   }, []);
 
   const isActive = (path: string) => location.pathname === path;
