@@ -10,15 +10,27 @@ describe('MorphoDiTaAPI', () => {
   });
 
   it('getModels successfully fetches models', async () => {
-    const mockResponse = { models: { 'model1': {} }, acknowledgements: [] };
+    const mockResponse = { models: { 'czech-model1': ['tag', 'analyze'] }, acknowledgements: [] };
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
 
     const result = await MorphoDiTaAPI.getModels();
-    expect(result).toEqual(mockResponse);
-    expect(mockFetch).toHaveBeenCalledWith('https://lindat.mff.cuni.cz/services/morphodita/api/models', {});
+    expect(result).toEqual({
+      models: {
+        'czech-model1': {
+          name: 'czech-model1',
+          language: 'Czech',
+          description: 'model1',
+          capabilities: ['tag', 'analyze'],
+        },
+      },
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://lindat.mff.cuni.cz/services/morphodita/api/models?output=json',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('handles API errors gracefully with retry', async () => {
