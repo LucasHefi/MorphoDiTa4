@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { DatabaseService } from '../../services/database';
 import { Session, MorphologicalData } from '../../types/database';
-import { cn } from '../common/Button';
+import { cn } from '../common/utils';
 
 type TableType = 'sessions' | 'morphological_data';
 

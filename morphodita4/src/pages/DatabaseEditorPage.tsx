@@ -4,7 +4,7 @@ import { DatabaseService } from '../services/database';
 import { Session, MorphologicalData } from '../types/database';
 import { DatabaseTable } from '../components/database/DatabaseTable';
 import { Button, Input } from '../components/common';
-import { cn } from '../components/common/Button';
+import { cn } from '../components/common/utils';
 import { RefreshCw, Search, Trash2, X } from 'lucide-react';
 
 type TableType = 'sessions' | 'morphological_data';

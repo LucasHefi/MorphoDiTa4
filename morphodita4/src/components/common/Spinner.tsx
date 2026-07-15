@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './Button';
+import { cn } from './utils';
 import { Loader2 } from 'lucide-react';
 
 export interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {

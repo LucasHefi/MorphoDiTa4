@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { cn } from './Button';
+import { cn } from './utils';
 
 export interface Tab {
   id: string;

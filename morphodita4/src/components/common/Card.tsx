@@ -1,5 +1,5 @@
 import React, { HTMLAttributes } from 'react';
-import { cn } from './Button';
+import { cn } from './utils';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   glass?: boolean;

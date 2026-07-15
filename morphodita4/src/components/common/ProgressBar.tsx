@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './Button';
+import { cn } from './utils';
 
 export interface ProgressBarProps {
   progress: number; // 0 to 100
