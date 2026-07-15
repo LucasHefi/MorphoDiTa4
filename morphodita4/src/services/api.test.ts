@@ -34,14 +34,25 @@ describe('MorphoDiTaAPI', () => {
   });
 
   it('handles API errors gracefully with retry', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: false, status: 500 })
-      .mockResolvedValueOnce({ ok: false, status: 500 })
-      .mockResolvedValueOnce({ ok: false, status: 500 })
-      .mockResolvedValueOnce({ ok: false, status: 500 }); // 4th call fails
+    vi.useFakeTimers();
+    const serverError = {
+      ok: false,
+      status: 500,
+      text: async () => 'temporary server error',
+    };
+    mockFetch.mockResolvedValue(serverError);
 
-    await expect(MorphoDiTaAPI.getModels()).rejects.toThrow(APIError);
-    expect(mockFetch).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
+    try {
+      const request = MorphoDiTaAPI.getModels();
+      const rejection = expect(request).rejects.toThrow(APIError);
+
+      await vi.runAllTimersAsync();
+      await rejection;
+
+      expect(mockFetch).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('tagText sends correct parameters', async () => {
