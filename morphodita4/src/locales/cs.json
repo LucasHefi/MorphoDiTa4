@@ -1,0 +1,226 @@
+{
+  "common": {
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "offline": "Offline"
+  },
+  "nav": {
+    "analyzer": "Analýza",
+    "wizard": "Průvodce",
+    "settings": "Nastavení",
+    "about": "O programu",
+    "database": "Databáze"
+  },
+  "home": {
+    "title": "MorphoDiTa Client",
+    "subtitle": "Morfologická analýza českého jazyka",
+    "modelSelection": "Výběr modelu",
+    "analyzer": {
+      "title": "Analyzátor",
+      "description": "Základní i pokročilá morfologická analýza textu"
+    },
+    "wizard": {
+      "title": "Průvodce Klíčových Slov",
+      "description": "Hromadné zpracování slov s generováním forem a filtry"
+    },
+    "recent_activity": "Nedávná aktivita",
+    "table": {
+      "name": "Název",
+      "items": "Položek",
+      "status": "Stav",
+      "date": "Datum"
+    }
+  },
+  "analyzer": {
+    "model_select": "Vyberte model",
+    "advanced_options": "Pokročilé volby",
+    "guesser": "Použít guesser",
+    "input_format": "Formát vstupu",
+    "input_untokenized": "Netokenizovaný",
+    "input_vertical": "Vertikální",
+    "derivation": "Derivace",
+    "convert_tagset": "Konvertovat tagset",
+    "batchingNote": "Dlouhý vstup bude zpracován po dávkách.",
+    "operations": {
+      "tag": "Tagovat",
+      "analyze": "Analyzovat",
+      "generate": "Generovat",
+      "tokenize": "Tokenizovat"
+    },
+    "input_placeholder": "Zadejte text k analýze...",
+    "process": "Zpracovat",
+    "results_title": "Výsledek",
+    "no_result_placeholder": "Zadejte text a spusťte analýzu pro zobrazení výsledků."
+  },
+  "wizard": {
+    "steps": {
+      "input": "Zadání",
+      "processing": "Zpracování",
+      "results": "Výsledky",
+      "summary": "Souhrn"
+    },
+    "next": "Další",
+    "back": "Zpět",
+    "input_title": "Zadejte klíčová slova",
+    "import_txt": "Import TXT",
+    "input_description": "Vložte text nebo seznam slov oddělených mezerou, čárkou, nebo novým řádkem.",
+    "input_placeholder": "Např: pes kočka myš..."
+  },
+  "settings": {
+    "title": "Nastavení aplikace",
+    "theme": "Téma",
+    "language": "Jazyk",
+    "themes": {
+      "light": "Světlé",
+      "dark": "Tmavé",
+      "system": "Systémové"
+    },
+    "offlineMode": "Offline mód",
+    "offlineModeDesc": "Načítat seznam modelů z lokální složky místo API",
+    "batchSize": "Velikost dávky pro API",
+    "batchSizeDesc": "Max. slov na jeden požadavek API (výchozí 50)",
+    "aboutLink": "O programu",
+    "installType": "Typ instalace",
+    "databaseEditor": "Databázový editor"
+  },
+  "database": {
+    "title": "Databázový editor",
+    "description": "Prohlížení a úprava databázových záznamů.",
+    "table": {
+      "sessions": "Relace",
+      "morphological_data": "Morfologická data"
+    },
+    "searchPlaceholder": "Hledat...",
+    "search": "Hledat",
+    "refresh": "Obnovit",
+    "delete": "Smazat vybrané"
+  },
+  "tagset": {
+    "unknown": "Neznámý '{{val}}'",
+    "unknown_tag": "Neznámý tag",
+    "wordClass": {
+      "N": "Podstatné jméno",
+      "V": "Sloveso",
+      "A": "Přídavné jméno",
+      "P": "Zájmeno",
+      "C": "Číslovka",
+      "D": "Příslovce",
+      "R": "Předložka",
+      "J": "Spojka",
+      "T": "Částice",
+      "I": "Citoslovce",
+      "Z": "Zkratka",
+      "X": "Cizí slovo"
+    },
+    "subtype": {
+      "noun": {
+        "N": "Obecné",
+        "H": "Vlastní"
+      },
+      "verb": {
+        "B": "Být",
+        "c": "Modální",
+        "e": "Fázové",
+        "f": "Frekventativum",
+        "i": "Iterativum",
+        "p": "Perfektivum",
+        "q": "Frekventativum (impf)",
+        "t": "Faktitivum",
+        "w": "Reflexivní",
+        "I": "Imperfektivum",
+        "F": "Futurum",
+        "R": "Preteritum"
+      },
+      "adj": {
+        "2": "Stupňovatelné",
+        "N": "Nestupňovatelné",
+        "W": "Přivlastňovací"
+      },
+      "pron": {
+        "1": "Osobní",
+        "2": "Vztažné",
+        "3": "Tázací",
+        "4": "Vztažné/Tázací",
+        "5": "Neurčité",
+        "6": "Záporné",
+        "7": "Vzájemné",
+        "8": "Všeobecně neurčité",
+        "9": "Vztažné/Tázací"
+      }
+    },
+    "gender": {
+      "M": "Mužský životný",
+      "F": "Ženský",
+      "N": "Mužský neživotný",
+      "I": "Střední",
+      "Y": "Obourodý",
+      "T": "Rodově neoznačený",
+      "H": "Životný",
+      "Q": "Životný/neživotný",
+      "U": "Neurčitý"
+    },
+    "case": {
+      "1": "1. pád",
+      "2": "2. pád",
+      "3": "3. pád",
+      "4": "4. pád",
+      "5": "5. pád",
+      "6": "6. pád",
+      "7": "7. pád",
+      "X": "Neoznačený",
+      "Y": "Reziduální",
+      "Z": "Homonymie"
+    },
+    "number": {
+      "S": "Jednotné",
+      "P": "Množné",
+      "D": "Duál",
+      "W": "Singuláre tantum",
+      "X": "Neoznačené"
+    },
+    "possessivity": {
+      "none": "Žádná",
+      "title": "Přivlastňovací",
+      "person": {
+        "1": "1. osoba",
+        "2": "2. osoba",
+        "3": "3. osoba"
+      },
+      "number": {
+        "S": "singulár",
+        "P": "plurál",
+        "D": "duál"
+      },
+      "gender": {
+        "M": "mužský živ.",
+        "F": "ženský",
+        "N": "mužský než.",
+        "I": "střední"
+      },
+      "case": {
+        "1": "1. pád",
+        "2": "2. pád",
+        "3": "3. pád",
+        "4": "4. pád",
+        "5": "5. pád",
+        "6": "6. pád",
+        "7": "7. pád"
+      }
+    }
+  },
+  "about": {
+    "title": "O programu",
+    "name": "MorphoDiTa Client",
+    "author": "Autor: Lukáš Hefner (mediamaker.cz)",
+    "license": "Licence: Mozilla Public License 2.0",
+    "version": "Verze: {version}",
+    "description": "Desktopová aplikace pro morfologickou analýzu českého jazyka pomocí nástroje MorphoDiTa.",
+    "tech": "Postaveno na React + Tauri + TypeScript.",
+    "links": "Oficiální stránky: https://ufal.mff.cuni.cz/morphodita"
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "common": {
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "offline": "Offline"
+  },
+  "nav": {
+    "analyzer": "Analiza",
+    "wizard": "Kreator",
+    "settings": "Ustawienia",
+    "about": "O programie",
+    "database": "Baza danych"
+  },
+  "home": {
+    "title": "MorphoDiTa Client",
+    "subtitle": "Analiza morfologiczna języka czeskiego",
+    "modelSelection": "Wybór modelu",
+    "analyzer": {
+      "title": "Analizator",
+      "description": "Podstawowa i zaawansowana analiza morfologiczna tekstu"
+    },
+    "wizard": {
+      "title": "Kreator słów kluczowych",
+      "description": "Masowe przetwarzanie słów z generowaniem form i filtrami"
+    },
+    "recent_activity": "Ostatnia aktywność",
+    "table": {
+      "name": "Nazwa",
+      "items": "Elementy",
+      "status": "Status",
+      "date": "Data"
+    }
+  },
+  "analyzer": {
+    "model_select": "Wybierz model",
+    "advanced_options": "Opcje zaawansowane",
+    "guesser": "Użyj guessera",
+    "input_format": "Format wejściowy",
+    "input_untokenized": "Netokenizowany",
+    "input_vertical": "Wertykalny",
+    "derivation": "Derywacja",
+    "convert_tagset": "Konwertuj tagset",
+    "batchingNote": "Długie wejście będzie przetwarzane partiami.",
+    "operations": {
+      "tag": "Taguj",
+      "analyze": "Analizuj",
+      "generate": "Generuj",
+      "tokenize": "Tokenizuj"
+    },
+    "input_placeholder": "Wprowadź tekst do analizy...",
+    "process": "Przetwarzaj",
+    "results_title": "Wynik",
+    "no_result_placeholder": "Wprowadź tekst i uruchom analizę, aby zobaczyć wyniki."
+  },
+  "wizard": {
+    "steps": {
+      "input": "Wejście",
+      "processing": "Przetwarzanie",
+      "results": "Wyniki",
+      "summary": "Podsumowanie"
+    },
+    "next": "Dalej",
+    "back": "Wstecz",
+    "input_title": "Wprowadź słowa kluczowe",
+    "import_txt": "Importuj TXT",
+    "input_description": "Wstaw tekst lub listę słów oddzielonych spacją, przecinkiem lub nową linią.",
+    "input_placeholder": "np.: pies kot mysz..."
+  },
+  "settings": {
+    "title": "Ustawienia aplikacji",
+    "theme": "Motyw",
+    "language": "Język",
+    "themes": {
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy"
+    },
+    "offlineMode": "Tryb offline",
+    "offlineModeDesc": "Ładuj listę modeli z folderu lokalnego zamiast API",
+    "batchSize": "Rozmiar partii API",
+    "batchSizeDesc": "Maks. słów na żądanie API (domyślnie 50)",
+    "aboutLink": "O programie",
+    "installType": "Typ instalacji",
+    "databaseEditor": "Edytor bazy danych"
+  },
+  "database": {
+    "title": "Edytor bazy danych",
+    "description": "Przeglądanie i edycja rekordów bazy danych.",
+    "table": {
+      "sessions": "Sesje",
+      "morphological_data": "Dane morfologiczne"
+    },
+    "searchPlaceholder": "Szukaj...",
+    "search": "Szukaj",
+    "refresh": "Odśwież",
+    "delete": "Usuń zaznaczone"
+  },
+  "tagset": {
+    "unknown": "Nieznany '{{val}}'",
+    "unknown_tag": "Nieznany tag",
+    "wordClass": {
+      "N": "Rzeczownik",
+      "V": "Czasownik",
+      "A": "Przymiotnik",
+      "P": "Zaimek",
+      "C": "Liczebnik",
+      "D": "Przysłówek",
+      "R": "Przyimek",
+      "J": "Spójnik",
+      "T": "Partuła",
+      "I": "Wykrzyknik",
+      "Z": "Skrót",
+      "X": "Obce słowo"
+    },
+    "subtype": {
+      "noun": {
+        "N": "Pospolity",
+        "H": "Własny"
+      },
+      "verb": {
+        "B": "Być",
+        "c": "Modalny",
+        "e": "Fazowy",
+        "f": "Frequentativum",
+        "i": "Iterativum",
+        "p": "Dokonany",
+        "q": "Frequentativum (impf)",
+        "t": "Faktitywny",
+        "w": "Zwrotny",
+        "I": "Niedokonany",
+        "F": "Przyszły",
+        "R": "Przeszły"
+      },
+      "adj": {
+        "2": "Stopniowalny",
+        "N": "Niestopniowalny",
+        "W": "Dzierżawczy"
+      },
+      "pron": {
+        "1": "Osobowy",
+        "2": "Względny",
+        "3": "Pytający",
+        "4": "Względny/Pytający",
+        "5": "Nieokreślony",
+        "6": "Przeczący",
+        "7": "Wzajemny",
+        "8": "Ogólnie nieokreślony",
+        "9": "Względny/Pytający"
+      }
+    },
+    "gender": {
+      "M": "Męski osobowy",
+      "F": "Żeński",
+      "N": "Męski nieosobowy",
+      "I": "Nijaki",
+      "Y": "Oburodzajowy",
+      "T": "Rodzaj nieoznaczony",
+      "H": "Żywotny",
+      "Q": "Żywotny/Nieżywotny",
+      "U": "Nieokreślony"
+    },
+    "case": {
+      "1": "1. przypadek (Mianownik)",
+      "2": "2. przypadek (Dopełniacz)",
+      "3": "3. przypadek (Celownik)",
+      "4": "4. przypadek (Biernik)",
+      "5": "5. przypadek (Wołacz)",
+      "6": "6. przypadek (Miejscownik)",
+      "7": "7. przypadek (Narzędnik)",
+      "X": "Nieoznaczony",
+      "Y": "Resztkowy",
+      "Z": "Homonimia"
+    },
+    "number": {
+      "S": "Liczba pojedyncza",
+      "P": "Liczba mnoga",
+      "D": "Dualis",
+      "W": "Singulare tantum",
+      "X": "Nieoznaczony"
+    },
+    "possessivity": {
+      "none": "Brak",
+      "title": "Dzierżawczy",
+      "person": {
+        "1": "1. osoba",
+        "2": "2. osoba",
+        "3": "3. osoba"
+      },
+      "number": {
+        "S": "liczba poj.",
+        "P": "liczba mn.",
+        "D": "dualis"
+      },
+      "gender": {
+        "M": "męski żyw.",
+        "F": "żeński",
+        "N": "męski nieżyw.",
+        "I": "nijaki"
+      },
+      "case": {
+        "1": "1. przypadek",
+        "2": "2. przypadek",
+        "3": "3. przypadek",
+        "4": "4. przypadek",
+        "5": "5. przypadek",
+        "6": "6. przypadek",
+        "7": "7. przypadek"
+      }
+    }
+  },
+  "about": {
+    "title": "O programie",
+    "name": "MorphoDiTa Client",
+    "author": "Autor: Lukáš Hefner (mediamaker.cz)",
+    "license": "Licencja: Mozilla Public License 2.0",
+    "version": "Wersja: {version}",
+    "description": "Aplikacja desktopowa do analizy morfologicznej języka czeskiego przy użyciu narzędzia MorphoDiTa.",
+    "tech": "Zbudowane na React + Tauri + TypeScript.",
+    "links": "Oficjalna strona: https://ufal.mff.cuni.cz/morphodita"
+  }
+}

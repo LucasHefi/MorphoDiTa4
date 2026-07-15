@@ -1,0 +1,226 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "offline": "Offline"
+  },
+  "nav": {
+    "analyzer": "Analysis",
+    "wizard": "Wizard",
+    "settings": "Settings",
+    "about": "About",
+    "database": "Database"
+  },
+  "home": {
+    "title": "MorphoDiTa Client",
+    "subtitle": "Morphological analysis for Czech language",
+    "modelSelection": "Model Selection",
+    "analyzer": {
+      "title": "Analyzer",
+      "description": "Basic and advanced morphological analysis of text"
+    },
+    "wizard": {
+      "title": "Keyword Wizard",
+      "description": "Batch processing of words with form generation and filters"
+    },
+    "recent_activity": "Recent Activity",
+    "table": {
+      "name": "Name",
+      "items": "Items",
+      "status": "Status",
+      "date": "Date"
+    }
+  },
+  "analyzer": {
+    "model_select": "Select model",
+    "advanced_options": "Advanced Options",
+    "guesser": "Use guesser",
+    "input_format": "Input format",
+    "input_untokenized": "Untokenized",
+    "input_vertical": "Vertical",
+    "derivation": "Derivation",
+    "convert_tagset": "Convert tagset",
+    "batchingNote": "Long input will be processed in batches.",
+    "operations": {
+      "tag": "Tag",
+      "analyze": "Analyze",
+      "generate": "Generate",
+      "tokenize": "Tokenize"
+    },
+    "input_placeholder": "Enter text to analyze...",
+    "process": "Process",
+    "results_title": "Result",
+    "no_result_placeholder": "Enter text and run analysis to see results."
+  },
+  "wizard": {
+    "steps": {
+      "input": "Input",
+      "processing": "Processing",
+      "results": "Results",
+      "summary": "Summary"
+    },
+    "next": "Next",
+    "back": "Back",
+    "input_title": "Enter keywords",
+    "import_txt": "Import TXT",
+    "input_description": "Insert text or a list of words separated by space, comma, or newline.",
+    "input_placeholder": "e.g.: dog cat mouse..."
+  },
+  "settings": {
+    "title": "Application Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "offlineMode": "Offline Mode",
+    "offlineModeDesc": "Load model list from local folder instead of API",
+    "batchSize": "API Batch Size",
+    "batchSizeDesc": "Max words per API request (default 50)",
+    "aboutLink": "About",
+    "installType": "Install Type",
+    "databaseEditor": "Database Editor"
+  },
+  "database": {
+    "title": "Database Editor",
+    "description": "Browse and edit database records.",
+    "table": {
+      "sessions": "Sessions",
+      "morphological_data": "Morphological Data"
+    },
+    "searchPlaceholder": "Search...",
+    "search": "Search",
+    "refresh": "Refresh",
+    "delete": "Delete Selected"
+  },
+  "tagset": {
+    "unknown": "Unknown '{{val}}'",
+    "unknown_tag": "Unknown tag",
+    "wordClass": {
+      "N": "Noun",
+      "V": "Verb",
+      "A": "Adjective",
+      "P": "Pronoun",
+      "C": "Numeral",
+      "D": "Adverb",
+      "R": "Preposition",
+      "J": "Conjunction",
+      "T": "Particle",
+      "I": "Interjection",
+      "Z": "Abbreviation",
+      "X": "Foreign word"
+    },
+    "subtype": {
+      "noun": {
+        "N": "Common",
+        "H": "Proper"
+      },
+      "verb": {
+        "B": "To be",
+        "c": "Modal",
+        "e": "Phase",
+        "f": "Frequentative",
+        "i": "Iterative",
+        "p": "Perfective",
+        "q": "Frequentative (impf)",
+        "t": "Factitive",
+        "w": "Reflexive",
+        "I": "Imperfective",
+        "F": "Future",
+        "R": "Preterite"
+      },
+      "adj": {
+        "2": "Gradable",
+        "N": "Non-gradable",
+        "W": "Possessive"
+      },
+      "pron": {
+        "1": "Personal",
+        "2": "Relative",
+        "3": "Interrogative",
+        "4": "Relative/Interrogative",
+        "5": "Indefinite",
+        "6": "Negative",
+        "7": "Reciprocal",
+        "8": "General indefinite",
+        "9": "Relative/Interrogative"
+      }
+    },
+    "gender": {
+      "M": "Masculine animate",
+      "F": "Feminine",
+      "N": "Masculine inanimate",
+      "I": "Neuter",
+      "Y": "Ambigeneric",
+      "T": "Gender unmarked",
+      "H": "Animate",
+      "Q": "Animate/Inanimate",
+      "U": "Undefined"
+    },
+    "case": {
+      "1": "1st case (Nominative)",
+      "2": "2nd case (Genitive)",
+      "3": "3rd case (Dative)",
+      "4": "4th case (Accusative)",
+      "5": "5th case (Vocative)",
+      "6": "6th case (Locative)",
+      "7": "7th case (Instrumental)",
+      "X": "Unmarked",
+      "Y": "Residual",
+      "Z": "Homonymy"
+    },
+    "number": {
+      "S": "Singular",
+      "P": "Plural",
+      "D": "Dual",
+      "W": "Singulare tantum",
+      "X": "Unmarked"
+    },
+    "possessivity": {
+      "none": "None",
+      "title": "Possessive",
+      "person": {
+        "1": "1st person",
+        "2": "2nd person",
+        "3": "3rd person"
+      },
+      "number": {
+        "S": "singular",
+        "P": "plural",
+        "D": "dual"
+      },
+      "gender": {
+        "M": "masc. anim.",
+        "F": "feminine",
+        "N": "masc. inan.",
+        "I": "neuter"
+      },
+      "case": {
+        "1": "1st case",
+        "2": "2nd case",
+        "3": "3rd case",
+        "4": "4th case",
+        "5": "5th case",
+        "6": "6th case",
+        "7": "7th case"
+      }
+    }
+  },
+  "about": {
+    "title": "About",
+    "name": "MorphoDiTa Client",
+    "author": "Author: Lukáš Hefner (mediamaker.cz)",
+    "license": "License: Mozilla Public License 2.0",
+    "version": "Version: {version}",
+    "description": "Desktop application for morphological analysis of the Czech language using the MorphoDiTa tool.",
+    "tech": "Built with React + Tauri + TypeScript.",
+    "links": "Official site: https://ufal.mff.cuni.cz/morphodita"
+  }
+}

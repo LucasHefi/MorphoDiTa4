@@ -1,0 +1,34 @@
+# Dependencies and generated output
+morphodita4/node_modules/
+morphodita4/dist/
+morphodita4/src-tauri/target/
+morphodita4/src-tauri/gen/schemas/
+
+# Local model payloads are license-controlled release inputs, not source.
+morphodita4/soubor/
+
+# Environment files and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Logs, caches, coverage and temporary files
+*.log
+coverage/
+.nyc_output/
+.vite/
+*.tmp
+*.temp
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
