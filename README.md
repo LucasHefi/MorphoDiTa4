@@ -23,7 +23,6 @@ Kompletní dokumentace je v [docs/](docs/):
 | [database_schema.md](docs/database_schema.md) | Schema databáze a CRUD operace |
 | [ui_guide.md](docs/ui_guide.md) | UI/UX design guidelines |
 | [development_guide.md](docs/development_guide.md) | Kódovací konvence a pravidla |
-| [agents.md](docs/agents.md) | Implementační checklist pro agenty |
 | [release-linux.md](docs/release-linux.md) | Linux testovací balíček a platformní release hranice |
 
 ## Aktuální release strategie
@@ -60,7 +59,6 @@ MorphoDiTa4/
 │   ├── database_schema.md
 │   ├── ui_guide.md
 │   ├── development_guide.md
-│   ├── agents.md
 │   └── README.md
 │
 ├── morphodita4/                   # Nová aplikace
@@ -88,7 +86,6 @@ Všechny specifikace jsou kompletní. Aplikace čeká na implementaci.
 - [x] database_schema.md - Schema, CRUD, migrace
 - [x] ui_guide.md - Design, animace, komponenty
 - [x] development_guide.md - Konvence, příklady kódu
-- [x] agents.md - Implementační checklist (15 fází)
 
 ### Čeká na Implementaci
 - [x] Základní struktura projektu (Fáze 1)
@@ -110,12 +107,10 @@ Všechny specifikace jsou kompletní. Aplikace čeká na implementaci.
 1. **Přečtěte si dokumentaci v pořadí:**
    ```
    docs/spec.md → docs/api_spec.md → docs/database_schema.md
-   → docs/ui_guide.md → docs/development_guide.md → docs/agents.md
+   → docs/ui_guide.md → docs/development_guide.md
    ```
 
-2. **Sledujte checklist v [docs/agents.md](docs/agents.md)**
-
-3. **Implementujte fázi po fázi**
+2. **Implementujte fázi po fázi**
 
 ## Klíčové Funkce Z Původní Aplikace
 

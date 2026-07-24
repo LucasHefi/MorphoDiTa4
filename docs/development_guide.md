@@ -40,7 +40,6 @@ MorphoDiTa4/
 │   ├── database_schema.md         # Schema a migrace
 │   ├── ui_guide.md                # UI/UX design guidelines
 │   ├── development_guide.md       # Tento dokument
-│   ├── agents.md                  # Checklist pro agenty
 │   └── README.md                  # Úvod do dokumentace
 │
 ├── morphodita4/                   # Nová aplikace
