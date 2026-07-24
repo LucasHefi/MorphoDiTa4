@@ -25,14 +25,14 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   derivation,
   onDerivationChange,
   convertTagset,
-  onConvertTagsetChange
+  onConvertTagsetChange,
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const showGuesser = ['analyze', 'generate'].includes(operation);
-  const showInputFormat = ['analyze'].includes(operation);
-  const showDerivation = ['analyze'].includes(operation);
+  const showInputFormat = operation === 'analyze';
+  const showDerivation = operation === 'analyze';
   const showConvertTagset = ['analyze', 'generate'].includes(operation);
 
   if (!showGuesser && !showInputFormat && !showDerivation && !showConvertTagset) {
@@ -73,10 +73,14 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             <Select
               label={t('analyzer.input_format')}
               value={inputFormat}
-              onChange={(e) => onInputFormatChange(e.target.value as any)}
+              onChange={(e) => {
+                if (e.target.value === 'untokenized' || e.target.value === 'vertical') {
+                  onInputFormatChange(e.target.value);
+                }
+              }}
               options={[
                 { value: 'untokenized', label: t('analyzer.input_untokenized') },
-                { value: 'vertical', label: t('analyzer.input_vertical') }
+                { value: 'vertical', label: t('analyzer.input_vertical') },
               ]}
             />
           )}
@@ -85,19 +89,30 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             <Select
               label={t('analyzer.derivation')}
               value={derivation}
-              onChange={(e) => onDerivationChange(e.target.value as any)}
+              onChange={(e) => {
+                switch (e.target.value) {
+                  case 'none':
+                  case 'root':
+                  case 'path':
+                  case 'tree':
+                    onDerivationChange(e.target.value);
+                    break;
+                }
+              }}
               options={[
                 { value: 'none', label: 'none' },
                 { value: 'root', label: 'root' },
                 { value: 'path', label: 'path' },
-                { value: 'tree', label: 'tree' }
+                { value: 'tree', label: 'tree' },
               ]}
             />
           )}
 
           {showConvertTagset && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-muted-foreground leading-none">{t('analyzer.convert_tagset')}</label>
+              <label className="text-xs font-semibold text-muted-foreground leading-none">
+                {t('analyzer.convert_tagset')}
+              </label>
               <input
                 type="text"
                 value={convertTagset}

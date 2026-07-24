@@ -34,7 +34,7 @@ export const WizardResults: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {taggedTokens?.map((token: any, idx: number) => (
+          {taggedTokens?.map((token, idx) => (
             <tr key={idx} className="bg-background border-b border-border hover:bg-secondary/50">
               <td className="px-4 py-2 font-mono text-muted-foreground w-12">{idx + 1}</td>
               <td className="px-4 py-2 font-medium">{token.token}</td>

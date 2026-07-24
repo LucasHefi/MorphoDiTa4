@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { cn } from './utils';
 
 export interface Tab {
@@ -15,7 +15,8 @@ export interface TabsProps {
 }
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTabChange }) => {
-  const [activeTab, setActiveTab] = useState<string>(defaultTabId || tabs[0]?.id);
+  const [activeTab, setActiveTab] = useState<string>(defaultTabId || tabs[0]?.id || '');
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
@@ -24,13 +25,39 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTab
     }
   };
 
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, tabIndex: number) => {
+    const direction = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    const targetIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? tabs.length - 1
+        : direction === 0
+          ? tabIndex
+          : (tabIndex + direction + tabs.length) % tabs.length;
+
+    if (targetIndex === tabIndex) return;
+    event.preventDefault();
+    const targetId = tabs[targetIndex]?.id;
+    if (!targetId) return;
+    handleTabClick(targetId);
+    tabRefs.current[targetId]?.focus();
+  };
+
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex border-b border-border mb-4">
-        {tabs.map((tab) => (
+      <div role="tablist" aria-label="Tabs" className="flex border-b border-border mb-4">
+        {tabs.map((tab, tabIndex) => (
           <button
             key={tab.id}
+            ref={(element) => { tabRefs.current[tab.id] = element; }}
+            type="button"
+            role="tab"
+            id={`${tab.id}-tab`}
+            aria-controls={`${tab.id}-panel`}
+            aria-selected={activeTab === tab.id}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => handleTabClick(tab.id)}
+            onKeyDown={(event) => handleTabKeyDown(event, tabIndex)}
             className={cn(
               "px-4 py-2 font-medium text-sm transition-colors relative",
               activeTab === tab.id
@@ -45,7 +72,13 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTab
           </button>
         ))}
       </div>
-      <div className="mt-2">
+      <div
+        className="mt-2"
+        role="tabpanel"
+        id={`${activeTab}-panel`}
+        aria-labelledby={`${activeTab}-tab`}
+        tabIndex={0}
+      >
         {tabs.find((tab) => tab.id === activeTab)?.content}
       </div>
     </div>

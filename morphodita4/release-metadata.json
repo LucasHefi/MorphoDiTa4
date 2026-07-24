@@ -1,0 +1,24 @@
+{
+  "application": "MorphoDiTa Client",
+  "version": "0.1.0",
+  "license": "MPL-2.0",
+  "authors": ["MorphoDiTa Client contributors"],
+  "repository": null,
+  "models": [
+    {
+      "id": "czech-250909",
+      "version": "2.1.0",
+      "license": "CC BY-NC-SA 4.0",
+      "commercialUse": false,
+      "sourceUrl": "https://hdl.handle.net/11234/1-5985",
+      "noticeFiles": [
+        "models/czech-250909/LICENSE.txt",
+        "models/czech-250909/README.txt"
+      ]
+    }
+  ],
+  "openGates": [
+    "repository-mapping",
+    "model-commercial-distribution"
+  ]
+}

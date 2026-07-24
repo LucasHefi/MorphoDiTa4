@@ -1,15 +1,15 @@
 import { create } from 'zustand';
-import { FilterOptions } from '../types/common';
+import type { FilterOptions, WizardProcessingResult } from '../types/common';
 
 interface WizardStore {
   currentStep: number;
   keywordsText: string;
   filters: FilterOptions;
-  processingResult: any; // Type to be refined later
+  processingResult: WizardProcessingResult | null;
   setStep: (step: number) => void;
   setKeywordsText: (text: string) => void;
   setFilters: (filters: Partial<FilterOptions>) => void;
-  setProcessingResult: (result: any) => void;
+  setProcessingResult: (result: WizardProcessingResult) => void;
   reset: () => void;
 }
 

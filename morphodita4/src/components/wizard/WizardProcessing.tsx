@@ -5,29 +5,32 @@ import { useApiStore } from '../../store/useApiStore';
 import { MorphoDiTaAPI } from '../../services/api';
 import { DatabaseService } from '../../services/database';
 import { parseInputText, cleanLemma } from '../../services/filters';
+import { buildWizardRelations } from '../../services/wizardPipeline';
 import { ProgressBar, Spinner, Button } from '../common';
 import { LogPanel, type LogEntry } from '../analyzer/LogPanel';
 import { splitText, processInBatches, getBatchSize } from '../../services/batcher';
 
 const AnalyzerLogPanel = LogPanel;
 
+type LogLevel = LogEntry['level'];
+
 export const WizardProcessing: React.FC = () => {
   const { t } = useTranslation();
   const { keywordsText, setProcessingResult, setStep } = useWizardStore();
   const { selectedModel } = useApiStore();
-  
+
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const hasStarted = useRef(false);
 
-  const addLog = (level: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR', message: string) => {
-    setLogs(prev => [...prev, {
+  const addLog = (level: LogLevel, message: string) => {
+    setLogs((previous) => [...previous, {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: new Date().toISOString(),
       level,
-      message
+      message,
     }]);
   };
 
@@ -45,9 +48,9 @@ export const WizardProcessing: React.FC = () => {
       try {
         const wordsForTagging = parseInputText(keywordsText);
         addLog('DEBUG', `Počet slov k analýze: ${wordsForTagging.length}`);
-        
+
         addLog('INFO', 'Kontroluji existenci slov v databázi...');
-        const newWords = [];
+        const newWords: string[] = [];
         for (const word of wordsForTagging) {
           const exists = await DatabaseService.wordFormExists(word);
           if (!exists) {
@@ -69,32 +72,39 @@ export const WizardProcessing: React.FC = () => {
         const joinedWords = wordsForTagging.join('\n');
         const batchSize = getBatchSize();
         const wordChunks = splitText(joinedWords, batchSize);
-        const tagResponses = await processInBatches(wordChunks, (c) => MorphoDiTaAPI.tagText(c, selectedModel));
-        const tagResult = tagResponses.flatMap(r => r.result).flat();
+        const tagResponses = await processInBatches(
+          wordChunks,
+          (chunk) => MorphoDiTaAPI.tagText(chunk, selectedModel),
+        );
+        const tagResult = tagResponses.flatMap((response) => response.result).flat();
         setProgress(50);
         addLog('DEBUG', `Tagování dokončeno: ${tagResult.length} tokenů.`);
 
-        const rawLemmas = tagResult.map(item => cleanLemma(item.lemma));
-        const uniqueLemmas = Array.from(new Set(rawLemmas.filter(l => l.length > 0)));
+        const rawLemmas = tagResult.map((item) => cleanLemma(item.lemma));
+        const uniqueLemmas = Array.from(new Set(rawLemmas.filter((lemma) => lemma.length > 0)));
         addLog('INFO', `Získáno ${uniqueLemmas.length} unikátních lemmat. Generuji formy...`);
 
         const lemmaChunks = splitText(uniqueLemmas.join('\n'), batchSize);
-        const generateResponses = await processInBatches(lemmaChunks, (c) => MorphoDiTaAPI.generateForms(c, selectedModel));
-        const generateResult = generateResponses.flatMap(r => r.result).flat();
+        const generateResponses = await processInBatches(
+          lemmaChunks,
+          (chunk) => MorphoDiTaAPI.generateForms(chunk, selectedModel),
+        );
+        const generateResult = generateResponses.flatMap((response) => response.result).flat();
         setProgress(80);
         addLog('DEBUG', 'Generování dokončeno.');
 
-        const finalResult = {
+        const relations = buildWizardRelations(tagResult, generateResult);
+
+        setProcessingResult({
           inputWords: wordsForTagging.length,
-          newWords: newWords,
+          newWords,
           uniqueLemmas: uniqueLemmas.length,
           lemmas: uniqueLemmas,
           forms: generateResult,
           taggedTokens: tagResult,
-          model: selectedModel
-        };
-
-        setProcessingResult(finalResult);
+          relations,
+          model: selectedModel,
+        });
         setProgress(100);
         addLog('INFO', 'Zpracování úspěšně dokončeno.');
         setIsFinished(true);
@@ -108,18 +118,20 @@ export const WizardProcessing: React.FC = () => {
 
     if (keywordsText && !isProcessing && !isFinished && !hasStarted.current) {
       hasStarted.current = true;
-      processKeywords();
+      void processKeywords();
     }
-  }, [keywordsText, selectedModel]);
+  }, [keywordsText, selectedModel, isProcessing, isFinished, setProcessingResult]);
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold text-foreground">
-          Zpracování
-        </h2>
+        <h2 className="text-xl font-semibold text-foreground">Zpracování</h2>
         <p className="text-sm text-muted-foreground">
-          {isProcessing ? 'Probíhá zpracování vašich dat, čekejte prosím...' : isFinished ? 'Zpracování dokončeno.' : 'Připravuji...'}
+          {isProcessing
+            ? 'Probíhá zpracování vašich dat, čekejte prosím...'
+            : isFinished
+              ? 'Zpracování dokončeno.'
+              : 'Připravuji...'}
         </p>
       </div>
 
@@ -145,19 +157,10 @@ export const WizardProcessing: React.FC = () => {
       </div>
 
       <div className="flex justify-end gap-2 mt-4">
-        {/* We allow going back even during processing if they really want, but let's disable to prevent messy state */}
-        <Button 
-          variant="secondary" 
-          onClick={() => setStep(1)}
-          disabled={isProcessing}
-        >
+        <Button variant="secondary" onClick={() => setStep(1)} disabled={isProcessing}>
           {t('wizard.back')}
         </Button>
-        <Button 
-          onClick={() => setStep(3)} 
-          disabled={!isFinished}
-          className="min-w-[120px]"
-        >
+        <Button onClick={() => setStep(3)} disabled={!isFinished} className="min-w-[120px]">
           {t('wizard.next')}
         </Button>
       </div>

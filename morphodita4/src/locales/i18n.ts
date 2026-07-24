@@ -4,9 +4,9 @@ import { initReactI18next } from 'react-i18next';
 import cs from './cs.json';
 import en from './en.json';
 import pl from './pl.json';
+import { readInitialSettings } from '../services/settings';
 
-const savedSettings = localStorage.getItem('morphodita-settings');
-const initialLang = savedSettings ? JSON.parse(savedSettings).state.language : 'cs';
+const initialLang = readInitialSettings().state.language;
 
 i18n
   .use(initReactI18next)

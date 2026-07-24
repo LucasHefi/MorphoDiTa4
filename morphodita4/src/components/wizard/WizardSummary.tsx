@@ -4,10 +4,10 @@ import { useWizardStore } from '../../store/useWizardStore';
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '../common';
 import { applyFiltersToArray, cleanLemma, removeSpecialCharacters, removeDiacritics } from '../../services/filters';
 import { WorkflowService } from '../../services/workflow';
-import { 
-  downloadFile, 
-  exportToJson, 
-  exportStringArrayToCsv 
+import {
+  downloadFile,
+  exportToJson,
+  exportStringArrayToCsv,
 } from '../../services/export';
 
 export const WizardSummary: React.FC = () => {
@@ -18,6 +18,108 @@ export const WizardSummary: React.FC = () => {
   const [stopWordsInput, setStopWordsInput] = useState(filters.stopWordsList?.join(', ') || '');
   const [isSaving, setIsSaving] = useState(false);
 
+  const forms = useMemo(() => processingResult?.forms ?? [], [processingResult]);
+  const taggedTokens = useMemo(() => processingResult?.taggedTokens ?? [], [processingResult]);
+  const relations = useMemo(() => processingResult?.relations ?? [], [processingResult]);
+  const model = processingResult?.model ?? '';
+  const newWords = useMemo(() => processingResult?.newWords ?? [], [processingResult]);
+
+  const newWordsSet = useMemo(
+    () => new Set(newWords.map((word) => word.toLowerCase())),
+    [newWords],
+  );
+
+  const newLemmasSet = useMemo(
+    () => new Set(
+      relations
+        .filter((relation) => newWordsSet.has(relation.inputToken.toLowerCase()))
+        .map((relation) => cleanLemma(relation.lemma).toLowerCase()),
+    ),
+    [newWordsSet, relations],
+  );
+
+  const formsToLemmas = useMemo(() => {
+    const mapping = new Map<string, string>();
+    const sourceTaggedTokens = localFilters.showOnlyNew
+      ? taggedTokens.filter((token) => newWordsSet.has(token.token.toLowerCase()))
+      : taggedTokens;
+    const sourceForms = localFilters.showOnlyNew
+      ? forms.filter((form) => {
+          const cleanedForm = cleanLemma(form.lemma).toLowerCase();
+          return newLemmasSet.has(cleanedForm);
+        })
+      : forms;
+
+    sourceTaggedTokens.forEach((token) => {
+      mapping.set(token.token, cleanLemma(token.lemma));
+    });
+    sourceForms.forEach((form) => {
+      mapping.set(form.form, cleanLemma(form.lemma));
+    });
+
+    const result = new Set<string>();
+    mapping.forEach((lemma, form) => {
+      let displayLemma = lemma;
+      const ignoreDiacritics = localFilters.removeDiacritics;
+      if (ignoreDiacritics) {
+        const filteredLemma = applyFiltersToArray([lemma], {
+          ...localFilters,
+          removeDuplicates: false,
+          removeStopWords: false,
+          removeSpecialCharacters: false,
+        });
+        if (filteredLemma.length > 0) displayLemma = filteredLemma[0];
+      }
+
+      const cleanedForm = removeSpecialCharacters(form);
+      const cleanedLemmaCompare = ignoreDiacritics
+        ? displayLemma
+        : removeSpecialCharacters(displayLemma);
+      const formCompare = ignoreDiacritics
+        ? removeDiacritics(cleanedForm)
+        : cleanedForm.toLowerCase();
+      const lemmaCompare = ignoreDiacritics
+        ? cleanedLemmaCompare
+        : cleanedLemmaCompare.toLowerCase();
+
+      if (localFilters.removeDuplicates && formCompare === lemmaCompare) return;
+
+      const filteredForm = applyFiltersToArray([form], localFilters);
+      if (filteredForm.length > 0) {
+        result.add(`${filteredForm[0]} = ${displayLemma}`);
+      }
+    });
+    return Array.from(result).sort();
+  }, [forms, taggedTokens, localFilters, newLemmasSet, newWordsSet]);
+
+  const filteredLemmas = useMemo(() => {
+    const allLemmas = Array.from(new Set([
+      ...taggedTokens.map((token) => cleanLemma(token.lemma)),
+      ...forms.map((form) => cleanLemma(form.lemma)),
+    ])).filter((lemma) => lemma.length > 0);
+
+    return applyFiltersToArray(allLemmas, localFilters).sort();
+  }, [forms, taggedTokens, localFilters]);
+
+  const filteredForms = useMemo(() => {
+    const sourceTaggedTokens = localFilters.showOnlyNew
+      ? taggedTokens.filter((token) => newWordsSet.has(token.token.toLowerCase()))
+      : taggedTokens;
+    const sourceForms = localFilters.showOnlyNew
+      ? forms.filter((form) => {
+          const cleanedForm = cleanLemma(form.lemma).toLowerCase();
+          return newLemmasSet.has(cleanedForm);
+        })
+      : forms;
+
+    const allForms = Array.from(new Set([
+      ...sourceTaggedTokens.map((token) => token.token),
+      ...sourceForms.map((form) => form.form),
+    ])).filter((form) => form.length > 0);
+
+    return applyFiltersToArray(allForms, localFilters).sort();
+  }, [forms, taggedTokens, localFilters, newLemmasSet, newWordsSet]);
+
   if (!processingResult) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center animate-in fade-in">
@@ -27,152 +129,34 @@ export const WizardSummary: React.FC = () => {
     );
   }
 
-  const { forms, taggedTokens, model, newWords } = processingResult;
-  
-  const newWordsSet = useMemo(() => new Set((newWords as string[] || []).map((w: string) => w.toLowerCase())), [newWords]);
-
-  // Panel 1: Formy = Lemma
-  const formsToLemmas = useMemo(() => {
-    const mapping = new Map<string, string>();
-    
-    // Filter source data if "Show only new words" is active
-    const sourceTaggedTokens = localFilters.showOnlyNew 
-      ? taggedTokens?.filter((t: any) => newWordsSet.has(t.token.toLowerCase()))
-      : taggedTokens;
-      
-    const sourceForms = localFilters.showOnlyNew
-      ? forms?.filter((f: any) => {
-          const cleanedF = cleanLemma(f.lemma).toLowerCase();
-          // If the lemma of the generated form came from a new word's lemma
-          return Array.from(newWordsSet).some(nw => cleanLemma(nw).toLowerCase() === cleanedF);
-        }) || []
-      : forms || [];
-
-    // From tagged tokens
-    sourceTaggedTokens?.forEach((t: any) => {
-      mapping.set(t.token, cleanLemma(t.lemma));
-    });
-    // From generated forms
-    sourceForms.forEach((f: any) => {
-      mapping.set(f.form, cleanLemma(f.lemma));
-    });
-
-    const result = new Set<string>();
-    mapping.forEach((lemma, form) => {
-      let displayLemma = lemma;
-      const ignoreDiacritics = localFilters.removeDiacritics;
-      if (ignoreDiacritics) {
-        const fl = applyFiltersToArray([lemma], { 
-          ...localFilters, 
-          removeDuplicates: false, 
-          removeStopWords: false, 
-          removeSpecialCharacters: false 
-        });
-        if (fl.length > 0) displayLemma = fl[0];
-      }
-      
-      // When removeDuplicates is enabled, skip entries where form equals lemma
-      // Apply same cleaning as applyFiltersToArray does (removeSpecialCharacters is implicit, removeDiacritics already applied to displayLemma if enabled)
-      const cleanedForm = removeSpecialCharacters(form);
-      const cleanedLemmaCompare = ignoreDiacritics 
-        ? displayLemma  // already cleaned (special chars removed + toLowerCase via removeDiacritics)
-        : removeSpecialCharacters(displayLemma);
-      const formCompare = ignoreDiacritics 
-        ? removeDiacritics(cleanedForm) 
-        : cleanedForm.toLowerCase();
-      const lemmaCompare = ignoreDiacritics 
-        ? cleanedLemmaCompare  // already lowercased
-        : cleanedLemmaCompare.toLowerCase();
-      if (localFilters.removeDuplicates && formCompare === lemmaCompare) {
-        return;
-      }
-      
-      // Apply filters to form
-      const filteredForm = applyFiltersToArray([form], localFilters);
-      if (filteredForm.length > 0) {
-        result.add(`${filteredForm[0]} = ${displayLemma}`);
-      }
-    });
-    return Array.from(result).sort();
-  }, [forms, taggedTokens, localFilters]);
-
-  // Panel 2: Zpracovaná lemmata
-  const filteredLemmas = useMemo(() => {
-    const sourceTaggedTokens = taggedTokens;
-    
-    const sourceForms = forms || [];
-
-    const allLemmas = Array.from(new Set([
-      ...((sourceTaggedTokens as any[])?.map((t: any) => cleanLemma(t.lemma)) || []),
-      ...((sourceForms as any[]).map((f: any) => cleanLemma(f.lemma)) || [])
-    ])).filter(l => l && l.length > 0) as string[];
-    
-    return applyFiltersToArray(allLemmas, localFilters).sort();
-  }, [forms, taggedTokens, localFilters, newWordsSet]);
-
-  // Panel 3: Zpracované formy
-  const filteredForms = useMemo(() => {
-    const sourceTaggedTokens = localFilters.showOnlyNew 
-      ? taggedTokens?.filter((t: any) => newWordsSet.has(t.token.toLowerCase()))
-      : taggedTokens;
-    
-    const sourceForms = localFilters.showOnlyNew
-      ? forms?.filter((f: any) => {
-          const cleanedF = cleanLemma(f.lemma).toLowerCase();
-          return Array.from(newWordsSet).some(nw => cleanLemma(nw).toLowerCase() === cleanedF);
-        }) || []
-      : forms || [];
-
-    const allForms = Array.from(new Set([
-      ...((sourceTaggedTokens as any[])?.map((t: any) => t.token as string) || []),
-      ...((sourceForms as any[]).map((f: any) => f.form as string))
-    ])).filter(f => f && f.length > 0) as string[];
-
-    return applyFiltersToArray(allForms, localFilters).sort();
-  }, [forms, taggedTokens, localFilters, newWordsSet]);
-
   const handleApplyFilters = () => {
     setFilters({
       ...localFilters,
-      stopWordsList: stopWordsInput.split(/[,\s;]+/).map(s => s.trim()).filter(s => s.length > 0)
+      stopWordsList: stopWordsInput
+        .split(/[,\s;]+/)
+        .map((word) => word.trim())
+        .filter((word) => word.length > 0),
     });
   };
 
   const handleExport = (format: 'csv' | 'json' | 'txt') => {
     const timestamp = new Date().toISOString().slice(0, 10);
-    const exportData = {
-      formsToLemmas,
-      filteredLemmas,
-      filteredForms
-    };
-    
+    const exportData = { formsToLemmas, filteredLemmas, filteredForms };
+
     if (format === 'json') {
-      downloadFile(
-        exportToJson(exportData),
-        `wizard-results-${timestamp}.json`,
-        'application/json'
-      );
+      downloadFile(exportToJson(exportData), `wizard-results-${timestamp}.json`, 'application/json');
     } else if (format === 'csv') {
-      const formsToLemmasCsv = exportStringArrayToCsv(formsToLemmas);
-      const lemmasCsv = exportStringArrayToCsv(filteredLemmas);
-      const formsCsv = exportStringArrayToCsv(filteredForms);
-      
       const combinedCsv = [
         '# Forms to Lemmas',
-        formsToLemmasCsv,
+        exportStringArrayToCsv(formsToLemmas),
         '',
         '# Filtered Lemmas',
-        lemmasCsv,
+        exportStringArrayToCsv(filteredLemmas),
         '',
         '# Filtered Forms',
-        formsCsv
+        exportStringArrayToCsv(filteredForms),
       ].join('\n');
-      
-      downloadFile(
-        combinedCsv,
-        `wizard-results-${timestamp}.csv`,
-        'text/csv'
-      );
+      downloadFile(combinedCsv, `wizard-results-${timestamp}.csv`, 'text/csv');
     } else {
       const combinedTxt = [
         '# Forms to Lemmas',
@@ -182,30 +166,19 @@ export const WizardSummary: React.FC = () => {
         ...filteredLemmas,
         '',
         '# Filtered Forms',
-        ...filteredForms
+        ...filteredForms,
       ].join('\n');
-      
-      downloadFile(
-        combinedTxt,
-        `wizard-results-${timestamp}.txt`,
-        'text/plain'
-      );
+      downloadFile(combinedTxt, `wizard-results-${timestamp}.txt`, 'text/plain');
     }
   };
 
   const handleFinish = async () => {
     setIsSaving(true);
     try {
-      await WorkflowService.saveWizardResults(
-        taggedTokens,
-        forms,
-        model,
-        keywordsText
-      );
+      await WorkflowService.saveWizardResults(taggedTokens, forms, model, keywordsText);
       if (confirm('Slova byla úspěšně uložena do databáze.\n\nChcete zpracovat další nová klíčová slova?')) {
         reset();
       } else {
-        // Go to home or close
         setStep(1);
       }
     } catch (error) {
@@ -230,7 +203,7 @@ export const WizardSummary: React.FC = () => {
             <CardTitle className="text-sm">Formy = Lemma ({formsToLemmas.length})</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto text-xs font-mono">
-            {formsToLemmas.map((item, i) => <div key={i}>{item}</div>)}
+            {formsToLemmas.map((item, index) => <div key={index}>{item}</div>)}
           </CardContent>
         </Card>
         <Card glass className="flex flex-col overflow-hidden">
@@ -255,63 +228,38 @@ export const WizardSummary: React.FC = () => {
         <h3 className="text-md font-semibold mb-4">Filtrace výsledků</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              checked={localFilters.removeDuplicates}
-              onChange={(e) => setLocalFilters({...localFilters, removeDuplicates: e.target.checked})}
-              className="rounded text-primary focus:ring-primary"
-            />
+            <input type="checkbox" checked={localFilters.removeDuplicates} onChange={(event) => setLocalFilters({ ...localFilters, removeDuplicates: event.target.checked })} className="rounded text-primary focus:ring-primary" />
             <span className="text-sm">Odstranit duplicity</span>
           </label>
           <label className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              checked={localFilters.removeDiacritics}
-              onChange={(e) => setLocalFilters({...localFilters, removeDiacritics: e.target.checked})}
-              className="rounded text-primary focus:ring-primary"
-            />
+            <input type="checkbox" checked={localFilters.removeDiacritics} onChange={(event) => setLocalFilters({ ...localFilters, removeDiacritics: event.target.checked })} className="rounded text-primary focus:ring-primary" />
             <span className="text-sm">Odstranit diakritiku</span>
           </label>
           <label className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              checked={localFilters.removeSpecialCharacters}
-              onChange={(e) => setLocalFilters({...localFilters, removeSpecialCharacters: e.target.checked})}
-              className="rounded text-primary focus:ring-primary"
-            />
+            <input type="checkbox" checked={localFilters.removeSpecialCharacters} onChange={(event) => setLocalFilters({ ...localFilters, removeSpecialCharacters: event.target.checked })} className="rounded text-primary focus:ring-primary" />
             <span className="text-sm">Odstranit speciální znaky</span>
           </label>
           <label className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              checked={localFilters.removeStopWords}
-              onChange={(e) => setLocalFilters({...localFilters, removeStopWords: e.target.checked})}
-              className="rounded text-primary focus:ring-primary"
-            />
+            <input type="checkbox" checked={localFilters.removeStopWords} onChange={(event) => setLocalFilters({ ...localFilters, removeStopWords: event.target.checked })} className="rounded text-primary focus:ring-primary" />
             <span className="text-sm">Odstranit Stop slova</span>
           </label>
           <label className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              checked={localFilters.showOnlyNew}
-              onChange={(e) => setLocalFilters({...localFilters, showOnlyNew: e.target.checked})}
-              className="rounded text-primary focus:ring-primary"
-            />
+            <input type="checkbox" checked={localFilters.showOnlyNew} onChange={(event) => setLocalFilters({ ...localFilters, showOnlyNew: event.target.checked })} className="rounded text-primary focus:ring-primary" />
             <span className="text-sm">Jen nová slova</span>
           </label>
         </div>
-        
+
         {localFilters.removeStopWords && (
           <div className="mt-4">
-            <Input 
+            <Input
               label="Vlastní Stop Slova (oddělená čárkou)"
               value={stopWordsInput}
-              onChange={(e) => setStopWordsInput(e.target.value)}
+              onChange={(event) => setStopWordsInput(event.target.value)}
               placeholder="a, i, se, na..."
             />
           </div>
         )}
-        
+
         <div className="mt-4 flex justify-end">
           <Button variant="secondary" size="sm" onClick={handleApplyFilters}>
             Aplikovat filtry
@@ -320,22 +268,14 @@ export const WizardSummary: React.FC = () => {
       </div>
 
       <div className="flex justify-between mt-4">
-        <Button 
-          variant="secondary" 
-          onClick={() => setStep(3)}
-        >
+        <Button variant="secondary" onClick={() => setStep(3)}>
           {t('wizard.back')}
         </Button>
-        
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => handleExport('csv')}>Export CSV</Button>
           <Button variant="ghost" onClick={() => handleExport('json')}>Export JSON</Button>
           <Button variant="ghost" onClick={() => handleExport('txt')}>Export TXT</Button>
-          <Button 
-            variant="primary" 
-            onClick={handleFinish}
-            disabled={isSaving}
-          >
+          <Button variant="primary" onClick={handleFinish} disabled={isSaving}>
             {isSaving ? 'Ukládám...' : 'Dokončit a uložit'}
           </Button>
         </div>

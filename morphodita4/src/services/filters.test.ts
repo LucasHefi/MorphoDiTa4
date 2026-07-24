@@ -71,5 +71,32 @@ describe('Text Filters', () => {
       const result = applyFilters(words, options);
       expect(result).toEqual(['kocka']);
     });
+    it('preserves spaces and hyphens when special-character filtering is disabled', () => {
+      expect(applyFilters(['česko-slovenský', 'Nový Sad'], {
+        removeDiacritics: false,
+        removeDuplicates: false,
+        removeStopWords: false,
+        removeSpecialCharacters: false,
+      })).toEqual(['česko-slovenský', 'Nový Sad']);
+    });
+
+    it('handles Czech and Polish diacritics without corrupting Unicode', () => {
+      expect(applyFilters(['Příliš', 'żółć', 'Łódź'], {
+        removeDiacritics: true,
+        removeDuplicates: true,
+        removeStopWords: false,
+        removeSpecialCharacters: false,
+      })).toEqual(['prilis', 'zołc', 'łodz']);
+    });
+
+    it('handles a long token list without changing order', () => {
+      const words = Array.from({ length: 5000 }, (_, index) => `slovo-${index}`);
+      expect(applyFilters(words, {
+        removeDiacritics: false,
+        removeDuplicates: false,
+        removeStopWords: false,
+        removeSpecialCharacters: false,
+      })).toEqual(words);
+    });
   });
 });

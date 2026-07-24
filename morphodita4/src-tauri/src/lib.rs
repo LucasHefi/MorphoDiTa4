@@ -1,3 +1,4 @@
+pub mod backup;
 pub mod commands;
 pub mod db;
 
@@ -28,6 +29,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::create_session,
+            commands::save_wizard_results,
             commands::update_session_status,
             commands::insert_morphological_data,
             commands::get_sessions,
@@ -39,6 +41,16 @@ pub fn run() {
             commands::start_morphodita_server,
             commands::stop_morphodita_server,
             commands::get_offline_models_dir,
+            commands::get_all_morphological_data,
+            commands::delete_sessions,
+            commands::delete_morphological_data,
+            commands::update_session,
+            commands::update_morphological_data,
+            commands::search_sessions,
+            commands::search_morphological_data,
+            commands::backup_database,
+            commands::validate_backup,
+            commands::restore_database,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

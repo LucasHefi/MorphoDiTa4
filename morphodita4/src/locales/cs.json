@@ -67,9 +67,10 @@
     "next": "Další",
     "back": "Zpět",
     "input_title": "Zadejte klíčová slova",
-    "import_txt": "Import TXT",
-    "input_description": "Vložte text nebo seznam slov oddělených mezerou, čárkou, nebo novým řádkem.",
-    "input_placeholder": "Např: pes kočka myš..."
+    "import_txt": "Importovat TXT",
+    "input_description": "Vložte text nebo seznam slov oddělených mezerou, čárkou nebo novým řádkem.",
+    "input_placeholder": "Např: pes kočka myš...",
+    "input_label": "Klíčová slova"
   },
   "settings": {
     "title": "Nastavení aplikace",
@@ -80,13 +81,21 @@
       "dark": "Tmavé",
       "system": "Systémové"
     },
-    "offlineMode": "Offline mód",
-    "offlineModeDesc": "Načítat seznam modelů z lokální složky místo API",
+    "offlineMode": "Používat lokální MorphoDiTa",
+    "offlineModeDesc": "Vynutit lokální MorphoDiTa a nepoužívat online API",
+    "offlineFallback": "Použít lokální fallback",
+    "offlineFallbackDesc": "Při nedostupnosti online API automaticky použít lokální MorphoDiTa",
     "batchSize": "Velikost dávky pro API",
     "batchSizeDesc": "Max. slov na jeden požadavek API (výchozí 50)",
     "aboutLink": "O programu",
     "installType": "Typ instalace",
-    "databaseEditor": "Databázový editor"
+    "databaseEditor": "Databázový editor",
+    "recoveryNotice": "Některá uložená nastavení byla neplatná nebo zastaralá. Byly obnoveny bezpečné výchozí hodnoty.",
+    "dismissRecovery": "Zavřít upozornění"
+  },
+  "transport": {
+    "offline-explicit": "Lokální MorphoDiTa je aktivní, protože byl v nastavení zvolen offline režim.",
+    "offline-fallback": "Online API není dostupné. Je aktivní lokální fallback MorphoDiTa."
   },
   "database": {
     "title": "Databázový editor",
@@ -98,7 +107,10 @@
     "searchPlaceholder": "Hledat...",
     "search": "Hledat",
     "refresh": "Obnovit",
-    "delete": "Smazat vybrané"
+    "delete": "Smazat vybrané",
+    "previous": "Předchozí",
+    "next": "Další",
+    "page": "Strana"
   },
   "tagset": {
     "unknown": "Neznámý '{{val}}'",

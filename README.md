@@ -24,6 +24,15 @@ Kompletní dokumentace je v [docs/](docs/):
 | [ui_guide.md](docs/ui_guide.md) | UI/UX design guidelines |
 | [development_guide.md](docs/development_guide.md) | Kódovací konvence a pravidla |
 | [agents.md](docs/agents.md) | Implementační checklist pro agenty |
+| [release-linux.md](docs/release-linux.md) | Linux testovací balíček a platformní release hranice |
+
+## Aktuální release strategie
+
+- Online LINDA MorphoDiTa API je výchozí transport.
+- Lokální MorphoDiTa je explicitní offline režim nebo fallback při nedostupnosti online API.
+- Linux `.deb` je testovací artefakt vytvářený na Linuxu.
+- Windows release se vytváří na Windows runneru a vyžaduje Windows sidecar `x86_64-pc-windows-msvc.exe`.
+- Linux build není důkazem Windows kompatibility.
 
 ## Technological Stack
 

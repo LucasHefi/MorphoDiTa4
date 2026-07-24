@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { DatabaseService } from '../../services/database';
-import { Session, MorphologicalData } from '../../types/database';
+import { canEditDatabaseColumn, hasExpectedAffectedRows } from './databaseEditorContracts';
+import type { DatabaseId, DatabaseRow } from '../../types/database';
 import { cn } from '../common/utils';
 
 type TableType = 'sessions' | 'morphological_data';
@@ -17,14 +18,14 @@ const TABLE_CONFIG: Record<TableType, { columns: ColumnConfig[]; searchable: str
   sessions: {
     columns: [
       { key: 'id', label: 'ID', width: 80 },
-      { key: 'operation', label: 'Operace', width: 100 },
-      { key: 'model', label: 'Model', width: 120 },
-      { key: 'input_text', label: 'Vstup', width: 200 },
-      { key: 'parameters', label: 'Parametry', width: 150 },
-      { key: 'result_count', label: 'Výsledků', width: 80 },
-      { key: 'processing_time', label: 'Čas (s)', width: 80 },
-      { key: 'status', label: 'Status', width: 100 },
-      { key: 'error_message', label: 'Chyba', width: 150 },
+      { key: 'operation', label: 'Operace', width: 100, editable: true },
+      { key: 'model', label: 'Model', width: 120, editable: true },
+      { key: 'input_text', label: 'Vstup', width: 200, editable: true },
+      { key: 'parameters', label: 'Parametry', width: 150, editable: true },
+      { key: 'result_count', label: 'Výsledků', width: 80, editable: true },
+      { key: 'processing_time', label: 'Čas (s)', width: 80, editable: true },
+      { key: 'status', label: 'Status', width: 100, editable: true },
+      { key: 'error_message', label: 'Chyba', width: 150, editable: true },
       { key: 'created_at', label: 'Vytvořeno', width: 120 },
       { key: 'completed_at', label: 'Dokončeno', width: 120 },
     ],
@@ -33,13 +34,13 @@ const TABLE_CONFIG: Record<TableType, { columns: ColumnConfig[]; searchable: str
   morphological_data: {
     columns: [
       { key: 'id', label: 'ID', width: 80 },
-      { key: 'source_type', label: 'Typ', width: 80 },
-      { key: 'original_form', label: 'Původní forma', width: 150 },
-      { key: 'lemma', label: 'Lemma', width: 150 },
-      { key: 'tag', label: 'Tag', width: 120 },
-      { key: 'generated_form', label: 'Vygenerovaná forma', width: 150 },
-      { key: 'probability', label: 'Pravděpodobnost', width: 120 },
-      { key: 'session_id', label: 'Relace ID', width: 100 },
+      { key: 'source_type', label: 'Typ', width: 80, editable: true },
+      { key: 'original_form', label: 'Původní forma', width: 150, editable: true },
+      { key: 'lemma', label: 'Lemma', width: 150, editable: true },
+      { key: 'tag', label: 'Tag', width: 120, editable: true },
+      { key: 'generated_form', label: 'Vygenerovaná forma', width: 150, editable: true },
+      { key: 'probability', label: 'Pravděpodobnost', width: 120, editable: true },
+      { key: 'session_id', label: 'Relace ID', width: 100, editable: true },
       { key: 'created_at', label: 'Vytvořeno', width: 120 },
     ],
     searchable: ['source_type', 'original_form', 'lemma', 'tag', 'generated_form'],
@@ -48,33 +49,36 @@ const TABLE_CONFIG: Record<TableType, { columns: ColumnConfig[]; searchable: str
 
 interface DatabaseTableProps {
   tableType: TableType;
-  data: (Session | MorphologicalData)[];
-  selectedIds: Set<number>;
-  onSelectChange: (ids: Set<number>) => void;
-  onDataChange: (data: any[]) => void;
+  data: DatabaseRow[];
+  selectedIds: Set<DatabaseId>;
+  onSelectChange: (ids: Set<DatabaseId>) => void;
   onStatusChange: (status: string) => void;
+  onRefresh: () => Promise<void>;
 }
+
+const getFieldValue = (row: DatabaseRow, field: string): unknown =>
+  (row as unknown as Record<string, unknown>)[field];
 
 export const DatabaseTable: React.FC<DatabaseTableProps> = ({
   tableType,
   data,
   selectedIds,
   onSelectChange,
-  onDataChange,
   onStatusChange,
+  onRefresh,
 }) => {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [editingCell, setEditingCell] = useState<{ id: number; field: string } | null>(null);
-  const [editValue, setEditValue] = useState<any>(null);
+  const [editingCell, setEditingCell] = useState<{ id: DatabaseId; field: string } | null>(null);
+  const [editValue, setEditValue] = useState<unknown>(null);
 
   const config = TABLE_CONFIG[tableType];
 
   const sortedData = useMemo(() => {
     if (!sortColumn) return data;
-    return [...data].sort((a: any, b: any) => {
-      const aVal = a[sortColumn];
-      const bVal = b[sortColumn];
+    return [...data].sort((a, b) => {
+      const aVal = getFieldValue(a, sortColumn);
+      const bVal = getFieldValue(b, sortColumn);
       if (aVal === null || aVal === undefined) return 1;
       if (bVal === null || bVal === undefined) return -1;
       const comparison = String(aVal).localeCompare(String(bVal));
@@ -84,7 +88,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
 
   const handleSort = useCallback((column: string) => {
     if (sortColumn === column) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection((previous) => previous === 'asc' ? 'desc' : 'asc');
     } else {
       setSortColumn(column);
       setSortDirection('asc');
@@ -93,14 +97,18 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
 
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      const allIds = new Set(data.map((row: any) => row.id).filter(Boolean));
+      const allIds = new Set(
+        data
+          .map((row) => row.id)
+          .filter((id): id is DatabaseId => id !== undefined),
+      );
       onSelectChange(allIds);
     } else {
       onSelectChange(new Set());
     }
   }, [data, onSelectChange]);
 
-  const handleSelectRow = useCallback((id: number, checked: boolean) => {
+  const handleSelectRow = useCallback((id: DatabaseId, checked: boolean) => {
     const newIds = new Set(selectedIds);
     if (checked) {
       newIds.add(id);
@@ -110,7 +118,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
     onSelectChange(newIds);
   }, [selectedIds, onSelectChange]);
 
-  const handleEditStart = useCallback((id: number, field: string, value: any) => {
+  const handleEditStart = useCallback((id: DatabaseId, field: string, value: unknown) => {
     setEditingCell({ id, field });
     setEditValue(value);
   }, []);
@@ -119,11 +127,16 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
     if (!editingCell) return;
 
     try {
-      await DatabaseService.updateRecord(tableType, editingCell.id, editingCell.field, editValue);
-      const updated = data.map((row: any) => 
-        row.id === editingCell.id ? { ...row, [editingCell.field]: editValue } : row
+      const affectedRows = await DatabaseService.updateRecord(
+        tableType,
+        editingCell.id,
+        editingCell.field,
+        editValue,
       );
-      onDataChange(updated);
+      if (!hasExpectedAffectedRows(affectedRows)) {
+        throw new Error('Záznam nebyl změněn');
+      }
+      await onRefresh();
       onStatusChange('Uloženo');
     } catch (error) {
       onStatusChange(`Chyba: ${String(error)}`);
@@ -131,15 +144,15 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
 
     setEditingCell(null);
     setEditValue(null);
-  }, [editingCell, editValue, data, tableType, onDataChange, onStatusChange]);
+  }, [editingCell, editValue, tableType, onRefresh, onStatusChange]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === 'Escape') {
-      handleEditComplete();
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === 'Escape') {
+      void handleEditComplete();
     }
   }, [handleEditComplete]);
 
-  const formatCellValue = (value: any, field: string): string => {
+  const formatCellValue = (value: unknown, field: string): string => {
     if (value === null || value === undefined) return '-';
     if (field === 'parameters' && typeof value === 'object') return JSON.stringify(value);
     if (field === 'processing_time' && typeof value === 'number') return value.toFixed(2);
@@ -147,11 +160,10 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
     return String(value);
   };
 
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '-';
+  const formatDate = (dateValue: unknown): string => {
+    if (typeof dateValue !== 'string' || !dateValue) return '-';
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleString('cs-CS', {
+      return new Date(dateValue).toLocaleString('cs-CZ', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -159,12 +171,12 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
         minute: '2-digit',
       });
     } catch {
-      return dateStr;
+      return dateValue;
     }
   };
 
-  const allSelected = data.length > 0 && data.every((row: any) => selectedIds.has(row.id));
-  const someSelected = data.some((row: any) => selectedIds.has(row.id)) && !allSelected;
+  const allSelected = data.length > 0 && data.every((row) => row.id !== undefined && selectedIds.has(row.id));
+  const someSelected = data.some((row) => row.id !== undefined && selectedIds.has(row.id)) && !allSelected;
 
   return (
     <div className="glass-panel rounded-lg overflow-hidden">
@@ -176,29 +188,27 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
                 <input
                   type="checkbox"
                   checked={allSelected}
-                  ref={(el) => {
-                    if (el) el.indeterminate = someSelected;
+                  ref={(element) => {
+                    if (element) element.indeterminate = someSelected;
                   }}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  onChange={(event) => handleSelectAll(event.target.checked)}
                   className="w-4 h-4 accent-primary"
                 />
               </th>
-              {config.columns.map((col) => (
+              {config.columns.map((column) => (
                 <th
-                  key={col.key}
+                  key={column.key}
                   className={cn(
-                    "px-3 py-2 text-left text-sm font-medium text-foreground/70",
-                    col.sortable !== false && "cursor-pointer hover:text-foreground"
+                    'px-3 py-2 text-left text-sm font-medium text-foreground/70',
+                    column.sortable !== false && 'cursor-pointer hover:text-foreground',
                   )}
-                  style={{ width: col.width }}
-                  onClick={() => col.sortable !== false && handleSort(col.key)}
+                  style={{ width: column.width }}
+                  onClick={() => column.sortable !== false && handleSort(column.key)}
                 >
                   <div className="flex items-center gap-1">
-                    {col.label}
-                    {sortColumn === col.key && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
+                    {column.label}
+                    {sortColumn === column.key && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
                 </th>
@@ -206,50 +216,59 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((row: any) => (
-              <tr
-                key={row.id}
-                className={cn(
-                  "border-b border-border/50 hover:bg-secondary/30 transition-colors",
-                  selectedIds.has(row.id) && "bg-primary/20"
-                )}
-              >
-                <td className="px-2 py-1">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(row.id)}
-                    onChange={(e) => handleSelectRow(row.id, e.target.checked)}
-                    className="w-4 h-4 accent-primary"
-                  />
-                </td>
-                {config.columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className="px-3 py-1 text-sm text-foreground/90 cursor-pointer"
-                    onDoubleClick={() => handleEditStart(row.id, col.key, row[col.key])}
-                  >
-                    {editingCell?.id === row.id && editingCell?.field === col.key ? (
-                      <input
-                        type={col.key === 'processing_time' || col.key === 'probability' || col.key === 'result_count' ? 'number' : 'text'}
-                        value={editValue ?? ''}
-                        onChange={(e) => setEditValue(col.key === 'processing_time' || col.key === 'probability' || col.key === 'result_count' ? parseFloat(e.target.value) : e.target.value)}
-                        onBlur={handleEditComplete}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-1 py-0.5 text-xs bg-background border border-border rounded"
-                        autoFocus
-                      />
-                    ) : (
-                      <span>
-                        {col.key === 'created_at' || col.key === 'completed_at' 
-                          ? formatDate(row[col.key]) 
-                          : formatCellValue(row[col.key], col.key)
-                        }
-                      </span>
-                    )}
+            {sortedData.map((row) => {
+              const rowId = row.id ?? '';
+              return (
+                <tr
+                  key={rowId}
+                  className={cn(
+                    'border-b border-border/50 hover:bg-secondary/30 transition-colors',
+                    selectedIds.has(rowId) && 'bg-primary/20',
+                  )}
+                >
+                  <td className="px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(rowId)}
+                      onChange={(event) => handleSelectRow(rowId, event.target.checked)}
+                      className="w-4 h-4 accent-primary"
+                    />
                   </td>
-                ))}
-              </tr>
-            ))}
+                  {config.columns.map((column) => {
+                    const value = getFieldValue(row, column.key);
+                    return (
+                      <td
+                        key={column.key}
+                        className="px-3 py-1 text-sm text-foreground/90 cursor-pointer"
+                        onDoubleClick={() => canEditDatabaseColumn(column.editable) && handleEditStart(rowId, column.key, value)}
+                      >
+                        {editingCell?.id === rowId && editingCell?.field === column.key ? (
+                          <input
+                            type={column.key === 'processing_time' || column.key === 'probability' || column.key === 'result_count' ? 'number' : 'text'}
+                            value={typeof editValue === 'string' || typeof editValue === 'number' ? editValue : ''}
+                            onChange={(event) => setEditValue(
+                              column.key === 'processing_time' || column.key === 'probability' || column.key === 'result_count'
+                                ? parseFloat(event.target.value)
+                                : event.target.value,
+                            )}
+                            onBlur={() => void handleEditComplete()}
+                            onKeyDown={handleKeyDown}
+                            className="w-full px-1 py-0.5 text-xs bg-background border border-border rounded"
+                            autoFocus
+                          />
+                        ) : (
+                          <span>
+                            {column.key === 'created_at' || column.key === 'completed_at'
+                              ? formatDate(value)
+                              : formatCellValue(value, column.key)}
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
             {sortedData.length === 0 && (
               <tr>
                 <td colSpan={config.columns.length + 1} className="px-4 py-8 text-center text-muted-foreground">

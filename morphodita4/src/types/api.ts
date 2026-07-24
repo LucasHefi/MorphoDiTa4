@@ -13,6 +13,14 @@ export interface MorphologicalTag {
   space?: string;
 }
 
+export interface TaggedToken extends MorphologicalTag {
+  token: string;
+}
+
+export interface GeneratedForm extends MorphologicalTag {
+  form: string;
+}
+
 export interface TagComponents {
   rawTag: string;
   wordClass: string;
@@ -28,6 +36,9 @@ export interface Token {
   space: string;
 }
 
+export type DisplayMorphologicalTag = MorphologicalTag & { token?: string };
+export type AnalyzerResult = DisplayMorphologicalTag[][] | Token[][];
+
 export interface APIResponse<T> {
   model: string;
   result: T;
@@ -42,7 +53,7 @@ export interface ModelsResponse {
 
 export interface GenerateResponse {
   model: string;
-  result: Array<MorphologicalTag[]>;
+  result: GeneratedForm[][];
 }
 
 export interface AnalyzeResponse {
@@ -52,7 +63,7 @@ export interface AnalyzeResponse {
 
 export interface TagResponse {
   model: string;
-  result: Array<Array<{ token: string; space?: string } & MorphologicalTag>>;
+  result: TaggedToken[][];
 }
 
 export interface TokenizeResponse {

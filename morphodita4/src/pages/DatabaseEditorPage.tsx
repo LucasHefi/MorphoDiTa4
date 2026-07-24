@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatabaseService } from '../services/database';
-import { Session, MorphologicalData } from '../types/database';
+import { DATABASE_PAGE_SIZE, hasExpectedAffectedRows } from '../components/database/databaseEditorContracts';
+import type { DatabaseId, DatabaseRow } from '../types/database';
 import { DatabaseTable } from '../components/database/DatabaseTable';
 import { Button, Input } from '../components/common';
 import { cn } from '../components/common/utils';
@@ -12,18 +13,23 @@ type TableType = 'sessions' | 'morphological_data';
 export const DatabaseEditorPage: React.FC = () => {
   const { t } = useTranslation();
   const [tableType, setTableType] = useState<TableType>('sessions');
-  const [data, setData] = useState<(Session | MorphologicalData)[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [data, setData] = useState<DatabaseRow[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<DatabaseId>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     setStatus(t('common.loading'));
     try {
-      const result = await DatabaseService.getAllData(tableType, 500);
+      const result = await DatabaseService.getAllData(
+        tableType,
+        DATABASE_PAGE_SIZE,
+        page * DATABASE_PAGE_SIZE,
+      );
       setData(result);
       setStatus(`${result.length} záznamů načteno`);
     } catch (error) {
@@ -31,7 +37,7 @@ export const DatabaseEditorPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [tableType, t]);
+  }, [tableType, t, page]);
 
   useEffect(() => {
     loadData();
@@ -90,9 +96,11 @@ export const DatabaseEditorPage: React.FC = () => {
     setStatus(t('common.loading'));
     try {
       const ids = Array.from(selectedIds);
-      await DatabaseService.deleteRecords(tableType, ids);
-      const remaining = data.filter((row: any) => !selectedIds.has(row.id));
-      setData(remaining);
+      const affectedRows = await DatabaseService.deleteRecords(tableType, ids);
+      if (!hasExpectedAffectedRows(affectedRows, ids.length)) {
+        throw new Error(`Změněno bylo ${affectedRows} z ${ids.length} záznamů`);
+      }
+      await loadData();
       setSelectedIds(new Set());
       setStatus(`${t('common.success')}: ${t('database.delete')} ${ids.length} záznamů`);
     } catch (error) {
@@ -100,7 +108,7 @@ export const DatabaseEditorPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedIds, tableType, data, t]);
+  }, [selectedIds, tableType, t, loadData]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -113,7 +121,10 @@ export const DatabaseEditorPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                 <select
                   value={tableType}
-                  onChange={(e) => setTableType(e.target.value as TableType)}
+                  onChange={(e) => {
+                    setTableType(e.target.value as TableType);
+                    setPage(0);
+                  }}
                   className="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
                 >
                   <option value="sessions">{t('database.table.sessions')}</option>
@@ -180,10 +191,34 @@ export const DatabaseEditorPage: React.FC = () => {
               data={data}
               selectedIds={selectedIds}
               onSelectChange={setSelectedIds}
-              onDataChange={setData}
               onStatusChange={setStatus}
+              onRefresh={loadData}
             />
           </div>
+
+          {!searchTerm.trim() && (
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPage((current) => Math.max(0, current - 1))}
+                disabled={page === 0 || isLoading}
+              >
+                {t('database.previous')}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {t('database.page')} {page + 1}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPage((current) => current + 1)}
+                disabled={isLoading || data.length < DATABASE_PAGE_SIZE}
+              >
+                {t('database.next')}
+              </Button>
+            </div>
+          )}
 
           <div className="text-sm text-muted-foreground px-2">
             {status}

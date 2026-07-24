@@ -14,7 +14,7 @@ import { Settings as SettingsIcon } from 'lucide-react';
 // Simple Layout wrapper
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { t, i18n } = useTranslation();
-  const { theme, language } = useAppStore();
+  const { theme, language, transportNotice } = useAppStore();
   const location = useLocation();
 
   // Apply theme
@@ -87,11 +87,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             to="/settings" 
             className={`p-2 rounded-md transition-colors hover:bg-secondary ${isActive('/settings') ? 'text-primary bg-secondary' : 'text-foreground/60'}`}
             title={t('nav.settings')}
+            aria-label={t('nav.settings')}
           >
             <SettingsIcon className="w-5 h-5" />
           </Link>
         </div>
       </header>
+      {transportNotice && (
+        <div role="status" className="border-b border-yellow-500/50 bg-yellow-500/10 px-4 py-2 text-center text-sm text-foreground">
+          {t(`transport.${transportNotice}`)}
+        </div>
+      )}
       <div className="flex-1">
         {children}
       </div>

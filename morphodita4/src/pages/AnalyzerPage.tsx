@@ -4,23 +4,24 @@ import { useApiStore } from '../store/useApiStore';
 import { MorphoDiTaAPI } from '../services/api';
 import { OperationType } from '../types/common';
 import { splitText, processInBatches, getBatchSize } from '../services/batcher';
-import { 
-  ModelSelector, 
-  OperationSelector, 
-  TextInput, 
-  AdvancedOptions, 
-  ResultPanel, 
-  LogPanel, 
-  ExportMenu 
+import {
+  ModelSelector,
+  OperationSelector,
+  TextInput,
+  AdvancedOptions,
+  ResultPanel,
+  LogPanel,
+  ExportMenu,
 } from '../components/analyzer';
-import { 
-  exportToJson, 
-  downloadFile, 
-  exportMorphologicalTagsToCsv, 
-  exportMorphologicalTagsToTxt 
+import {
+  exportToJson,
+  downloadFile,
+  exportMorphologicalTagsToCsv,
+  exportMorphologicalTagsToTxt,
 } from '../services/export';
 import { Button } from '../components/common';
-import { LogEntry } from '../components/analyzer/LogPanel';
+import type { LogEntry } from '../components/analyzer/LogPanel';
+import type { AnalyzerResult } from '../types/api';
 
 export const AnalyzerPage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,23 +29,22 @@ export const AnalyzerPage: React.FC = () => {
 
   const [operation, setOperation] = useState<OperationType>('analyze');
   const [inputText, setInputText] = useState('');
-  
-  // Advanced options state
+
   const [guesser, setGuesser] = useState(true);
   const [inputFormat, setInputFormat] = useState<'untokenized' | 'vertical'>('untokenized');
   const [derivation, setDerivation] = useState<'none' | 'root' | 'path' | 'tree'>('none');
   const [convertTagset, setConvertTagset] = useState('');
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AnalyzerResult | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
-  const addLog = (level: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR', message: string) => {
-    setLogs(prev => [...prev, {
+  const addLog = (level: LogEntry['level'], message: string) => {
+    setLogs((prev) => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: new Date().toISOString(),
       level,
-      message
+      message,
     }]);
   };
 
@@ -68,26 +68,47 @@ export const AnalyzerPage: React.FC = () => {
       if (chunks.length > 1) {
         addLog('INFO', t('analyzer.batchingNote'));
       }
-      let res;
+
+      let processedResult: AnalyzerResult;
       switch (operation) {
-        case 'tag':
-          const tagRs = await processInBatches(chunks, (c) => MorphoDiTaAPI.tagText(c, selectedModel));
-          res = { result: tagRs.flatMap(r => r.result) };
+        case 'tag': {
+          const tagResponses = await processInBatches(chunks, (chunk) =>
+            MorphoDiTaAPI.tagText(chunk, selectedModel),
+          );
+          processedResult = tagResponses.flatMap((response) => response.result);
           break;
-        case 'analyze':
-          const analyzeRs = await processInBatches(chunks, (c) => MorphoDiTaAPI.analyzeText(c, selectedModel, guesser, inputFormat, derivation, convertTagset));
-          res = { result: analyzeRs.flatMap(r => r.result) };
+        }
+        case 'analyze': {
+          const analyzeResponses = await processInBatches(chunks, (chunk) =>
+            MorphoDiTaAPI.analyzeText(
+              chunk,
+              selectedModel,
+              guesser,
+              inputFormat,
+              derivation,
+              convertTagset,
+            ),
+          );
+          processedResult = analyzeResponses.flatMap((response) => response.result);
           break;
-        case 'generate':
-          const genRs = await processInBatches(chunks, (c) => MorphoDiTaAPI.generateForms(c, selectedModel, guesser, convertTagset));
-          res = { result: genRs.flatMap(r => r.result) };
+        }
+        case 'generate': {
+          const generateResponses = await processInBatches(chunks, (chunk) =>
+            MorphoDiTaAPI.generateForms(chunk, selectedModel, guesser, convertTagset),
+          );
+          processedResult = generateResponses.flatMap((response) => response.result);
           break;
-        case 'tokenize':
-          const tokRs = await processInBatches(chunks, (c) => MorphoDiTaAPI.tokenizeText(c, selectedModel));
-          res = { result: tokRs.flatMap(r => r.result) };
+        }
+        case 'tokenize': {
+          const tokenizeResponses = await processInBatches(chunks, (chunk) =>
+            MorphoDiTaAPI.tokenizeText(chunk, selectedModel),
+          );
+          processedResult = tokenizeResponses.flatMap((response) => response.result);
           break;
+        }
       }
-      setResult(res?.result);
+
+      setResult(processedResult);
       addLog('INFO', 'Operace úspěšně dokončena.');
     } catch (error) {
       addLog('ERROR', `Chyba: ${error instanceof Error ? error.message : String(error)}`);
@@ -98,10 +119,10 @@ export const AnalyzerPage: React.FC = () => {
 
   const handleExport = (format: 'csv' | 'json' | 'txt') => {
     if (!result) return;
-    
+
     const timestamp = new Date().toISOString().slice(0, 10);
     const filename = `morphodita-result-${operation}-${timestamp}.${format}`;
-    
+
     switch (format) {
       case 'csv':
         downloadFile(exportMorphologicalTagsToCsv(result), filename, 'text/csv');
@@ -119,28 +140,17 @@ export const AnalyzerPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 container max-w-7xl py-6 sm:py-8 px-4 sm:px-8 flex flex-col lg:flex-row gap-6 animate-in fade-in duration-300">
-        
-        {/* Left Column - Input & Controls */}
         <div className="flex flex-col gap-4 w-full lg:w-[45%] xl:w-[35%] lg:max-h-[calc(100vh-8rem)] lg:sticky lg:top-20">
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h2>
-            
-            <ModelSelector />
-            
-            <OperationSelector 
-              selectedOperation={operation} 
-              onOperationChange={setOperation} 
-            />
 
-            <TextInput 
-              value={inputText} 
-              onChange={setInputText} 
-              disabled={isProcessing} 
-            />
+            <ModelSelector />
+            <OperationSelector selectedOperation={operation} onOperationChange={setOperation} />
+            <TextInput value={inputText} onChange={setInputText} disabled={isProcessing} />
             <p className="text-xs text-muted-foreground mt-1">{t('analyzer.batchingNote')}</p>
 
             <div className="mt-4">
-              <AdvancedOptions 
+              <AdvancedOptions
                 operation={operation}
                 guesser={guesser}
                 onGuesserChange={setGuesser}
@@ -154,8 +164,8 @@ export const AnalyzerPage: React.FC = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <Button 
-                onClick={handleProcess} 
+              <Button
+                onClick={handleProcess}
                 isLoading={isProcessing}
                 disabled={!inputText.trim() || !selectedModel}
                 className="w-full sm:w-auto"
@@ -170,14 +180,13 @@ export const AnalyzerPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column - Results */}
         <div className="flex flex-col w-full lg:flex-1 min-h-[400px]">
           {result ? (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col h-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-        <h2 className="text-xl font-semibold text-foreground">{t('analyzer.results_title')}</h2>
-        <ExportMenu onExport={handleExport} />
-      </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h2 className="text-xl font-semibold text-foreground">{t('analyzer.results_title')}</h2>
+                <ExportMenu onExport={handleExport} />
+              </div>
               <div className="flex-1 overflow-auto">
                 <ResultPanel result={result} operation={operation} />
               </div>
@@ -191,7 +200,6 @@ export const AnalyzerPage: React.FC = () => {
             </div>
           )}
         </div>
-
       </main>
     </div>
   );

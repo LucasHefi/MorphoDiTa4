@@ -9,15 +9,18 @@ export interface LogEntry {
   message: string;
 }
 
+type LogFilter = 'ALL' | 'INFO' | 'WARNING' | 'ERROR';
+
 export interface LogPanelProps {
   logs: LogEntry[];
   onClear: () => void;
 }
 
 export const LogPanel: React.FC<LogPanelProps> = ({ logs, onClear }) => {
-  const [filter, setFilter] = useState<'ALL' | 'INFO' | 'WARNING' | 'ERROR'>('ALL');
+  const [filter, setFilter] = useState<LogFilter>('ALL');
+  const filters: LogFilter[] = ['ALL', 'INFO', 'WARNING', 'ERROR'];
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs.filter((log) => {
     if (filter === 'ALL') return true;
     if (filter === 'INFO') return ['INFO', 'DEBUG'].includes(log.level);
     return log.level === filter;
@@ -37,17 +40,17 @@ export const LogPanel: React.FC<LogPanelProps> = ({ logs, onClear }) => {
     <div className="flex flex-col h-full bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       <div className="flex justify-between items-center p-2 bg-secondary/50 border-b border-border">
         <div className="flex gap-2">
-          {['ALL', 'INFO', 'WARNING', 'ERROR'].map((f) => (
+          {filters.map((level) => (
             <button
-              key={f}
-              onClick={() => setFilter(f as any)}
+              key={level}
+              onClick={() => setFilter(level)}
               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                filter === f 
-                  ? 'bg-primary text-primary-foreground' 
+                filter === level
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
               }`}
             >
-              {f}
+              {level}
             </button>
           ))}
         </div>
@@ -60,7 +63,7 @@ export const LogPanel: React.FC<LogPanelProps> = ({ logs, onClear }) => {
         {filteredLogs.length === 0 ? (
           <div className="text-muted-foreground text-center py-4">No logs to display</div>
         ) : (
-          filteredLogs.map(log => (
+          filteredLogs.map((log) => (
             <div key={log.id} className="mb-1 flex gap-2">
               <span className="text-muted-foreground whitespace-nowrap">
                 [{new Date(log.timestamp).toLocaleTimeString()}]

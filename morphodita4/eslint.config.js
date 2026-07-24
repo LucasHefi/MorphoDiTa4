@@ -14,6 +14,12 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+  {
+    files: ['**/*.mjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
   ...tseslint.configs['flat/recommended'],
   {
     files: ['**/*.{ts,tsx}'],

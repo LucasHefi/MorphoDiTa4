@@ -1,0 +1,43 @@
+name: Quality gates
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: morphodita4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: morphodita4/package-lock.json
+      - run: npm ci
+      - run: npm run version:check
+      - run: npm run check
+      - run: npm run test -- --run
+      - run: npm run build
+      - run: npm audit --audit-level=high
+
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: morphodita4/src-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo check --locked
+      - run: cargo clippy --locked -- -D warnings
+      - run: cargo test --locked

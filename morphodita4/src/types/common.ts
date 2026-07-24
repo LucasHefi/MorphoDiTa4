@@ -30,12 +30,36 @@ export interface FilterOptions {
 
 export type OperationType = 'tag' | 'analyze' | 'generate' | 'tokenize';
 
+import type { GeneratedForm, TaggedToken } from './api';
+
+export interface WizardTokenRelation {
+  inputToken: string;
+  lemma: string;
+  tag: string;
+  generatedForms: GeneratedForm[];
+}
+
+export interface WizardProcessingResult {
+  inputWords: number;
+  newWords: string[];
+  uniqueLemmas: number;
+  lemmas: string[];
+  forms: GeneratedForm[];
+  taggedTokens: TaggedToken[];
+  relations: WizardTokenRelation[];
+  model: string;
+}
+
 export interface AppState {
   theme: 'light' | 'dark' | 'system';
   language: 'cs' | 'en' | 'pl';
   useOfflineMode: boolean;
+  offlineFallbackEnabled: boolean;
   apiBatchSize: number;
 }
+
+export type TransportStatus = 'unknown' | 'online' | 'offline';
+export type TransportNotice = 'offline-explicit' | 'offline-fallback';
 
 export interface SelectOption {
   value: string;

@@ -60,9 +60,10 @@ export const WizardInput: React.FC = () => {
 
           <div className="relative">
             <TextArea
+              label={t('wizard.input_label')}
               value={keywordsText}
               onChange={(e) => setKeywordsText(e.target.value)}
-              placeholder="Zadejte klíčová slova (jedno na řádek, nebo oddělená čárkou či středníkem)..."
+              placeholder={t('wizard.input_placeholder')}
               className="h-[300px] font-mono text-sm resize-none"
             />
             <div className="absolute bottom-2 right-3 text-xs text-muted-foreground">

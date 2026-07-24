@@ -1,11 +1,16 @@
+export type DatabaseId = string | number;
+export type DatabasePayload = Record<string, unknown>;
+export type DatabaseRow = Session | MorphologicalData;
+
 export interface Session {
   id?: string;
   operation: 'tag' | 'analyze' | 'generate' | 'tokenize';
   model: string;
   input_text: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
   result_count: number;
   processing_time?: number;
+
   status: 'pending' | 'processing' | 'completed' | 'failed';
   error_message?: string;
   created_at?: string;

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "czech-250909",
+  "version": "2.1.0",
+  "release": "250909",
+  "language": "czech",
+  "artifact": "czech.tagger",
+  "sourceUrl": "https://hdl.handle.net/11234/1-5985",
+  "license": {
+    "spdx": "CC-BY-NC-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+  },
+  "notices": ["LICENSE.txt", "README.txt"],
+  "serverCompatibility": {
+    "minServerVersion": "1.11.3",
+    "maxServerVersion": "1.11.3"
+  },
+  "description": "Official Czech MorfFlex2.1/PDT-C2.0 MorphoDiTa tagger release 250909.",
+  "capabilities": ["tag", "analyze", "generate", "tokenize"]
+}

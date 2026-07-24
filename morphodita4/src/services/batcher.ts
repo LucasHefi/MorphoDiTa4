@@ -20,23 +20,59 @@ export function splitText(input: string, batchSize: number = 50): string[] {
   return chunks
 }
 
+export interface BatchProcessingOptions {
+  signal?: AbortSignal;
+  partialFailure?: 'fail-fast' | 'continue';
+  onError?: (error: unknown, index: number, chunk: string) => void;
+}
+
+export const BATCH_DELAY_MS = 100;
+
+function createAbortError(): DOMException {
+  return new DOMException('The operation was aborted', 'AbortError');
+}
+
+function waitForBatchDelay(delay: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.reject(createAbortError());
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, delay);
+    const onAbort = () => {
+      clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', onAbort);
+      reject(createAbortError());
+    };
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
 export async function processInBatches<T>(
   chunks: string[],
   processor: (chunk: string) => Promise<T>,
-  onProgress?: (i: number) => void
+  onProgress?: (i: number) => void,
+  options: BatchProcessingOptions = {},
 ): Promise<T[]> {
-  const results: T[] = []
-  const delay = 100
+  const results: T[] = [];
   for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i]
-    const res = await processor(chunk)
-    results.push(res)
-    if (onProgress) onProgress(i + 1)
+    const chunk = chunks[i];
+    if (options.signal?.aborted) throw createAbortError();
+
+    try {
+      results.push(await processor(chunk));
+    } catch (error) {
+      if (options.signal?.aborted) throw createAbortError();
+      if (options.partialFailure !== 'continue') throw error;
+      options.onError?.(error, i, chunk);
+    }
+
+    onProgress?.(i + 1);
     if (i < chunks.length - 1) {
-      await new Promise(r => setTimeout(r, delay))
+      await waitForBatchDelay(BATCH_DELAY_MS, options.signal);
     }
   }
-  return results
+  return results;
 }
 
 export function getBatchSize(): number {

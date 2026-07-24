@@ -1,0 +1,1 @@
+Official Czech MorphoDiTa model bundle\n\nSource: https://hdl.handle.net/11234/1-5985\nRelease: czech-morfflex2.1-pdtc2.0-250909\nLicense: CC BY-NC-SA 4.0\nServer: MorphoDiTa 1.11.3\n\nThe .tagger file is consumed by the bundled morphodita_server REST sidecar.\n

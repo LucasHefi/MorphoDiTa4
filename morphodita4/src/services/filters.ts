@@ -69,7 +69,9 @@ export const applyFiltersToArray = (words: string[], options: {
     result = removeStopWords(result, options.stopWordsList || DEFAULT_STOP_WORDS);
   }
   
-  result = result.map(removeSpecialCharacters).filter(w => w.length > 0);
+  if (options.removeSpecialCharacters) {
+    result = result.map(removeSpecialCharacters).filter(w => w.length > 0);
+  }
   
   if (options.removeDuplicates || options.removeDiacritics) {
     result = removeDuplicates(result);

@@ -1,12 +1,18 @@
 {
   "name": "morphodita4",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "author": "MorphoDiTa Client contributors",
+  "license": "MPL-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "check": "npm run lint && tsc -b --pretty false --incremental false",
+    "version:check": "node scripts/check-release-metadata.mjs",
+    "verify:offline": "node scripts/verify-offline-no-network.mjs",
+    "build:linux:test": "npm run build && tauri build --bundles deb",
     "preview": "vite preview",
     "test": "vitest",
     "tauri": "tauri"
@@ -22,7 +28,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.4.1",
-    "react-router": "^7.3.0",
+    "react-router": "8.3.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.12",
     "zustand": "^5.0.3"

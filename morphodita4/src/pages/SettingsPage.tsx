@@ -10,7 +10,20 @@ import type { AppState } from '../types/common';
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { theme, setTheme, language, setLanguage, useOfflineMode, setUseOfflineMode, apiBatchSize, setApiBatchSize } = useAppStore();
+  const {
+    theme,
+    setTheme,
+    language,
+    setLanguage,
+    useOfflineMode,
+    setUseOfflineMode,
+    offlineFallbackEnabled,
+    setOfflineFallbackEnabled,
+    apiBatchSize,
+    setApiBatchSize,
+    settingsRecoveryNotice,
+    dismissSettingsRecovery,
+  } = useAppStore();
 
   const themeOptions: Array<{ value: AppState['theme']; label: string; icon: React.ReactNode }> = [
     { value: 'light', label: t('settings.themes.light'), icon: <Sun className="w-4 h-4" /> },
@@ -29,6 +42,19 @@ export const SettingsPage: React.FC = () => {
       <main className="flex-1 container max-w-2xl py-12 px-4 sm:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <h1 className="text-3xl font-bold mb-8 text-foreground">{t('settings.title')}</h1>
 
+        {settingsRecoveryNotice && (
+          <div role="alert" className="mb-6 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm">
+            <p>{t('settings.recoveryNotice')}</p>
+            <button
+              type="button"
+              onClick={dismissSettingsRecovery}
+              className="mt-2 font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {t('settings.dismissRecovery')}
+            </button>
+          </div>
+        )}
+
         <div className="space-y-6">
           <Card glass>
             <CardHeader>
@@ -42,6 +68,8 @@ export const SettingsPage: React.FC = () => {
                 {themeOptions.map((option) => (
                   <button
                     key={option.value}
+                    type="button"
+                    aria-pressed={theme === option.value}
                     onClick={() => setTheme(option.value)}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
                       theme === option.value
@@ -69,6 +97,8 @@ export const SettingsPage: React.FC = () => {
                 {languageOptions.map((option) => (
                   <button
                     key={option.value}
+                    type="button"
+                    aria-pressed={language === option.value}
                     onClick={() => setLanguage(option.value)}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
                       language === option.value
@@ -105,6 +135,20 @@ export const SettingsPage: React.FC = () => {
                   <span className="font-medium">{t('settings.offlineMode')}</span>
                 </label>
                 <p className="text-sm text-muted-foreground -mt-2">{t('settings.offlineModeDesc')}</p>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={offlineFallbackEnabled}
+                    onChange={(e) => {
+                      setOfflineFallbackEnabled(e.target.checked);
+                      useApiStore.getState().invalidateModels();
+                    }}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  <span className="font-medium">{t('settings.offlineFallback')}</span>
+                </label>
+                <p className="text-sm text-muted-foreground -mt-2">{t('settings.offlineFallbackDesc')}</p>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">{t('settings.batchSize')}</label>

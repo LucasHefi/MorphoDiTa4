@@ -68,8 +68,9 @@
     "back": "Wstecz",
     "input_title": "Wprowadź słowa kluczowe",
     "import_txt": "Importuj TXT",
-    "input_description": "Wstaw tekst lub listę słów oddzielonych spacją, przecinkiem lub nową linią.",
-    "input_placeholder": "np.: pies kot mysz..."
+    "input_description": "Wstaw tekst lub listę słów oddzielonych spacją, przecinkiem lub nowym wierszem.",
+    "input_placeholder": "np.: pies kot mysz...",
+    "input_label": "Słowa kluczowe"
   },
   "settings": {
     "title": "Ustawienia aplikacji",
@@ -80,13 +81,21 @@
       "dark": "Ciemny",
       "system": "Systemowy"
     },
-    "offlineMode": "Tryb offline",
-    "offlineModeDesc": "Ładuj listę modeli z folderu lokalnego zamiast API",
+    "offlineMode": "Używaj lokalnego MorphoDiTa",
+    "offlineModeDesc": "Wymuś lokalne MorphoDiTa i nie używaj internetowego API",
+    "offlineFallback": "Używaj lokalnego fallbacku",
+    "offlineFallbackDesc": "Automatycznie użyj lokalnego MorphoDiTa, gdy internetowe API jest niedostępne",
     "batchSize": "Rozmiar partii API",
     "batchSizeDesc": "Maks. słów na żądanie API (domyślnie 50)",
     "aboutLink": "O programie",
     "installType": "Typ instalacji",
-    "databaseEditor": "Edytor bazy danych"
+    "databaseEditor": "Edytor bazy danych",
+    "recoveryNotice": "Niektóre zapisane ustawienia były nieprawidłowe lub nieaktualne. Przywrócono bezpieczne wartości domyślne.",
+    "dismissRecovery": "Zamknij komunikat"
+  },
+  "transport": {
+    "offline-explicit": "Lokalne MorphoDiTa jest aktywne, ponieważ wybrano tryb offline w ustawieniach.",
+    "offline-fallback": "Internetowe API jest niedostępne. Aktywny jest lokalny fallback MorphoDiTa."
   },
   "database": {
     "title": "Edytor bazy danych",
@@ -98,7 +107,10 @@
     "searchPlaceholder": "Szukaj...",
     "search": "Szukaj",
     "refresh": "Odśwież",
-    "delete": "Usuń zaznaczone"
+    "delete": "Usuń zaznaczone",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona"
   },
   "tagset": {
     "unknown": "Nieznany '{{val}}'",

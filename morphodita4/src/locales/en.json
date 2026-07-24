@@ -69,7 +69,8 @@
     "input_title": "Enter keywords",
     "import_txt": "Import TXT",
     "input_description": "Insert text or a list of words separated by space, comma, or newline.",
-    "input_placeholder": "e.g.: dog cat mouse..."
+    "input_placeholder": "e.g.: dog cat mouse...",
+    "input_label": "Keywords"
   },
   "settings": {
     "title": "Application Settings",
@@ -80,13 +81,21 @@
       "dark": "Dark",
       "system": "System"
     },
-    "offlineMode": "Offline Mode",
-    "offlineModeDesc": "Load model list from local folder instead of API",
+    "offlineMode": "Use local MorphoDiTa",
+    "offlineModeDesc": "Force local MorphoDiTa and do not use the online API",
+    "offlineFallback": "Use local fallback",
+    "offlineFallbackDesc": "Use local MorphoDiTa automatically when the online API is unavailable",
     "batchSize": "API Batch Size",
     "batchSizeDesc": "Max words per API request (default 50)",
     "aboutLink": "About",
     "installType": "Install Type",
-    "databaseEditor": "Database Editor"
+    "databaseEditor": "Database Editor",
+    "recoveryNotice": "Some saved settings were invalid or outdated. Safe defaults were restored.",
+    "dismissRecovery": "Dismiss notice"
+  },
+  "transport": {
+    "offline-explicit": "Local MorphoDiTa is active because offline mode was selected in Settings.",
+    "offline-fallback": "The online API is unavailable. Local MorphoDiTa fallback is active."
   },
   "database": {
     "title": "Database Editor",
@@ -98,7 +107,10 @@
     "searchPlaceholder": "Search...",
     "search": "Search",
     "refresh": "Refresh",
-    "delete": "Delete Selected"
+    "delete": "Delete Selected",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
   },
   "tagset": {
     "unknown": "Unknown '{{val}}'",
