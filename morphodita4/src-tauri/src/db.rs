@@ -747,6 +747,7 @@ pub fn search_lemmas(conn: &Connection, query: &str) -> Result<Vec<Morphological
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn test_connection() -> Connection {
         let conn = Connection::open_in_memory().unwrap();
@@ -890,6 +891,105 @@ mod tests {
         assert!(get_sessions(&conn, Some(0), Some(0)).is_err());
         assert!(get_sessions(&conn, Some(1), Some(-1)).is_err());
         assert!(get_all_morphological_data(&conn, Some(1_001), Some(0)).is_err());
+    }
+
+    #[test]
+    fn persists_sessions_across_close_and_reopen_with_deterministic_bounded_order() {
+        struct TemporaryDatabase {
+            path: PathBuf,
+        }
+
+        impl TemporaryDatabase {
+            fn new() -> Self {
+                let nonce = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .expect("system clock must be after the Unix epoch")
+                    .as_nanos();
+                let path = std::env::temp_dir().join(format!(
+                    "morphodita-db-persistence-{}-{nonce}.sqlite",
+                    std::process::id()
+                ));
+                remove_database_artifacts(&path);
+                Self { path }
+            }
+        }
+
+        impl Drop for TemporaryDatabase {
+            fn drop(&mut self) {
+                remove_database_artifacts(&self.path);
+            }
+        }
+
+        fn remove_database_artifacts(path: &std::path::Path) {
+            let _ = std::fs::remove_file(path);
+            for suffix in ["-journal", "-wal", "-shm"] {
+                let _ = std::fs::remove_file(path.with_file_name(format!(
+                    "{}{}",
+                    path.file_name().and_then(|name| name.to_str()).unwrap_or("database"),
+                    suffix
+                )));
+            }
+        }
+
+        let temporary_database = TemporaryDatabase::new();
+        let conn = open_database_at(&temporary_database.path).unwrap();
+        let created_at = [
+            "2026-08-01T10:00:00.000Z",
+            "2026-08-03T10:00:00.000Z",
+            "2026-08-03T10:00:00.000Z",
+            "2026-08-02T10:00:00.000Z",
+            "2026-08-03T10:00:00.000Z",
+            "2026-08-01T10:00:00.000Z",
+        ];
+        let mut ids = Vec::new();
+
+        for timestamp in created_at {
+            let id = create_session(
+                &conn,
+                Session {
+                    id: None,
+                    operation: "analyze".to_string(),
+                    model: "czech-model".to_string(),
+                    input_text: "seeded input".to_string(),
+                    parameters: "{}".to_string(),
+                    result_count: 1,
+                    processing_time: None,
+                    status: "completed".to_string(),
+                    error_message: None,
+                    created_at: None,
+                    completed_at: None,
+                },
+            )
+            .unwrap();
+            conn.execute(
+                "UPDATE sessions SET created_at = ?1 WHERE id = ?2",
+                params![timestamp, id],
+            )
+            .unwrap();
+            ids.push(id);
+        }
+
+        assert!(temporary_database.path.exists());
+        drop(conn);
+
+        let reopened = open_database_at(&temporary_database.path).unwrap();
+        let sessions = get_sessions(&reopened, Some(4), Some(0)).unwrap();
+        let expected_ids = vec![ids[4], ids[2], ids[1], ids[3]];
+
+        assert_eq!(sessions.len(), expected_ids.len());
+        assert_eq!(
+            sessions
+                .iter()
+                .map(|session| session.id.unwrap())
+                .collect::<Vec<_>>(),
+            expected_ids
+        );
+        assert_eq!(get_sessions(&reopened, Some(4), Some(0)).unwrap().len(), 4);
+        drop(reopened);
+
+        let database_path = temporary_database.path.clone();
+        drop(temporary_database);
+        assert!(!database_path.exists());
     }
 
     #[test]

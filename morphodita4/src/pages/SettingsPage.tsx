@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/common';
 import { Sun, Moon, Monitor, Globe, Info } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import type { AppState } from '../types/common';
+import { ModelDownloadPanel } from './ModelDownloadPanel';
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -165,6 +166,8 @@ export const SettingsPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          <ModelDownloadPanel />
 
 <Card glass>
              <CardHeader>

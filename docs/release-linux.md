@@ -1,6 +1,39 @@
 # Linux test release
 
-MorphoDiTa Client is developed on Linux and is intended to run primarily on Windows. The Linux package is a test artifact, not evidence of Windows release readiness.
+This document defines the current release boundary. The only locally supported and
+verified platform scope is a Linux x86_64 test `.deb`. That evidence does not
+create a public, production, or cross-platform support promise.
+
+## Supported platform matrix
+
+| Platform | Minimum OS | Architecture | Required native evidence | Current commitment |
+|---|---|---|---|---|
+| Linux | **OPEN / unverified**: no minimum distribution or kernel baseline is established as release evidence | x86_64 (`amd64`) | Linux runner, the packaged `morphodita-server` sidecar, and the test `.deb` procedure below | **Locally supported/verified test scope only**; no public or production support commitment |
+| Windows | **OPEN / unverified**: no minimum Windows version is established as release evidence | x86_64 candidate | Windows runner and Windows sidecar `x86_64-pc-windows-msvc.exe`; direct Windows build, install/startup, and offline-sidecar smoke test | **OPEN** until the target artifacts and host are directly tested; no support commitment yet |
+| macOS | Not defined because macOS is outside the current release scope | No current release architecture is decided | No current macOS artifact or host test | **Out of scope**; no support commitment |
+
+The current posture is therefore **Linux x86_64 test scope**, not a
+Windows/macOS/Linux supported-release matrix. Windows remains a future candidate;
+a Linux build must not be reported as a Windows release.
+
+The repository contains older planning prose that names additional platforms or
+minimum versions. Those statements are not release evidence; the matrix above is
+the current release decision for this document.
+
+## Packaging controls and open boundaries
+
+- **Signing:** **OPEN / unverified**. No signing configuration or signed artifact
+  evidence is recorded for the current test package. A `sha256sum` is an
+  integrity record, not a code-signing signature.
+- **Notarization:** **OPEN / unverified**. macOS notarization is not part of the
+  current release scope, and no notarization evidence exists.
+- **Update channel:** **OPEN / unverified**. The repository documents a manually
+  built test `.deb`, but no application updater, update feed, or publication
+  channel is configured or verified here. The online LINDA API transport is not an
+  application update channel.
+- **Support commitment:** limited to local verification of the Linux x86_64 test
+  artifact. Windows has no support commitment until direct testing passes; macOS
+  has no support commitment while out of scope.
 
 ## Transport policy
 
@@ -18,12 +51,8 @@ npm ci
 npm run build:linux:test
 ```
 
-The script runs the frontend production build and then creates only the Debian bundle:
-
-```bash
-npm run build
-npm exec -- tauri build --bundles deb
-```
+The canonical script runs the frontend production build and creates only the
+Debian bundle (`tauri build --bundles deb`).
 
 Expected artifact:
 
@@ -48,16 +77,19 @@ dpkg-deb -c "src-tauri/target/release/bundle/deb/MorphoDiTa Client_<version>_amd
 sha256sum "src-tauri/target/release/bundle/deb/MorphoDiTa Client_<version>_amd64.deb"
 ```
 
-A package-only pass does not prove installation, GUI startup, database initialization, or Windows compatibility. For the Linux sidecar smoke test, extract the package to a temporary directory, start only the packaged `morphodita-server`, and verify `/models` and `/tag` before stopping the process.
+A package-only pass does not prove installation, GUI startup, database
+initialization, or Windows compatibility. For the Linux sidecar smoke test,
+extract the package to a temporary directory, start only the packaged
+`morphodita-server`, and verify `/models` and `/tag` before stopping the process.
 
-## Platform boundaries
+## Documentation verification
 
-The Tauri source is shared, but native artifacts are target-specific:
+After changing the owned documentation paths, run this concise repository-level
+check from the repository root:
 
-| Target | Build environment | Required sidecar suffix | Evidence state |
-|---|---|---|---|
-| Linux x86_64 | Linux runner | `x86_64-unknown-linux-gnu` | Linux `.deb` test artifact |
-| Windows x86_64 | Windows runner | `x86_64-pc-windows-msvc.exe` | OPEN until built and smoke-tested |
-| macOS | matching macOS runner | matching Rust target suffix | Not part of the current release scope |
+```bash
+git -c core.whitespace=cr-at-eol diff --check -- docs/release-linux.md README.md morphodita4/README.md
+```
 
-A Linux build must not be reported as a Windows release. Windows packaging requires the Windows sidecar and a Windows runner or an equivalent verified Windows toolchain.
+This checks documentation diff whitespace only; it does not prove runtime,
+installer, signing, notarization, updater, or target-host behavior.

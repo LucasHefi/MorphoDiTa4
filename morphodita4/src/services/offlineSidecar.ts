@@ -1,12 +1,12 @@
 import { Command } from '@tauri-apps/plugin-shell';
 import type { Child } from '@tauri-apps/plugin-shell';
-import { getBundledModelsDir } from './platformPaths';
+import { exists } from '@tauri-apps/plugin-fs';
+import { getLocalModelsDir } from './platformPaths';
 
 const DEFAULT_PORT = 8765;
 const MAX_PORT_ATTEMPTS = 5;
 const READY_ATTEMPTS = 40;
 const READY_DELAY_MS = 250;
-const BUNDLED_MODEL_DIRECTORY = '';
 const BUNDLED_MODEL_ID = 'czech-250909';
 const BUNDLED_MODEL_FILE = 'czech.tagger';
 const MODEL_ACKNOWLEDGEMENT = 'https://hdl.handle.net/11234/1-5985';
@@ -129,11 +129,16 @@ async function startInternal(modelDir?: string): Promise<string> {
   stopRequested = false;
 
   try {
-    const modelsPath = modelDir || await getBundledModelsDir();
+    const modelsPath = modelDir || await getLocalModelsDir();
     for (let attempt = 0; attempt < MAX_PORT_ATTEMPTS && !stopRequested; attempt += 1) {
       const port = DEFAULT_PORT + attempt;
-      const modelDirectory = modelDir || joinModelPath(modelsPath, BUNDLED_MODEL_DIRECTORY);
+      const modelDirectory = modelDir || joinModelPath(modelsPath, BUNDLED_MODEL_ID);
       const modelPath = joinModelPath(modelDirectory, BUNDLED_MODEL_FILE);
+      if (!(await exists(modelPath))) {
+        throw new OfflineSidecarError(
+          `local model ${BUNDLED_MODEL_ID} is not installed; open Settings and consent to the official model download`,
+        );
+      }
       const command = Command.sidecar('binaries/morphodita-server', [
         String(port),
         BUNDLED_MODEL_ID,

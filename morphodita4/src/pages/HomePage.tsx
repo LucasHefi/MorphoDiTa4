@@ -1,14 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { Card, CardHeader, CardTitle, CardDescription } from '../components/common';
+import { Card, CardHeader, CardTitle, CardDescription, Button } from '../components/common';
 import { useDbStore } from '../store/useDbStore';
 import { ModelSelector } from '../components/analyzer/ModelSelector';
 
 export const HomePage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { recentActivity } = useDbStore();
+  const { recentActivity, isLoading, error, loadSessions } = useDbStore();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -67,16 +67,29 @@ export const HomePage: React.FC = () => {
           </Card>
         </div>
 
-        {recentActivity && recentActivity.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4 text-foreground">{t('home.recent_activity')}</h3>
+        <section className="mt-8" aria-labelledby="recent-activity-title">
+          <h3 id="recent-activity-title" className="text-lg font-semibold mb-4 text-foreground">
+            {t('home.recent_activity')}
+          </h3>
+          {isLoading ? (
+            <p role="status" className="text-sm text-muted-foreground">{t('home.activity.loading')}</p>
+          ) : error ? (
+            <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+              <p className="text-sm text-muted-foreground">{t('home.activity.error')}</p>
+              <Button variant="secondary" size="sm" onClick={() => void loadSessions().catch(() => undefined)}>
+                {t('home.activity.retry')}
+              </Button>
+            </div>
+          ) : recentActivity.length === 0 ? (
+            <p role="status" className="text-sm text-muted-foreground">{t('home.activity.empty')}</p>
+          ) : (
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden overflow-x-auto">
               <table className="w-full text-sm text-left min-w-[500px]">
                 <thead className="bg-secondary text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Operace</th>
-                    <th className="px-4 py-3 font-medium">Model</th>
-                    <th className="px-4 py-3 font-medium">Položek</th>
+                    <th className="px-4 py-3 font-medium">{t('home.table.operation')}</th>
+                    <th className="px-4 py-3 font-medium">{t('home.table.model')}</th>
+                    <th className="px-4 py-3 font-medium">{t('home.table.items')}</th>
                     <th className="px-4 py-3 font-medium">{t('home.table.status')}</th>
                     <th className="px-4 py-3 font-medium text-right">{t('home.table.date')}</th>
                   </tr>
@@ -84,7 +97,9 @@ export const HomePage: React.FC = () => {
                 <tbody>
                   {recentActivity.map((session) => (
                     <tr key={session.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
-                      <td className="px-4 py-3 font-medium text-foreground capitalize">{session.operation}</td>
+                      <td className="px-4 py-3 font-medium text-foreground capitalize">
+                        {t(`analyzer.operations.${session.operation}`)}
+                      </td>
                       <td className="px-4 py-3 text-xs">{session.model}</td>
                       <td className="px-4 py-3">{session.result_count}</td>
                       <td className="px-4 py-3">
@@ -93,19 +108,19 @@ export const HomePage: React.FC = () => {
                           session.status === 'failed' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
                           'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                         }`}>
-                          {session.status}
+                          {t(`home.status.${session.status}`)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right text-muted-foreground">
-                        {session.created_at ? new Date(session.created_at as string).toLocaleDateString() : '-'}
+                        {session.created_at ? new Date(session.created_at).toLocaleDateString() : '-'}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+          )}
+        </section>
       </main>
     </div>
   );

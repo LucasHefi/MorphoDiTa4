@@ -13,7 +13,7 @@ const sidecar = packageRoot
   ? join(root, 'usr/bin/morphodita-server')
   : join(root, 'src-tauri/binaries/morphodita-server-x86_64-unknown-linux-gnu');
 const model = packageRoot
-  ? join(root, 'usr/lib/MorphoDiTa Client/models/czech.tagger')
+  ? join(root, 'usr/lib/MorphoDiTa Client/models/czech-250909/czech.tagger')
   : join(root, 'models/czech-250909/czech.tagger');
 const port = 8780 + (process.pid % 100);
 const base = `http://127.0.0.1:${port}`;

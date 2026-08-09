@@ -1,4 +1,5 @@
 import { DatabaseService } from './database';
+import { useDbStore } from '../store/useDbStore';
 import { cleanLemma } from './filters';
 import type {
   AnalyzerResult,
@@ -8,6 +9,10 @@ import type {
 } from '../types/api';
 import type { OperationType } from '../types/common';
 import type { DatabasePayload } from '../types/database';
+
+async function refreshActivity(): Promise<void> {
+  await useDbStore.getState().loadSessions();
+}
 
 export const WorkflowService = {
   /**
@@ -62,6 +67,7 @@ export const WorkflowService = {
       morphData,
     );
 
+    await refreshActivity();
     return result.savedCount;
   },
 
@@ -83,6 +89,7 @@ export const WorkflowService = {
       });
       if (!session.id) throw new Error('Analyzer session did not return an id');
       await DatabaseService.updateSessionStatus(session.id, 'completed', resultCount);
+      await refreshActivity();
       return resultCount;
     }
 
@@ -117,6 +124,7 @@ export const WorkflowService = {
       },
       morphData,
     );
+    await refreshActivity();
     return saved.savedCount;
   },
 };

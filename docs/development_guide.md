@@ -1029,10 +1029,9 @@ export default defineConfig({
    - Input validation pro všechny uživatelské vstupy
 
 6. **Kompatibilita**
-   - Windows 10+
-   - Linux (Ubuntu 20.04+)
-   - macOS 12+
-   - Testujte na všech platformách
+   - **Minimum OS baseline:** **OPEN / unverified**; pro žádnou platformu není stanovena minimální verze jako ověřená release evidence.
+   - Aktuální hranice release je v [kanonické release matici](release-linux.md): pouze lokálně testovaný Linux x86_64; Windows **OPEN / unverified**; macOS mimo rozsah.
+   - Testy jednotlivých platforem jsou release evidence gates, nikoli příslib aktuální podpory.
 
 ### Checklist pro Agenty
 

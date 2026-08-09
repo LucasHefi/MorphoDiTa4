@@ -9,15 +9,20 @@ const mocks = vi.hoisted(() => ({
     stderr: { on: vi.fn() },
   },
   sidecar: vi.fn(),
-  getBundledModelsDir: vi.fn(),
+  getLocalModelsDir: vi.fn(),
+  exists: vi.fn(),
 }));
 
 vi.mock('@tauri-apps/plugin-shell', () => ({
   Command: { sidecar: mocks.sidecar },
 }));
 
+vi.mock('@tauri-apps/plugin-fs', () => ({
+  exists: mocks.exists,
+}));
+
 vi.mock('./platformPaths', () => ({
-  getBundledModelsDir: mocks.getBundledModelsDir,
+  getLocalModelsDir: mocks.getLocalModelsDir,
 }));
 
 import { OfflineSidecar, OfflineSidecarError } from './offlineSidecar';
@@ -28,7 +33,8 @@ describe('OfflineSidecar platform path handling', () => {
     mocks.child.kill.mockResolvedValue(undefined);
     mocks.command.spawn.mockResolvedValue(mocks.child);
     mocks.sidecar.mockReturnValue(mocks.command);
-    mocks.getBundledModelsDir.mockResolvedValue('/opt/morphodita/resources/models');
+    mocks.getLocalModelsDir.mockResolvedValue('/opt/morphodita/appdata/models');
+    mocks.exists.mockResolvedValue(true);
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
     ok: true,
     json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'] } }),
@@ -46,7 +52,7 @@ describe('OfflineSidecar platform path handling', () => {
     expect(mocks.sidecar).toHaveBeenCalledWith('binaries/morphodita-server', [
       '8765',
       'czech-250909',
-      '/opt/morphodita/resources/models/czech.tagger',
+      '/opt/morphodita/appdata/models/czech-250909/czech.tagger',
       'https://hdl.handle.net/11234/1-5985',
     ]);
   });
@@ -60,7 +66,17 @@ describe('OfflineSidecar platform path handling', () => {
       'C:\\Program Files\\MorphoDiTa\\models\\czech.tagger',
       'https://hdl.handle.net/11234/1-5985',
     ]);
-    expect(mocks.getBundledModelsDir).not.toHaveBeenCalled();
+    expect(mocks.getLocalModelsDir).not.toHaveBeenCalled();
+  });
+
+  it('fails closed before spawning when the local model is missing', async () => {
+    mocks.exists.mockResolvedValue(false);
+
+    await expect(OfflineSidecar.start()).rejects.toMatchObject({
+      name: 'OfflineSidecarError',
+      message: expect.stringContaining('open Settings and consent'),
+    });
+    expect(mocks.sidecar).not.toHaveBeenCalled();
   });
 
   it('rejects an unrelated HTTP service that returns 200 without the bundled model', async () => {

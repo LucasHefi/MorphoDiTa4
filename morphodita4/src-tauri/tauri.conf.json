@@ -37,7 +37,6 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "../models/**/*": "models",
       "../../LICENSE": "LICENSE"
     },
     "windows": {

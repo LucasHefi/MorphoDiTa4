@@ -7,7 +7,7 @@ MorphoDiTa Client v4 je multi-platformní desktopová aplikace pro morfologickou
 ### 1.1 Klíčové Vlastnosti
 
 - **Dvě hlavní funkce**: Analýza textu + Průvodce klíčových slov
-- **Multi-platform**: Windows, Linux, macOS (pomoću Tauri)
+- **Platformní implementace (plánovací/specifikační kontext)**: Windows, Linux, macOS (pomoću Tauri); tento popis není tvrzením o podpoře aktuálního release. Aktuální hranice je v [kanonické release matici](release-linux.md)
 - **Témata**: Dark/Light mode s glassmorphism efekty
 - **Jazyky**: Čeština (CZ), Angličtina (EN), Polština (PL)
 - **Export**: CSV, JSON, TXT formáty
@@ -1132,7 +1132,10 @@ async function fetchWithRetry<T>(
 - [ ] I18n EN
 - [ ] I18n PL
 
-### Fáze 8: Testování a Balení
+### Fáze 8: Testování a Balení — release evidence gates
+
+Níže uvedený nezaškrtnutý checklist buildů pro Windows/Linux/macOS tvoří release evidence gates, nikoli aktuální příslib podpory. Aktuální hranice podle [kanonické release matice](release-linux.md): Linux x86_64 je pouze lokálně testovaný rozsah; Windows je **OPEN / unverified**; macOS je mimo aktuální rozsah (out of scope).
+
 - [ ] Unit testy
 - [ ] Integration testy
 - [ ] Build pro Windows

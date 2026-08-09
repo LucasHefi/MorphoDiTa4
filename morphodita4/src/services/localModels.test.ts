@@ -109,13 +109,13 @@ vi.mock('@tauri-apps/plugin-fs', () => ({
 
 import { assertModelCompatible, getLocalModels, importLocalModel, updateLocalModel } from './localModels';
 
-const manifest = (id = 'czech-sample', version = '1.0.0') =>
+const manifest = (id = 'czech-sample', version = '1.0.0', artifact = 'model.mor') =>
   JSON.stringify({
     schemaVersion: 1,
     id,
     version,
     language: 'czech',
-    artifact: 'model.mor',
+    artifact,
     sourceUrl: 'https://models.example.test/czech-sample',
     license: { spdx: 'CC-BY-4.0', url: 'https://spdx.org/licenses/CC-BY-4.0.html' },
     notices: ['NOTICE.txt'],
@@ -157,6 +157,17 @@ describe('local model inventory and import', () => {
     });
     expect(inventory.models['czech-sample'].sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(inventory.rejected).toEqual([{ name: 'partial', reason: 'model directory must contain exactly the manifest artifact' }]);
+  });
+
+  it('accepts the runtime-downloaded tagger artifact format', async () => {
+    fsState.addDirectory('/data/models/czech-250909');
+    fsState.addFile('/data/models/czech-250909/model.json', manifest('czech-250909', '2.1.0', 'czech.tagger'));
+    fsState.addFile('/data/models/czech-250909/czech.tagger', new Uint8Array([1, 2, 3]));
+    fsState.addFile('/data/models/czech-250909/NOTICE.txt', 'Fixture notice');
+
+    const inventory = await getLocalModels();
+
+    expect(inventory.models['czech-250909']).toMatchObject({ artifact: 'czech.tagger', sizeBytes: 3 });
   });
 
   it('copies a valid model into a temporary directory and publishes it with rename', async () => {

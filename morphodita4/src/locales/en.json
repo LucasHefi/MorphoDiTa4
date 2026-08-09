@@ -29,11 +29,26 @@
       "description": "Batch processing of words with form generation and filters"
     },
     "recent_activity": "Recent Activity",
+    "activity": {
+      "loading": "Loading recent activity...",
+      "empty": "No saved activity yet.",
+      "error": "Recent activity could not be loaded.",
+      "retry": "Retry"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
     "table": {
       "name": "Name",
+      "operation": "Operation",
+      "model": "Model",
       "items": "Items",
       "status": "Status",
-      "date": "Date"
+      "date": "Date",
+      "notAvailable": "Not available"
     }
   },
   "analyzer": {
@@ -93,7 +108,17 @@
     "installType": "Install Type",
     "databaseEditor": "Database Editor",
     "recoveryNotice": "Some saved settings were invalid or outdated. Safe defaults were restored.",
-    "dismissRecovery": "Dismiss notice"
+    "dismissRecovery": "Dismiss notice",
+    "modelDownloadTitle": "Local MorphoDiTa dictionary",
+    "modelDownloadDescription": "The model is not bundled with the application. It is downloaded directly from the official LINDAT repository only after your explicit license consent.",
+    "modelLicense": "Model license",
+    "modelSource": "Official source",
+    "modelDownloadSize": "Download size",
+    "modelCommercialUse": "Commercial use",
+    "modelCommercialUseNo": "Not permitted by the CC BY-NC-SA 4.0 license.",
+    "modelConsent": "I have read the license and agree to use this model under CC BY-NC-SA 4.0, including its non-commercial-use restriction.",
+    "modelDownloadButton": "Download dictionary",
+    "modelDownloadSuccess": "The dictionary was verified and saved for offline use."
   },
   "transport": {
     "offline-explicit": "Local MorphoDiTa is active because offline mode was selected in Settings.",
@@ -232,7 +257,7 @@
     "name": "MorphoDiTa Client",
     "author": "Author: Lukáš Hefner (mediamaker.cz)",
     "license": "License: Mozilla Public License 2.0",
-    "version": "Version: {version}",
+    "version": "Version: {{version}}",
     "description": "Desktop application for morphological analysis of the Czech language using the MorphoDiTa tool.",
     "tech": "Built with React + Tauri + TypeScript.",
     "links": "Official site: https://ufal.mff.cuni.cz/morphodita"

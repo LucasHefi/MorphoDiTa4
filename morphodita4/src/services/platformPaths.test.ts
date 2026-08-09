@@ -1,28 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { resolveResource } from '@tauri-apps/api/path';
-import { getBundledModelsDir } from './platformPaths';
+import { appDataDir, join } from '@tauri-apps/api/path';
+import { getLocalModelsDir } from './platformPaths';
 
 vi.mock('@tauri-apps/api/path', () => ({
-  resolveResource: vi.fn(),
+  appDataDir: vi.fn(),
+  join: vi.fn(),
 }));
 
-describe('getBundledModelsDir', () => {
+describe('getLocalModelsDir', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it('returns the Tauri-resolved resource path without assuming a host separator', async () => {
-    vi.mocked(resolveResource).mockResolvedValue('C:\\Program Files\\MorphoDiTa\\resources\\models');
+  it('resolves the app-data models directory without assuming a host separator', async () => {
+    vi.mocked(appDataDir).mockResolvedValue('C:\\Users\\test\\AppData');
+    vi.mocked(join).mockResolvedValue('C:\\Users\\test\\AppData\\models');
 
-    await expect(getBundledModelsDir()).resolves.toBe('C:\\Program Files\\MorphoDiTa\\resources\\models');
-    expect(resolveResource).toHaveBeenCalledWith('models');
+    await expect(getLocalModelsDir()).resolves.toBe('C:\\Users\\test\\AppData\\models');
+    expect(appDataDir).toHaveBeenCalledOnce();
+    expect(join).toHaveBeenCalledWith('C:\\Users\\test\\AppData', 'models');
   });
 
-  it('keeps a missing resource explicit', async () => {
-    vi.mocked(resolveResource).mockRejectedValue(new Error('resource lookup failed'));
+  it('keeps an unavailable app-data directory explicit', async () => {
+    vi.mocked(appDataDir).mockRejectedValue(new Error('app data lookup failed'));
 
-    await expect(getBundledModelsDir()).rejects.toThrow(
-      'Bundled MorphoDiTa models resource is unavailable: resource lookup failed',
+    await expect(getLocalModelsDir()).rejects.toThrow(
+      'Local MorphoDiTa models directory is unavailable: app data lookup failed',
     );
   });
 });

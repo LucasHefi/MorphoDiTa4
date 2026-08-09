@@ -7,6 +7,13 @@
   ],
   "permissions": [
     "core:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$APPDATA/models" },
+        { "path": "$APPDATA/models/**/*" }
+      ]
+    },
     "fs:allow-read-dir",
     "fs:allow-read-file",
     "fs:allow-read-text-file",

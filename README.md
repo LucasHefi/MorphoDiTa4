@@ -8,7 +8,7 @@ Multi-platformní desktopová aplikace pro morfologickou analýzu českého jazy
 - **Průvodce klíčových slov**: Hromadné zpracování slov s generováním forem a filtry
 - **Databáze**: Lokální ukládání výsledků s SQLite
 - **Export**: CSV, JSON, TXT formáty
-- **Multi-platform**: Windows, Linux, macOS
+- **Platformní release rozsah**: Linux x86_64 (testovací `.deb`, lokálně ověřený rozsah); Windows x86_64 OPEN; macOS mimo aktuální release scope
 - **Multi-language**: Čeština (CZ), Angličtina (EN), Polština (PL)
 - **Témata**: Dark/Light mode s glassmorphism efekty
 
@@ -30,8 +30,25 @@ Kompletní dokumentace je v [docs/](docs/):
 - Online LINDA MorphoDiTa API je výchozí transport.
 - Lokální MorphoDiTa je explicitní offline režim nebo fallback při nedostupnosti online API.
 - Linux `.deb` je testovací artefakt vytvářený na Linuxu.
-- Windows release se vytváří na Windows runneru a vyžaduje Windows sidecar `x86_64-pc-windows-msvc.exe`.
+- Windows je kandidátní cíl: vyžaduje Windows runner, Windows sidecar `x86_64-pc-windows-msvc.exe` a přímý test buildu, instalace, spuštění a offline sidecaru; stav zůstává OPEN.
 - Linux build není důkazem Windows kompatibility.
+
+### Podporovaná platformní matice
+
+Toto je aktuální release rozhodnutí. „Lokálně ověřený rozsah“ není veřejný,
+produkční ani dlouhodobý závazek podpory.
+
+| Platforma | Minimum OS | Architektura | Stav a závazek |
+|-----------|------------|--------------|----------------|
+| Linux | **OPEN / neověřeno**; minimální distribuce ani kernel nejsou ověřeným release baseline | x86_64 (`amd64`) | Lokálně podporovaný/ověřený testovací `.deb`; bez veřejného či produkčního závazku podpory |
+| Windows | **OPEN / neověřeno**; minimální verze Windows není ověřeným release baseline | x86_64 kandidát | **OPEN** do přímého testu na Windows runneru s Windows sidecarem; zatím bez závazku podpory |
+| macOS | Není stanoveno; macOS není v aktuálním release scope | Release architektura není rozhodnuta | Mimo aktuální release scope; bez závazku podpory |
+
+Podepisování a distribuční kanály jsou samostatné release gates:
+
+- **Podepisování:** **OPEN / neověřeno**; v repozitáři není evidence podepsaného artefaktu ani podepisovací konfigurace. `sha256sum` je pouze záznam integrity, ne podpis.
+- **Notarizace:** **OPEN / neověřeno**; macOS notarizace není v aktuálním release scope.
+- **Update kanál:** **OPEN / neověřeno**; je doložen pouze ručně vytvořený testovací `.deb`, nikoli updater, update feed nebo publikační kanál.
 
 ## Technological Stack
 

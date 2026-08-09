@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readdir, readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,13 +15,14 @@ function readCargoVersion(cargoToml) {
 }
 
 export async function readReleaseMetadata() {
-  const [source, packageManifest, packageLock, cargoToml, tauriConfig, modelManifest] = await Promise.all([
+  const [source, packageManifest, packageLock, cargoToml, tauriConfig, modelCatalog, bundledModelArtifacts] = await Promise.all([
     readJson('release-metadata.json'),
     readJson('package.json'),
     readJson('package-lock.json'),
     readFile(join(appRoot, 'src-tauri/Cargo.toml'), 'utf8'),
     readJson('src-tauri/tauri.conf.json'),
-    readJson('models/czech-250909/model.json'),
+    readJson('model-catalog.json'),
+    findBundledModelArtifacts(join(appRoot, 'models')),
   ]);
 
   return {
@@ -35,7 +36,9 @@ export async function readReleaseMetadata() {
       tauri: tauriConfig.version,
     },
     packageLicense: packageManifest.license,
-    modelLicenses: [modelManifest.license?.spdx],
+    modelLicenses: modelCatalog.models.map((model) => model.license?.spdx),
+    modelCatalog,
+    bundledModelArtifacts,
   };
 }
 
@@ -51,8 +54,20 @@ export function validateReleaseMetadata(metadata) {
   if (metadata.modelLicenses.length !== metadata.models.length) {
     throw new Error('every declared model must expose one SPDX license');
   }
+  if (metadata.bundledModelArtifacts.length > 0) {
+    throw new Error(`bundled model artifacts are forbidden: ${metadata.bundledModelArtifacts.join(', ')}`);
+  }
   for (const model of metadata.models) {
-    if (!model.license || !model.sourceUrl || model.noticeFiles?.length === 0) {
+    const catalogModel = metadata.modelCatalog.models.find((candidate) => candidate.id === model.id);
+    if (
+      !model.license ||
+      !model.sourceUrl ||
+      !model.downloadUrl ||
+      model.noticeFiles?.length === 0 ||
+      !catalogModel ||
+      catalogModel.downloadUrl !== model.downloadUrl ||
+      model.noticeFiles.some((file) => file.startsWith('models/'))
+    ) {
       throw new Error(`model ${model.id} is missing provenance or notice metadata`);
     }
   }
@@ -64,4 +79,25 @@ export function validateReleaseMetadata(metadata) {
     authors: metadata.authors,
     openGates: metadata.openGates,
   };
+}
+
+async function findBundledModelArtifacts(directory) {
+  try {
+    await access(directory);
+  } catch {
+    return [];
+  }
+  const artifacts = [];
+  async function visit(current) {
+    for (const entry of await readdir(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) {
+        await visit(path);
+      } else if (/\.(?:tagger|mor|zip)$/i.test(entry.name)) {
+        artifacts.push(path);
+      }
+    }
+  }
+  await visit(directory);
+  return artifacts;
 }

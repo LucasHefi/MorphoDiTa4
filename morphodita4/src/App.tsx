@@ -9,12 +9,14 @@ import { AboutPage } from './pages/AboutPage';
 import { DatabaseEditorPage } from './pages/DatabaseEditorPage';
 import { useAppStore } from './store/useAppStore';
 import { useApiStore } from './store/useApiStore';
+import { useDbStore } from './store/useDbStore';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 // Simple Layout wrapper
-const Layout = ({ children }: { children: React.ReactNode }) => {
+export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { t, i18n } = useTranslation();
   const { theme, language, transportNotice } = useAppStore();
+  const { loadSessions } = useDbStore();
   const location = useLocation();
 
   // Apply theme
@@ -37,11 +39,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [language, i18n]);
 
-  // Initial load effect
+  // Initial model and database activity loads
   useEffect(() => {
     const { models, refreshModels } = useApiStore.getState();
     if (Object.keys(models).length === 0) void refreshModels();
   }, []);
+
+  useEffect(() => {
+    void loadSessions().catch(() => undefined);
+  }, [loadSessions]);
 
   const isActive = (path: string) => location.pathname === path;
 

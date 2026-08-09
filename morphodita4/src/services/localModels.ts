@@ -1,10 +1,10 @@
-import { appDataDir, join } from '@tauri-apps/api/path';
+import { join } from '@tauri-apps/api/path';
 import { exists, mkdir, readDir, readFile, remove, rename, stat, writeFile } from '@tauri-apps/plugin-fs';
 import type { ModelInfo } from '../types/api';
+import { getLocalModelsDir } from './platformPaths';
 
-const USER_MODELS_DIRECTORY = 'models';
 const MODEL_MANIFEST_FILE = 'model.json';
-const MODEL_ARTIFACT_EXTENSION = '.mor';
+const MODEL_ARTIFACT_EXTENSIONS = ['.mor', '.tagger'] as const;
 const MODEL_MANIFEST_VERSION = 1;
 
 const textDecoder = new TextDecoder();
@@ -67,7 +67,7 @@ export class LocalModelError extends Error {
 
 export async function getUserModelsDir(): Promise<string> {
   try {
-    return await join(await appDataDir(), USER_MODELS_DIRECTORY);
+    return await getLocalModelsDir();
   } catch (error) {
     throw new LocalModelError(`User model directory is unavailable: ${errorDetail(error)}`);
   }
@@ -218,7 +218,7 @@ async function readModelDirectory(modelDirectory: string): Promise<LocalModelInf
     if (!noticeEntry) throw new LocalModelError(`missing declared notice file: ${notice}`);
   }
   const artifactEntries = entries.filter(
-    (entry) => entry.isFile && entry.name.toLowerCase().endsWith(MODEL_ARTIFACT_EXTENSION),
+    (entry) => entry.isFile && isModelArtifact(entry.name),
   );
   if (artifactEntries.length !== 1 || artifactEntries[0].name !== manifest.artifact) {
     throw new LocalModelError('model directory must contain exactly the manifest artifact');
@@ -284,8 +284,8 @@ function parseManifest(raw: string): ModelManifest {
   ) {
     throw new LocalModelError('model manifest has invalid id, version, language or source URL');
   }
-  if (!isSafeName(manifest.artifact) || !manifest.artifact.toLowerCase().endsWith(MODEL_ARTIFACT_EXTENSION)) {
-    throw new LocalModelError('model manifest has an invalid .mor artifact name');
+  if (!isSafeName(manifest.artifact) || !isModelArtifact(manifest.artifact)) {
+    throw new LocalModelError('model manifest has an invalid model artifact name');
   }
   if (
     !isRecord(manifest.license) ||
@@ -319,7 +319,12 @@ function parseManifest(raw: string): ModelManifest {
 }
 
 function isAllowedModelFile(name: string): boolean {
-  return name === MODEL_MANIFEST_FILE || name.toLowerCase().endsWith(MODEL_ARTIFACT_EXTENSION) || isNoticeFile(name);
+  return name === MODEL_MANIFEST_FILE || isModelArtifact(name) || isNoticeFile(name);
+}
+
+function isModelArtifact(name: string): boolean {
+  const lowerName = name.toLowerCase();
+  return MODEL_ARTIFACT_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
 }
 
 function isNoticeFile(name: string): boolean {

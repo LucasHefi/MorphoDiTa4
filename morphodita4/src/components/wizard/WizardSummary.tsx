@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useWizardStore } from '../../store/useWizardStore';
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '../common';
 import { applyFiltersToArray, cleanLemma, removeSpecialCharacters, removeDiacritics } from '../../services/filters';
+import { selectWizardSources } from './wizardSummarySelectors';
 import { WorkflowService } from '../../services/workflow';
 import {
   downloadFile,
@@ -38,17 +39,14 @@ export const WizardSummary: React.FC = () => {
     [newWordsSet, relations],
   );
 
+  const selectedSources = useMemo(
+    () => selectWizardSources(taggedTokens, forms, Boolean(localFilters.showOnlyNew), newWordsSet, newLemmasSet),
+    [forms, taggedTokens, localFilters.showOnlyNew, newWordsSet, newLemmasSet],
+  );
+
   const formsToLemmas = useMemo(() => {
     const mapping = new Map<string, string>();
-    const sourceTaggedTokens = localFilters.showOnlyNew
-      ? taggedTokens.filter((token) => newWordsSet.has(token.token.toLowerCase()))
-      : taggedTokens;
-    const sourceForms = localFilters.showOnlyNew
-      ? forms.filter((form) => {
-          const cleanedForm = cleanLemma(form.lemma).toLowerCase();
-          return newLemmasSet.has(cleanedForm);
-        })
-      : forms;
+    const { taggedTokens: sourceTaggedTokens, forms: sourceForms } = selectedSources;
 
     sourceTaggedTokens.forEach((token) => {
       mapping.set(token.token, cleanLemma(token.lemma));
@@ -90,27 +88,19 @@ export const WizardSummary: React.FC = () => {
       }
     });
     return Array.from(result).sort();
-  }, [forms, taggedTokens, localFilters, newLemmasSet, newWordsSet]);
+  }, [selectedSources, localFilters]);
 
   const filteredLemmas = useMemo(() => {
     const allLemmas = Array.from(new Set([
-      ...taggedTokens.map((token) => cleanLemma(token.lemma)),
-      ...forms.map((form) => cleanLemma(form.lemma)),
+      ...selectedSources.taggedTokens.map((token) => cleanLemma(token.lemma)),
+      ...selectedSources.forms.map((form) => cleanLemma(form.lemma)),
     ])).filter((lemma) => lemma.length > 0);
 
     return applyFiltersToArray(allLemmas, localFilters).sort();
-  }, [forms, taggedTokens, localFilters]);
+  }, [selectedSources, localFilters]);
 
   const filteredForms = useMemo(() => {
-    const sourceTaggedTokens = localFilters.showOnlyNew
-      ? taggedTokens.filter((token) => newWordsSet.has(token.token.toLowerCase()))
-      : taggedTokens;
-    const sourceForms = localFilters.showOnlyNew
-      ? forms.filter((form) => {
-          const cleanedForm = cleanLemma(form.lemma).toLowerCase();
-          return newLemmasSet.has(cleanedForm);
-        })
-      : forms;
+    const { taggedTokens: sourceTaggedTokens, forms: sourceForms } = selectedSources;
 
     const allForms = Array.from(new Set([
       ...sourceTaggedTokens.map((token) => token.token),
@@ -118,7 +108,7 @@ export const WizardSummary: React.FC = () => {
     ])).filter((form) => form.length > 0);
 
     return applyFiltersToArray(allForms, localFilters).sort();
-  }, [forms, taggedTokens, localFilters, newLemmasSet, newWordsSet]);
+  }, [selectedSources, localFilters]);
 
   if (!processingResult) {
     return (

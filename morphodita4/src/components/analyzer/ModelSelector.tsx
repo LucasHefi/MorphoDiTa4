@@ -5,6 +5,7 @@ import { SelectOption } from '../../types/common';
 import { Button } from '../common/Button';
 import { RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 
 export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> = ({ compact = false, disabled = false }) => {
   const { t } = useTranslation();
@@ -35,6 +36,11 @@ export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> 
           error={error ? `${t('common.error')}: ${error}` : undefined}
         />
       </div>
+      {error && (
+        <Link to="/settings" className="mb-2 text-sm text-primary underline underline-offset-4">
+          {t('settings.modelDownloadTitle')}
+        </Link>
+      )}
       <Button
         variant="ghost"
         size="md"

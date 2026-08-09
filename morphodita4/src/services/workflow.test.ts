@@ -6,7 +6,14 @@ const databaseMock = vi.hoisted(() => ({
   updateSessionStatus: vi.fn(),
 }));
 
+const dbStoreMock = vi.hoisted(() => ({
+  loadSessions: vi.fn(),
+}));
+
 vi.mock('./database', () => ({ DatabaseService: databaseMock }));
+vi.mock('../store/useDbStore', () => ({
+  useDbStore: { getState: () => dbStoreMock },
+}));
 
 import { WorkflowService } from './workflow';
 
@@ -16,6 +23,7 @@ const generatedForms = [{ form: 'psa', lemma: 'pes', tag: 'Ncms1' }];
 describe('WorkflowService.saveWizardResults', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbStoreMock.loadSessions.mockResolvedValue(undefined);
   });
 
   it('persists analysis and generation rows through the transactional database command', async () => {
@@ -47,6 +55,7 @@ describe('WorkflowService.saveWizardResults', () => {
         }),
       ],
     );
+    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
   });
 
   it('propagates database write failure instead of reporting success', async () => {
@@ -57,11 +66,22 @@ describe('WorkflowService.saveWizardResults', () => {
       WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
     ).rejects.toBe(failure);
   });
+
+  it('does not report Wizard persistence success when refreshing activity fails', async () => {
+    const refreshFailure = new Error('activity refresh failed');
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '7', savedCount: 2 });
+    dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
+
+    await expect(
+      WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
+    ).rejects.toBe(refreshFailure);
+  });
 });
 
 describe('WorkflowService.saveAnalyzerResult', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbStoreMock.loadSessions.mockResolvedValue(undefined);
   });
 
   it('persists tag rows with the selected operation and source type', async () => {
@@ -75,6 +95,7 @@ describe('WorkflowService.saveAnalyzerResult', () => {
       expect.objectContaining({ operation: 'tag', model: 'czech-model', input_text: 'psa' }),
       [expect.objectContaining({ source_type: 'analysis', original_form: 'psa', lemma: 'pes' })],
     );
+    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
   });
 
   it('persists tokenize as a completed session without inventing morphology rows', async () => {
@@ -91,5 +112,26 @@ describe('WorkflowService.saveAnalyzerResult', () => {
     }));
     expect(databaseMock.updateSessionStatus).toHaveBeenCalledWith('9', 'completed', 1);
     expect(databaseMock.saveWizardResults).not.toHaveBeenCalled();
+    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not report tokenize persistence success when refreshing activity fails', async () => {
+    const refreshFailure = new Error('activity refresh failed');
+    databaseMock.createSession.mockResolvedValue({ id: '9' });
+    dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tokenize', [[{ token: 'psa', space: '' }]], 'czech-model', 'psa'),
+    ).rejects.toBe(refreshFailure);
+  });
+
+  it('does not report Analyzer persistence success when refreshing activity fails', async () => {
+    const refreshFailure = new Error('activity refresh failed');
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '8', savedCount: 1 });
+    dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tag', [[{ token: 'psa', lemma: 'pes', tag: 'Ncms1' }]], 'czech-model', 'psa'),
+    ).rejects.toBe(refreshFailure);
   });
 });

@@ -29,11 +29,26 @@
       "description": "Masowe przetwarzanie słów z generowaniem form i filtrami"
     },
     "recent_activity": "Ostatnia aktywność",
+    "activity": {
+      "loading": "Ładowanie ostatniej aktywności...",
+      "empty": "Nie ma jeszcze zapisanej aktywności.",
+      "error": "Nie udało się załadować ostatniej aktywności.",
+      "retry": "Spróbuj ponownie"
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "processing": "Przetwarzanie",
+      "completed": "Ukończono",
+      "failed": "Niepowodzenie"
+    },
     "table": {
       "name": "Nazwa",
+      "operation": "Operacja",
+      "model": "Model",
       "items": "Elementy",
       "status": "Status",
-      "date": "Data"
+      "date": "Data",
+      "notAvailable": "Brak danych"
     }
   },
   "analyzer": {
@@ -93,7 +108,17 @@
     "installType": "Typ instalacji",
     "databaseEditor": "Edytor bazy danych",
     "recoveryNotice": "Niektóre zapisane ustawienia były nieprawidłowe lub nieaktualne. Przywrócono bezpieczne wartości domyślne.",
-    "dismissRecovery": "Zamknij komunikat"
+    "dismissRecovery": "Zamknij komunikat",
+    "modelDownloadTitle": "Lokalny słownik MorphoDiTa",
+    "modelDownloadDescription": "Model nie jest częścią instalacji. Zostanie pobrany bezpośrednio z oficjalnego repozytorium LINDAT dopiero po wyrażeniu wyraźnej zgody na licencję.",
+    "modelLicense": "Licencja modelu",
+    "modelSource": "Oficjalne źródło",
+    "modelDownloadSize": "Rozmiar pobierania",
+    "modelCommercialUse": "Użycie komercyjne",
+    "modelCommercialUseNo": "Niedozwolone na licencji CC BY-NC-SA 4.0.",
+    "modelConsent": "Przeczytałem(-am) licencję i zgadzam się na używanie tego modelu zgodnie z CC BY-NC-SA 4.0, w tym z ograniczeniem użycia niekomercyjnego.",
+    "modelDownloadButton": "Pobierz słownik",
+    "modelDownloadSuccess": "Słownik został zweryfikowany i zapisany do użytku offline."
   },
   "transport": {
     "offline-explicit": "Lokalne MorphoDiTa jest aktywne, ponieważ wybrano tryb offline w ustawieniach.",
@@ -232,7 +257,7 @@
     "name": "MorphoDiTa Client",
     "author": "Autor: Lukáš Hefner (mediamaker.cz)",
     "license": "Licencja: Mozilla Public License 2.0",
-    "version": "Wersja: {version}",
+    "version": "Wersja: {{version}}",
     "description": "Aplikacja desktopowa do analizy morfologicznej języka czeskiego przy użyciu narzędzia MorphoDiTa.",
     "tech": "Zbudowane na React + Tauri + TypeScript.",
     "links": "Oficjalna strona: https://ufal.mff.cuni.cz/morphodita"

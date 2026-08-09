@@ -29,11 +29,26 @@
       "description": "Hromadné zpracování slov s generováním forem a filtry"
     },
     "recent_activity": "Nedávná aktivita",
+    "activity": {
+      "loading": "Načítání nedávné aktivity...",
+      "empty": "Zatím není uložena žádná aktivita.",
+      "error": "Nedávnou aktivitu se nepodařilo načíst.",
+      "retry": "Zkusit znovu"
+    },
+    "status": {
+      "pending": "Čeká",
+      "processing": "Zpracování",
+      "completed": "Dokončeno",
+      "failed": "Selhalo"
+    },
     "table": {
       "name": "Název",
+      "operation": "Operace",
+      "model": "Model",
       "items": "Položek",
       "status": "Stav",
-      "date": "Datum"
+      "date": "Datum",
+      "notAvailable": "Není k dispozici"
     }
   },
   "analyzer": {
@@ -93,7 +108,17 @@
     "installType": "Typ instalace",
     "databaseEditor": "Databázový editor",
     "recoveryNotice": "Některá uložená nastavení byla neplatná nebo zastaralá. Byly obnoveny bezpečné výchozí hodnoty.",
-    "dismissRecovery": "Zavřít upozornění"
+    "dismissRecovery": "Zavřít upozornění",
+    "modelDownloadTitle": "Lokální slovník MorphoDiTa",
+    "modelDownloadDescription": "Model není součástí instalace. Stáhne se přímo z oficiálního úložiště LINDAT pouze po vašem výslovném souhlasu s licencí.",
+    "modelLicense": "Licence modelu",
+    "modelSource": "Oficiální zdroj",
+    "modelDownloadSize": "Velikost stažení",
+    "modelCommercialUse": "Komerční použití",
+    "modelCommercialUseNo": "Není povoleno licencí CC BY-NC-SA 4.0.",
+    "modelConsent": "Zobrazil jsem licenci a souhlasím s použitím tohoto modelu podle CC BY-NC-SA 4.0, včetně omezení nekomerčního použití.",
+    "modelDownloadButton": "Stáhnout slovník",
+    "modelDownloadSuccess": "Slovník byl ověřen a uložen pro offline použití."
   },
   "transport": {
     "offline-explicit": "Lokální MorphoDiTa je aktivní, protože byl v nastavení zvolen offline režim.",
@@ -232,7 +257,7 @@
     "name": "MorphoDiTa Client",
     "author": "Autor: Lukáš Hefner (mediamaker.cz)",
     "license": "Licence: Mozilla Public License 2.0",
-    "version": "Verze: {version}",
+    "version": "Verze: {{version}}",
     "description": "Desktopová aplikace pro morfologickou analýzu českého jazyka pomocí nástroje MorphoDiTa.",
     "tech": "Postaveno na React + Tauri + TypeScript.",
     "links": "Oficiální stránky: https://ufal.mff.cuni.cz/morphodita"

@@ -73,8 +73,18 @@ export default defineConfig([
 ```
 
 
-## Offline Mode & Installer Notes (Phase 5+)
-- Offline uses morphodita-server sidecar (official prebuilt from https://ufal.mff.cuni.cz/morphodita/install).
-- Models in %APPDATA%\morphodita\models\ subdirs (bundled or user added).
-- NSIS hook in src-tauri/windows/installer-hooks.nsh for post-install model cleanup.
-- Re-apply customizations after Tauri CLI upgrades.
+## Platform and release status
+
+The canonical platform matrix and release boundaries are documented in
+[../docs/release-linux.md](../docs/release-linux.md):
+
+- Linux x86_64 is the only locally supported and verified test scope, using the
+  Debian package and Linux sidecar evidence.
+- Windows x86_64 remains **OPEN** until a Windows runner, Windows sidecar, and
+  direct Windows build/install/startup/offline-sidecar test are available.
+- macOS is outside the current release scope.
+
+The repository does not establish minimum OS versions, signing or notarization
+evidence, an application update channel, or a public support commitment. The
+NSIS hook and bundle configuration are implementation files; they do not by
+themselves prove a supported Windows release.

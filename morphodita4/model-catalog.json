@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "czech-250909",
+      "version": "2.1.0",
+      "language": "czech",
+      "sourceUrl": "https://hdl.handle.net/11234/1-5985",
+      "downloadUrl": "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams/a5d20e52-fc3d-4bc4-9df9-5b4c36839dcc/content",
+      "archiveName": "czech-morfflex2.1-pdtc2.0-250909.zip",
+      "archiveSizeBytes": 102852507,
+      "archiveMd5": "6d4a664404947ef33083076845db7655",
+      "archiveSha256": "4dcc33862cd4a2919c1079cd843d0e68b8ebbe01ea8895bb02179805e03774e7",
+      "archivePrefix": "czech-morfflex2.1-pdtc2.0-250909/",
+      "archiveEntries": [
+        "czech-morfflex2.1-pdtc2.0-250909/",
+        "czech-morfflex2.1-pdtc2.0-250909/LICENSE",
+        "czech-morfflex2.1-pdtc2.0-250909/README",
+        "czech-morfflex2.1-pdtc2.0-250909/README.html",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-250909.dict",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-250909-no_dia.dict",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-250909-no_dia-pos_only.dict",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-250909-pos_only.dict",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909-no_dia.tagger",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909-no_dia-pos_only.tagger",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909-pos_only.tagger",
+        "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909.tagger"
+      ],
+      "artifactPath": "czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909.tagger",
+      "artifactName": "czech.tagger",
+      "artifactSizeBytes": 26176905,
+      "artifactSha256": "173ea80a38d4ebb53a3e85a74f91ad02827738472809f155d965ce225d27cc3e",
+      "license": {
+        "spdx": "CC-BY-NC-SA-4.0",
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "commercialUse": false
+      },
+      "noticeEntries": [
+        { "archivePath": "czech-morfflex2.1-pdtc2.0-250909/LICENSE", "fileName": "LICENSE.txt" },
+        { "archivePath": "czech-morfflex2.1-pdtc2.0-250909/README", "fileName": "README.txt" }
+      ],
+      "serverCompatibility": {
+        "minServerVersion": "1.11.3",
+        "maxServerVersion": "1.11.3"
+      },
+      "capabilities": ["tag", "analyze", "generate", "tokenize"]
+    }
+  ]
+}

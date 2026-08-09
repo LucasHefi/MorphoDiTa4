@@ -33,4 +33,14 @@ describe('locale contracts', () => {
       expect(placeholders(locales.pl[key]), `${key} placeholders`).toEqual(placeholders(locales.cs[key]));
     }
   });
+
+  it('uses i18next interpolation syntax for the About version', () => {
+    const locales = { cs: flatten(cs), en: flatten(en), pl: flatten(pl) };
+
+    for (const [language, values] of Object.entries(locales)) {
+      expect(placeholders(values['about.version']), `${language} about.version`).toEqual(['version']);
+      expect(values['about.version']).toMatch(/{{\s*version\s*}}/);
+      expect(values['about.version']).not.toMatch(/(^|[^{}])\{version\}([^{}]|$)/);
+    }
+  });
 });
