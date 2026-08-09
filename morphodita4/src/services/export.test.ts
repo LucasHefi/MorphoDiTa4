@@ -71,14 +71,20 @@ describe('CSV exports', () => {
       lemma: 'lemma',
       tag: 'NN',
       probability: 0,
-    }])).toBe("token,lemma,tag,form,probability\r\n'=danger,lemma,NN,,0");
+    }])).toBe("token,lemma,tag,form,probability,space\r\n'=danger,lemma,NN,,0,");
   });
 
   it('exports tokenization items as CSV rows', () => {
     const token: Token = { token: 'word', space: ' ' };
 
     expect(exportMorphologicalTagsToCsv([[token]])).toBe(
-      'token,lemma,tag,form,probability\r\nword,,,,',
+      'token,lemma,tag,form,probability,space\r\nword,,,,, ',
+    );
+  });
+
+  it('exports string tokenization rows without object-only checks', () => {
+    expect(exportMorphologicalTagsToCsv([['word']])).toBe(
+      'token,lemma,tag,form,probability,space\r\nword,,,,,',
     );
   });
 

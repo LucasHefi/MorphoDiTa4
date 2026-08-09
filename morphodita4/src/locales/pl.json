@@ -54,6 +54,8 @@
     },
     "input_placeholder": "Wprowadź tekst do analizy...",
     "process": "Przetwarzaj",
+    "save": "Zapisz wynik",
+    "saveSuccess": "Zapisano {{count}} rekordów wyniku do bazy danych.",
     "results_title": "Wynik",
     "no_result_placeholder": "Wprowadź tekst i uruchom analizę, aby zobaczyć wyniki."
   },

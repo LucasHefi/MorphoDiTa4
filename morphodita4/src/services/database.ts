@@ -58,8 +58,8 @@ export type DatabaseCommandContract = {
   delete_morphological_data: { args: { ids: number[] }; result: number };
   update_session: { args: { id: number; field: string; value: unknown }; result: number };
   update_morphological_data: { args: { id: number; field: string; value: unknown }; result: number };
-  search_sessions: { args: { searchTerm: string; fields: string[] }; result: Session[] };
-  search_morphological_data: { args: { searchTerm: string; fields: string[] }; result: MorphologicalData[] };
+  search_sessions: { args: { searchTerm: string; fields: string[]; limit?: number; offset?: number }; result: Session[] };
+  search_morphological_data: { args: { searchTerm: string; fields: string[]; limit?: number; offset?: number }; result: MorphologicalData[] };
   backup_database: { args: { outputPath: string }; result: BackupMetadata };
   validate_backup: { args: { backupPath: string }; result: BackupMetadata };
   restore_database: { args: { backupPath: string }; result: RestoreResult };
@@ -306,11 +306,13 @@ export const DatabaseService = {
     table: 'sessions' | 'morphological_data',
     searchTerm: string,
     fields: string[],
+    limit?: number,
+    offset?: number,
   ): Promise<DatabaseRow[]> {
     if (table === 'sessions') {
-      return safeInvoke('search_sessions', { searchTerm, fields });
+      return safeInvoke('search_sessions', { searchTerm, fields, limit, offset });
     }
-    return safeInvoke('search_morphological_data', { searchTerm, fields });
+    return safeInvoke('search_morphological_data', { searchTerm, fields, limit, offset });
   },
 
   async backupDatabase(outputPath: string): Promise<BackupMetadata> {

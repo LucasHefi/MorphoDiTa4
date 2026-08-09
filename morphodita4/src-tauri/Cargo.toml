@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "MorphoDiTa desktop client"
 authors = ["MorphoDiTa Client contributors"]
 license = "MPL-2.0"
+repository = "https://github.com/LucasHefi/MorphoDiTa4"
 edition = "2021"
 rust-version = "1.77.2"
 

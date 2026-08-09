@@ -16,7 +16,21 @@
     "fs:allow-remove",
     "fs:allow-stat",
     "fs:allow-exists",
-    "shell:allow-execute",
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "binaries/morphodita-server",
+          "sidecar": true,
+          "args": [
+            { "validator": "^876[5-9]$" },
+            "czech-250909",
+            { "validator": ".+" },
+            "https://hdl.handle.net/11234/1-5985"
+          ]
+        }
+      ]
+    },
     "shell:allow-kill"
   ]
 }

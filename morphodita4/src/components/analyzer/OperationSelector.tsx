@@ -5,11 +5,13 @@ import { OperationType } from '../../types/common';
 export interface OperationSelectorProps {
   selectedOperation: OperationType;
   onOperationChange: (operation: OperationType) => void;
+  disabled?: boolean;
 }
 
-export const OperationSelector: React.FC<OperationSelectorProps> = ({ 
-  selectedOperation, 
-  onOperationChange 
+export const OperationSelector: React.FC<OperationSelectorProps> = ({
+  selectedOperation,
+  onOperationChange,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
 
@@ -23,8 +25,8 @@ export const OperationSelector: React.FC<OperationSelectorProps> = ({
   return (
     <div className="flex flex-wrap gap-4 mt-4 mb-4">
       {operations.map((op) => (
-        <label 
-          key={op.id} 
+        <label
+          key={op.id}
           className="flex items-center space-x-2 cursor-pointer group"
         >
           <div className="relative flex items-center justify-center">
@@ -34,6 +36,7 @@ export const OperationSelector: React.FC<OperationSelectorProps> = ({
               value={op.id}
               checked={selectedOperation === op.id}
               onChange={(e) => onOperationChange(e.target.value as OperationType)}
+              disabled={disabled}
               className="peer sr-only"
             />
             <div className="w-5 h-5 rounded-full border-2 border-muted-foreground peer-checked:border-primary peer-checked:bg-primary transition-all duration-200"></div>

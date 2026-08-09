@@ -22,4 +22,9 @@ describe('selectAvailableModel', () => {
   it('returns null when no model is available', () => {
     expect(selectAvailableModel({}, 'stale-model')).toBeNull();
   });
+
+  it('prefers the API default model before language heuristics', () => {
+    expect(selectAvailableModel({ 'english-model': {}, 'czech-pdt-model': {} }, null, 'english-model'))
+      .toBe('english-model');
+  });
 });

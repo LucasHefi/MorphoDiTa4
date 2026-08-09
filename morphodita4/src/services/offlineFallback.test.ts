@@ -20,7 +20,7 @@ vi.mock('../store/useAppStore', () => ({
   },
 }));
 
-import { MorphoDiTaAPI } from './api';
+import { APIContractError, MorphoDiTaAPI } from './api';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -94,6 +94,19 @@ describe('online-first fallback boundary', () => {
     });
 
     await expect(MorphoDiTaAPI.getModels()).rejects.toMatchObject({ status: 400 });
+    expect(state.sidecar.start).not.toHaveBeenCalled();
+    expect(state.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not mask malformed online JSON with the local fallback', async () => {
+    state.appSettings.useOfflineMode = false;
+    state.sidecar.start.mockResolvedValue('http://127.0.0.1:8765');
+    state.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => { throw new SyntaxError('unexpected end of JSON input'); },
+    });
+
+    await expect(MorphoDiTaAPI.getModels()).rejects.toBeInstanceOf(APIContractError);
     expect(state.sidecar.start).not.toHaveBeenCalled();
     expect(state.fetch).toHaveBeenCalledTimes(1);
   });

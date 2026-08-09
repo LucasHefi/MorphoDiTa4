@@ -54,6 +54,8 @@
     },
     "input_placeholder": "Zadejte text k analýze...",
     "process": "Zpracovat",
+    "save": "Uložit výsledek",
+    "saveSuccess": "Do databáze uloženo {{count}} řádků výsledku.",
     "results_title": "Výsledek",
     "no_result_placeholder": "Zadejte text a spusťte analýzu pro zobrazení výsledků."
   },

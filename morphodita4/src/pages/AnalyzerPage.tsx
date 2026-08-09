@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApiStore } from '../store/useApiStore';
-import { MorphoDiTaAPI } from '../services/api';
+import { assertModelSupportsOperation, MorphoDiTaAPI, normalizeAnalyzeResult } from '../services/api';
 import { OperationType } from '../types/common';
 import { splitText, processInBatches, getBatchSize } from '../services/batcher';
 import {
@@ -19,13 +19,14 @@ import {
   exportMorphologicalTagsToCsv,
   exportMorphologicalTagsToTxt,
 } from '../services/export';
+import { WorkflowService } from '../services/workflow';
 import { Button } from '../components/common';
 import type { LogEntry } from '../components/analyzer/LogPanel';
 import type { AnalyzerResult } from '../types/api';
 
 export const AnalyzerPage: React.FC = () => {
   const { t } = useTranslation();
-  const { selectedModel } = useApiStore();
+  const { models, selectedModel } = useApiStore();
 
   const [operation, setOperation] = useState<OperationType>('analyze');
   const [inputText, setInputText] = useState('');
@@ -36,8 +37,12 @@ export const AnalyzerPage: React.FC = () => {
   const [convertTagset, setConvertTagset] = useState('');
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<AnalyzerResult | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const requestController = useRef<AbortController | null>(null);
+
+  useEffect(() => () => requestController.current?.abort(), []);
 
   const addLog = (level: LogEntry['level'], message: string) => {
     setLogs((prev) => [...prev, {
@@ -57,7 +62,15 @@ export const AnalyzerPage: React.FC = () => {
       addLog('WARNING', 'Zadejte text k analýze.');
       return;
     }
+    try {
+      assertModelSupportsOperation(models, selectedModel, operation);
+    } catch (error) {
+      addLog('ERROR', error instanceof Error ? error.message : String(error));
+      return;
+    }
 
+    const controller = new AbortController();
+    requestController.current = controller;
     setIsProcessing(true);
     setResult(null);
     addLog('INFO', `Zahajuji operaci: ${operation}`);
@@ -73,7 +86,9 @@ export const AnalyzerPage: React.FC = () => {
       switch (operation) {
         case 'tag': {
           const tagResponses = await processInBatches(chunks, (chunk) =>
-            MorphoDiTaAPI.tagText(chunk, selectedModel),
+            MorphoDiTaAPI.tagText(chunk, selectedModel, 'json', { signal: controller.signal }),
+            undefined,
+            { signal: controller.signal },
           );
           processedResult = tagResponses.flatMap((response) => response.result);
           break;
@@ -87,21 +102,29 @@ export const AnalyzerPage: React.FC = () => {
               inputFormat,
               derivation,
               convertTagset,
+              'json',
+              { signal: controller.signal },
             ),
+            undefined,
+            { signal: controller.signal },
           );
-          processedResult = analyzeResponses.flatMap((response) => response.result);
+          processedResult = normalizeAnalyzeResult(analyzeResponses.flatMap((response) => response.result));
           break;
         }
         case 'generate': {
           const generateResponses = await processInBatches(chunks, (chunk) =>
-            MorphoDiTaAPI.generateForms(chunk, selectedModel, guesser, convertTagset),
+            MorphoDiTaAPI.generateForms(chunk, selectedModel, guesser, convertTagset, 'json', { signal: controller.signal }),
+            undefined,
+            { signal: controller.signal },
           );
           processedResult = generateResponses.flatMap((response) => response.result);
           break;
         }
         case 'tokenize': {
           const tokenizeResponses = await processInBatches(chunks, (chunk) =>
-            MorphoDiTaAPI.tokenizeText(chunk, selectedModel),
+            MorphoDiTaAPI.tokenizeText(chunk, selectedModel, 'json', { signal: controller.signal }),
+            undefined,
+            { signal: controller.signal },
           );
           processedResult = tokenizeResponses.flatMap((response) => response.result);
           break;
@@ -111,10 +134,19 @@ export const AnalyzerPage: React.FC = () => {
       setResult(processedResult);
       addLog('INFO', 'Operace úspěšně dokončena.');
     } catch (error) {
-      addLog('ERROR', `Chyba: ${error instanceof Error ? error.message : String(error)}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        addLog('WARNING', t('common.cancel'));
+      } else {
+        addLog('ERROR', `Chyba: ${error instanceof Error ? error.message : String(error)}`);
+      }
     } finally {
+      requestController.current = null;
       setIsProcessing(false);
     }
+  };
+
+  const handleCancel = () => {
+    requestController.current?.abort();
   };
 
   const handleExport = (format: 'csv' | 'json' | 'txt') => {
@@ -128,13 +160,37 @@ export const AnalyzerPage: React.FC = () => {
         downloadFile(exportMorphologicalTagsToCsv(result), filename, 'text/csv');
         break;
       case 'json':
-        downloadFile(exportToJson(result), filename, 'application/json');
+        downloadFile(exportToJson({
+          operation,
+          model: selectedModel,
+          input: inputText,
+          options: { guesser, inputFormat, derivation, convertTagset },
+          result,
+        }), filename, 'application/json');
         break;
       case 'txt':
         downloadFile(exportMorphologicalTagsToTxt(result), filename, 'text/plain');
         break;
     }
     addLog('INFO', `Export do ${format.toUpperCase()} dokončen: ${filename}`);
+  };
+
+  const handleSave = async () => {
+    if (!result || !selectedModel || isSaving) return;
+    setIsSaving(true);
+    try {
+      const savedCount = await WorkflowService.saveAnalyzerResult(
+        operation,
+        result,
+        selectedModel,
+        inputText,
+      );
+      addLog('INFO', t('analyzer.saveSuccess', { count: savedCount }));
+    } catch (error) {
+      addLog('ERROR', `${t('common.error')}: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -144,8 +200,8 @@ export const AnalyzerPage: React.FC = () => {
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h2>
 
-            <ModelSelector />
-            <OperationSelector selectedOperation={operation} onOperationChange={setOperation} />
+            <ModelSelector disabled={isProcessing} />
+            <OperationSelector selectedOperation={operation} onOperationChange={setOperation} disabled={isProcessing} />
             <TextInput value={inputText} onChange={setInputText} disabled={isProcessing} />
             <p className="text-xs text-muted-foreground mt-1">{t('analyzer.batchingNote')}</p>
 
@@ -160,18 +216,24 @@ export const AnalyzerPage: React.FC = () => {
                 onDerivationChange={setDerivation}
                 convertTagset={convertTagset}
                 onConvertTagsetChange={setConvertTagset}
+                disabled={isProcessing}
               />
             </div>
 
             <div className="mt-6 flex justify-end">
-              <Button
-                onClick={handleProcess}
-                isLoading={isProcessing}
-                disabled={!inputText.trim() || !selectedModel}
-                className="w-full sm:w-auto"
-              >
-                {t('analyzer.process')}
-              </Button>
+              {isProcessing ? (
+                <Button variant="danger" onClick={handleCancel} className="w-full sm:w-auto">
+                  {t('common.cancel')}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => void handleProcess()}
+                  disabled={!inputText.trim() || !selectedModel}
+                  className="w-full sm:w-auto"
+                >
+                  {t('analyzer.process')}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -185,7 +247,12 @@ export const AnalyzerPage: React.FC = () => {
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col h-full">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                 <h2 className="text-xl font-semibold text-foreground">{t('analyzer.results_title')}</h2>
-                <ExportMenu onExport={handleExport} />
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => void handleSave()} disabled={isSaving}>
+                    {isSaving ? t('common.loading') : t('analyzer.save')}
+                  </Button>
+                  <ExportMenu onExport={handleExport} />
+                </div>
               </div>
               <div className="flex-1 overflow-auto">
                 <ResultPanel result={result} operation={operation} />

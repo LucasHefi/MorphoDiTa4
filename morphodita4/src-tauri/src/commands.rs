@@ -234,10 +234,12 @@ pub fn search_sessions(
     state: State<'_, DbState>,
     search_term: String,
     fields: Vec<String>,
+    limit: Option<i32>,
+    offset: Option<i32>,
 ) -> std::result::Result<Vec<Session>, String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
-        db::search_sessions(conn, &search_term, &fields).map_err(|e| e.to_string())
+        db::search_sessions(conn, &search_term, &fields, limit, offset).map_err(|e| e.to_string())
     } else {
         Err("Database not initialized".to_string())
     }
@@ -248,10 +250,13 @@ pub fn search_morphological_data(
     state: State<'_, DbState>,
     search_term: String,
     fields: Vec<String>,
+    limit: Option<i32>,
+    offset: Option<i32>,
 ) -> std::result::Result<Vec<MorphologicalData>, String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
-        db::search_morphological_data(conn, &search_term, &fields).map_err(|e| e.to_string())
+        db::search_morphological_data(conn, &search_term, &fields, limit, offset)
+            .map_err(|e| e.to_string())
     } else {
         Err("Database not initialized".to_string())
     }

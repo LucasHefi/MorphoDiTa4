@@ -1,7 +1,7 @@
 import type { MorphologicalTag, TaggedToken, Token } from '../types/api';
 
 type CsvValue = string | number | boolean | null | undefined;
-type MorphologicalExportItem = MorphologicalTag | TaggedToken | Token;
+type MorphologicalExportItem = MorphologicalTag | TaggedToken | Token | string;
 
 const FORMULA_PREFIX = /^[\t\r ]*[=+\-@]/;
 const CSV_RECORD_SEPARATOR = '\r\n';
@@ -20,6 +20,12 @@ const encodeCsvCell = (value: CsvValue): string => {
 const flattenMorphologicalData = (
   data: MorphologicalExportItem[] | MorphologicalExportItem[][],
 ): MorphologicalExportItem[] => data.flatMap((item) => Array.isArray(item) ? item : [item]);
+
+const exportField = (item: MorphologicalExportItem, field: string): CsvValue => {
+  if (typeof item === 'string') return field === 'token' ? item : '';
+  if (field in item) return (item as unknown as Record<string, CsvValue>)[field];
+  return '';
+};
 
 export const exportToCsv = (
   data: ReadonlyArray<Record<string, CsvValue>>,
@@ -51,14 +57,10 @@ export const exportMorphologicalTagsToCsv = (
   data: MorphologicalExportItem[] | MorphologicalExportItem[][],
 ): string => {
   const allItems = flattenMorphologicalData(data);
-  const columns = ['token', 'lemma', 'tag', 'form', 'probability'];
-  const rows = allItems.map((item) => ({
-    token: 'token' in item ? item.token : '',
-    lemma: 'lemma' in item ? item.lemma : '',
-    tag: 'tag' in item ? item.tag : '',
-    form: 'form' in item ? item.form ?? '' : '',
-    probability: 'probability' in item ? item.probability ?? '' : '',
-  }));
+  const columns = ['token', 'lemma', 'tag', 'form', 'probability', 'space'];
+  const rows = allItems.map((item) => Object.fromEntries(
+    columns.map((column) => [column, exportField(item, column)]),
+  ));
   return exportToCsv(rows, columns);
 };
 
@@ -67,10 +69,10 @@ export const exportMorphologicalTagsToTxt = (
 ): string => {
   const allItems = flattenMorphologicalData(data);
   const lines = allItems.map((item) => {
-    const token = 'token' in item ? item.token : '';
-    const lemma = 'lemma' in item ? item.lemma : '';
-    const tag = 'tag' in item ? item.tag : '';
-    return [token, lemma, tag].filter(Boolean).join('\t');
+    return ['token', 'lemma', 'tag', 'form', 'space']
+      .map((field) => exportField(item, field))
+      .filter(Boolean)
+      .join('\t');
   });
   return lines.join('\n');
 };

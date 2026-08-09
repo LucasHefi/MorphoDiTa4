@@ -1,6 +1,12 @@
 import { DatabaseService } from './database';
 import { cleanLemma } from './filters';
-import type { GeneratedForm, TaggedToken } from '../types/api';
+import type {
+  AnalyzerResult,
+  DisplayMorphologicalTag,
+  GeneratedForm,
+  TaggedToken,
+} from '../types/api';
+import type { OperationType } from '../types/common';
 import type { DatabasePayload } from '../types/database';
 
 export const WorkflowService = {
@@ -57,5 +63,60 @@ export const WorkflowService = {
     );
 
     return result.savedCount;
+  },
+
+  async saveAnalyzerResult(
+    operation: OperationType,
+    result: AnalyzerResult,
+    model: string,
+    inputText: string,
+  ): Promise<number> {
+    const resultCount = result.reduce((count, row) => count + row.length, 0);
+    if (operation === 'tokenize') {
+      const session = await DatabaseService.createSession({
+        operation,
+        model,
+        input_text: inputText,
+        status: 'pending',
+        result_count: resultCount,
+        parameters: {},
+      });
+      if (!session.id) throw new Error('Analyzer session did not return an id');
+      await DatabaseService.updateSessionStatus(session.id, 'completed', resultCount);
+      return resultCount;
+    }
+
+    const morphData: DatabasePayload[] = operation === 'generate'
+      ? (result as GeneratedForm[][]).flat().map((form) => ({
+        session_id: null,
+        source_type: 'generation',
+        original_form: null,
+        lemma: cleanLemma(form.lemma),
+        tag: form.tag,
+        generated_form: form.form,
+        probability: form.probability ?? null,
+      }))
+      : (result as Array<Array<DisplayMorphologicalTag & { token?: string }>>).flat().map((item) => ({
+        session_id: null,
+        source_type: 'analysis',
+        original_form: item.token ?? null,
+        lemma: cleanLemma(item.lemma),
+        tag: item.tag,
+        generated_form: null,
+        probability: item.probability ?? null,
+      }));
+
+    const saved = await DatabaseService.saveWizardResults(
+      {
+        operation,
+        model,
+        input_text: inputText,
+        status: 'pending',
+        result_count: resultCount,
+        parameters: {},
+      },
+      morphData,
+    );
+    return saved.savedCount;
   },
 };

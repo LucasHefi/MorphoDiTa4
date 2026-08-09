@@ -333,7 +333,7 @@ pub fn insert_morphological_data(
 
     {
         let mut stmt = tx.prepare(
-            "INSERT INTO morphological_data (source_type, original_form, lemma, tag, generated_form, probability, session_id) 
+            "INSERT INTO morphological_data (source_type, original_form, lemma, tag, generated_form, probability, session_id)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
         )?;
 
@@ -362,8 +362,7 @@ pub fn get_sessions(
 ) -> Result<Vec<Session>> {
     let mut stmt = conn.prepare("SELECT id, operation, model, input_text, parameters, result_count, processing_time, status, error_message, created_at, completed_at FROM sessions ORDER BY created_at DESC, id DESC LIMIT ?1 OFFSET ?2")?;
 
-    let l = limit.unwrap_or(100);
-    let o = offset.unwrap_or(0);
+    let (l, o) = normalize_pagination(limit, offset)?;
 
     let session_iter = stmt.query_map(params![l, o], |row| {
         Ok(Session {
@@ -420,8 +419,9 @@ pub fn get_all_morphological_data(
     limit: Option<i32>,
     offset: Option<i32>,
 ) -> Result<Vec<MorphologicalData>> {
+    let (limit, offset) = normalize_pagination(limit, offset)?;
     let mut stmt = conn.prepare("SELECT id, source_type, original_form, lemma, tag, generated_form, probability, session_id, created_at FROM morphological_data ORDER BY created_at DESC, id DESC LIMIT ?1 OFFSET ?2")?;
-    let rows = stmt.query_map(params![limit.unwrap_or(100), offset.unwrap_or(0)], |row| {
+    let rows = stmt.query_map(params![limit, offset], |row| {
         Ok(MorphologicalData {
             id: row.get(0)?,
             source_type: row.get(1)?,
@@ -474,6 +474,28 @@ fn json_to_sql_value(value: Value) -> SqlValue {
     }
 }
 
+fn validate_numeric_update(field: &str, value: &Value) -> Result<()> {
+    let valid = match field {
+        "result_count" => value.as_i64().is_some_and(|number| number >= 0),
+        "processing_time" => value
+            .as_f64()
+            .is_some_and(|number| number.is_finite() && number >= 0.0),
+        "probability" => {
+            value
+                .as_f64()
+                .is_some_and(|number| number.is_finite() && (0.0..=1.0).contains(&number))
+                || value.is_null()
+        }
+        "session_id" => value.as_i64().is_some_and(|number| number > 0) || value.is_null(),
+        _ => true,
+    };
+    if valid {
+        Ok(())
+    } else {
+        Err(rusqlite::Error::InvalidParameterName(field.to_string()))
+    }
+}
+
 fn update_record(
     conn: &Connection,
     table: &str,
@@ -485,6 +507,7 @@ fn update_record(
     if !allowed_fields.contains(&field) {
         return Err(rusqlite::Error::InvalidParameterName(field.to_string()));
     }
+    validate_numeric_update(field, &value)?;
     let sql = format!("UPDATE {table} SET {field} = ?1 WHERE id = ?2");
     conn.execute(&sql, params![json_to_sql_value(value), id])
 }
@@ -544,10 +567,26 @@ fn validate_search_fields(fields: &[String], allowed_fields: &[&str]) -> Result<
     Ok(fields.to_vec())
 }
 
+fn normalize_pagination(limit: Option<i32>, offset: Option<i32>) -> Result<(i64, i64)> {
+    let limit = match limit {
+        None => 100,
+        Some(value) if (1..=1_000).contains(&value) => value,
+        Some(_) => return Err(rusqlite::Error::InvalidParameterName("limit".to_string())),
+    };
+    let offset = match offset {
+        None => 0,
+        Some(value) if value >= 0 => value,
+        Some(_) => return Err(rusqlite::Error::InvalidParameterName("offset".to_string())),
+    };
+    Ok((i64::from(limit), i64::from(offset)))
+}
+
 pub fn search_sessions(
     conn: &Connection,
     search_term: &str,
     fields: &[String],
+    limit: Option<i32>,
+    offset: Option<i32>,
 ) -> Result<Vec<Session>> {
     let fields = validate_search_fields(
         fields,
@@ -565,27 +604,32 @@ pub fn search_sessions(
         .map(|(index, field)| format!("{field} LIKE ?{}", index + 1))
         .collect::<Vec<_>>()
         .join(" OR ");
-    let sql = format!("SELECT id, operation, model, input_text, parameters, result_count, processing_time, status, error_message, created_at, completed_at FROM sessions WHERE {clauses} ORDER BY created_at DESC, id DESC LIMIT 100");
+    let (limit, offset) = normalize_pagination(limit, offset)?;
+    let limit_placeholder = fields.len() + 1;
+    let sql = format!("SELECT id, operation, model, input_text, parameters, result_count, processing_time, status, error_message, created_at, completed_at FROM sessions WHERE {clauses} ORDER BY created_at DESC, id DESC LIMIT ?{limit_placeholder} OFFSET ?{}", limit_placeholder + 1);
     let query_param = format!("%{search_term}%");
     let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map(
-        params_from_iter(fields.iter().map(|_| query_param.clone())),
-        |row| {
-            Ok(Session {
-                id: row.get(0)?,
-                operation: row.get(1)?,
-                model: row.get(2)?,
-                input_text: row.get(3)?,
-                parameters: row.get(4)?,
-                result_count: row.get(5)?,
-                processing_time: row.get(6)?,
-                status: row.get(7)?,
-                error_message: row.get(8)?,
-                created_at: row.get(9)?,
-                completed_at: row.get(10)?,
-            })
-        },
-    )?;
+    let mut query_params: Vec<SqlValue> = fields
+        .iter()
+        .map(|_| SqlValue::Text(query_param.clone()))
+        .collect();
+    query_params.push(SqlValue::Integer(limit));
+    query_params.push(SqlValue::Integer(offset));
+    let rows = stmt.query_map(params_from_iter(query_params), |row| {
+        Ok(Session {
+            id: row.get(0)?,
+            operation: row.get(1)?,
+            model: row.get(2)?,
+            input_text: row.get(3)?,
+            parameters: row.get(4)?,
+            result_count: row.get(5)?,
+            processing_time: row.get(6)?,
+            status: row.get(7)?,
+            error_message: row.get(8)?,
+            created_at: row.get(9)?,
+            completed_at: row.get(10)?,
+        })
+    })?;
     rows.collect()
 }
 
@@ -593,6 +637,8 @@ pub fn search_morphological_data(
     conn: &Connection,
     search_term: &str,
     fields: &[String],
+    limit: Option<i32>,
+    offset: Option<i32>,
 ) -> Result<Vec<MorphologicalData>> {
     let fields = validate_search_fields(
         fields,
@@ -611,32 +657,37 @@ pub fn search_morphological_data(
         .map(|(index, field)| format!("{field} LIKE ?{}", index + 1))
         .collect::<Vec<_>>()
         .join(" OR ");
-    let sql = format!("SELECT id, source_type, original_form, lemma, tag, generated_form, probability, session_id, created_at FROM morphological_data WHERE {clauses} ORDER BY created_at DESC, id DESC LIMIT 100");
+    let (limit, offset) = normalize_pagination(limit, offset)?;
+    let limit_placeholder = fields.len() + 1;
+    let sql = format!("SELECT id, source_type, original_form, lemma, tag, generated_form, probability, session_id, created_at FROM morphological_data WHERE {clauses} ORDER BY created_at DESC, id DESC LIMIT ?{limit_placeholder} OFFSET ?{}", limit_placeholder + 1);
     let query_param = format!("%{search_term}%");
     let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map(
-        params_from_iter(fields.iter().map(|_| query_param.clone())),
-        |row| {
-            Ok(MorphologicalData {
-                id: row.get(0)?,
-                source_type: row.get(1)?,
-                original_form: row.get(2)?,
-                lemma: row.get(3)?,
-                tag: row.get(4)?,
-                generated_form: row.get(5)?,
-                probability: row.get(6)?,
-                session_id: row.get(7)?,
-                created_at: row.get(8)?,
-            })
-        },
-    )?;
+    let mut query_params: Vec<SqlValue> = fields
+        .iter()
+        .map(|_| SqlValue::Text(query_param.clone()))
+        .collect();
+    query_params.push(SqlValue::Integer(limit));
+    query_params.push(SqlValue::Integer(offset));
+    let rows = stmt.query_map(params_from_iter(query_params), |row| {
+        Ok(MorphologicalData {
+            id: row.get(0)?,
+            source_type: row.get(1)?,
+            original_form: row.get(2)?,
+            lemma: row.get(3)?,
+            tag: row.get(4)?,
+            generated_form: row.get(5)?,
+            probability: row.get(6)?,
+            session_id: row.get(7)?,
+            created_at: row.get(8)?,
+        })
+    })?;
     rows.collect()
 }
 
 pub fn word_form_exists(conn: &Connection, word: &str) -> Result<bool> {
     let mut stmt = conn.prepare(
-        "SELECT 1 FROM morphological_data 
-         WHERE original_form = ?1 OR generated_form = ?1 
+        "SELECT 1 FROM morphological_data
+         WHERE original_form = ?1 OR generated_form = ?1
          LIMIT 1",
     )?;
     let exists = stmt.exists(params![word])?;
@@ -783,12 +834,62 @@ mod tests {
         assert_eq!(update_session(&conn, 1, "model", json!("m2")).unwrap(), 1);
         assert_eq!(update_session(&conn, 99, "model", json!("m2")).unwrap(), 0);
         assert_eq!(
-            search_sessions(&conn, "m2", &["model".to_string()])
+            search_sessions(&conn, "m2", &["model".to_string()], Some(10), Some(0))
                 .unwrap()
                 .len(),
             1
         );
         assert!(update_session(&conn, 1, "created_at", json!("bad")).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_numeric_updates_without_corrupting_rows() {
+        let conn = test_connection();
+        conn.execute(
+            "INSERT INTO sessions (id, operation, model, input_text, parameters, result_count, status)
+             VALUES (1, 'analyze', 'm1', 'alpha', '{}', 0, 'pending')",
+            [],
+        )
+        .unwrap();
+
+        assert!(update_session(&conn, 1, "result_count", json!(null)).is_err());
+        assert!(update_session(&conn, 1, "result_count", json!(-1)).is_err());
+        assert!(update_session(&conn, 1, "result_count", json!(1.5)).is_err());
+        assert!(update_session(&conn, 1, "processing_time", json!(-0.1)).is_err());
+
+        let result_count: i32 = conn
+            .query_row(
+                "SELECT result_count FROM sessions WHERE id = 1",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(result_count, 0);
+    }
+
+    #[test]
+    fn search_results_honor_limit_and_offset() {
+        let conn = test_connection();
+        for id in 1..=3 {
+            conn.execute(
+                "INSERT INTO sessions (id, operation, model, input_text, parameters, result_count, status)
+                 VALUES (?1, 'analyze', 'model', 'input', '{}', 0, 'completed')",
+                params![id],
+            )
+            .unwrap();
+        }
+
+        let page = search_sessions(&conn, "", &["model".to_string()], Some(1), Some(1)).unwrap();
+        assert_eq!(page.len(), 1);
+        assert_eq!(page[0].id, Some(2));
+    }
+
+    #[test]
+    fn rejects_invalid_list_pagination() {
+        let conn = test_connection();
+        assert!(get_sessions(&conn, Some(0), Some(0)).is_err());
+        assert!(get_sessions(&conn, Some(1), Some(-1)).is_err());
+        assert!(get_all_morphological_data(&conn, Some(1_001), Some(0)).is_err());
     }
 
     #[test]
@@ -848,7 +949,7 @@ mod tests {
         );
         assert_eq!(get_morphological_data(&conn, session_id).unwrap().len(), 2);
         assert_eq!(
-            search_morphological_data(&conn, "alpha", &["lemma".to_string()])
+            search_morphological_data(&conn, "alpha", &["lemma".to_string()], Some(10), Some(0))
                 .unwrap()
                 .len(),
             1
@@ -859,9 +960,15 @@ mod tests {
             1
         );
         assert_eq!(
-            search_sessions(&conn, "updated-model", &["model".to_string()])
-                .unwrap()
-                .len(),
+            search_sessions(
+                &conn,
+                "updated-model",
+                &["model".to_string()],
+                Some(10),
+                Some(0)
+            )
+            .unwrap()
+            .len(),
             1
         );
         assert!(insert_morphological_data(

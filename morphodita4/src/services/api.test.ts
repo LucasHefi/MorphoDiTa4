@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MorphoDiTaAPI, APIError } from './api';
+import {
+  APIContractError,
+  APIError,
+  APIInputError,
+  assertModelSupportsOperation,
+  MorphoDiTaAPI,
+  normalizeAnalyzeResult,
+} from './api';
 import { useAppStore } from '../store/useAppStore';
 
 const mockFetch = vi.fn();
@@ -126,5 +133,57 @@ describe('MorphoDiTaAPI', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('exposes LINDA default_model without changing the transformed model map', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        default_model: 'czech-model1',
+        models: { 'czech-model1': ['tag'] },
+      }),
+    });
+
+    await expect(MorphoDiTaAPI.getModels()).resolves.toMatchObject({
+      defaultModel: 'czech-model1',
+      models: { 'czech-model1': { capabilities: ['tag'] } },
+    });
+  });
+
+  it('rejects malformed model responses as a non-retryable contract error', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ models: { broken: ['tag', 42] } }),
+    });
+
+    await expect(MorphoDiTaAPI.getModels()).rejects.toBeInstanceOf(APIContractError);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('normalizes LINDA analyze analyses into display rows', () => {
+    expect(normalizeAnalyzeResult([[{
+      token: 'Kočka',
+      analyses: [
+        { lemma: 'kočka', tag: 'NNFS1-----A----' },
+        { lemma: 'Kočka-1_;Y', tag: 'NNMS1-----A----' },
+      ],
+      space: ' ',
+    }]])).toEqual([[
+      { token: 'Kočka', lemma: 'kočka', tag: 'NNFS1-----A----', space: ' ' },
+      { token: 'Kočka', lemma: 'Kočka-1_;Y', tag: 'NNMS1-----A----', space: ' ' },
+    ]]);
+  });
+
+  it('rejects empty operation input before making a network request', async () => {
+    await expect(MorphoDiTaAPI.tagText('   ', 'model1')).rejects.toBeInstanceOf(APIInputError);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects unsupported model operations before network dispatch', () => {
+    expect(() => assertModelSupportsOperation(
+      { 'czech-model': { capabilities: ['tag'], name: 'czech-model', language: 'Czech', description: '' } },
+      'czech-model',
+      'generate',
+    )).toThrow(APIInputError);
   });
 });

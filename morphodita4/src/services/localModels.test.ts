@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { webcrypto } from 'node:crypto';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

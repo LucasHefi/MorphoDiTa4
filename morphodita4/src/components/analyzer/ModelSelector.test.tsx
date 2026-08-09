@@ -1,4 +1,4 @@
-import { act } from 'react';
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -20,6 +20,15 @@ vi.mock('../../services/api', () => ({
 const reactTestEnvironment = globalThis as typeof globalThis & {
   IS_REACT_ACT_ENVIRONMENT?: boolean;
 };
+
+async function flushReactUpdates(callback: () => void | Promise<void>): Promise<void> {
+  let pending: void | Promise<void> = undefined;
+  flushSync(() => {
+    pending = callback();
+  });
+  await pending;
+  await Promise.resolve();
+}
 
 describe('ModelSelector', () => {
   let container: HTMLDivElement;
@@ -50,7 +59,7 @@ describe('ModelSelector', () => {
   });
 
   afterEach(async () => {
-    await act(async () => root.unmount());
+    await flushReactUpdates(() => root.unmount());
     container.remove();
   });
 
@@ -68,7 +77,7 @@ describe('ModelSelector', () => {
         },
       });
 
-    await act(async () => {
+    await flushReactUpdates(async () => {
       root.render(<ModelSelector />);
     });
 
@@ -83,18 +92,18 @@ describe('ModelSelector', () => {
       }),
     );
 
-    await act(async () => {
+    await flushReactUpdates(async () => {
       root.render(<ModelSelector />);
       await Promise.resolve();
     });
     expect(MorphoDiTaAPI.getModels).toHaveBeenCalledTimes(1);
 
-    act(() => {
+    await flushReactUpdates(() => {
       useAppStore.setState({ useOfflineMode: true });
       useApiStore.getState().invalidateModels();
     });
 
-    await act(async () => {
+    await flushReactUpdates(async () => {
       resolveRequest({
         models: {
           'stale-online-model': {

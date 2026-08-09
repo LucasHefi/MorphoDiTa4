@@ -14,8 +14,11 @@ All notable changes to MorphoDiTa Client are recorded here.
 
 ## [Unreleased]
 
-- Repository mapping, production distribution approval, and Windows release
-  evidence remain open.
+- Production distribution approval for the CC BY-NC-SA model and Windows
+  release evidence remain open.
+- The current Linux candidate has fresh frontend/Rust quality-gate, offline
+  no-network, packaged-sidecar, and isolated native-launch evidence; see the
+  Linux release procedure and Huly MDT-94 for the exact artifact readback.
 
 ## [0.1.0] - 2026-07-24
 

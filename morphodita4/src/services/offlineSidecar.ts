@@ -69,7 +69,9 @@ function appendDiagnostic(message: string): void {
 }
 
 function formatDiagnostic(value: unknown): string {
-  return typeof value === 'string' ? value : JSON.stringify(value);
+  if (typeof value === 'string') return value;
+  const serialized = JSON.stringify(value);
+  return serialized ?? String(value);
 }
 
 function joinModelPath(directory: string, fileName: string): string {
@@ -83,11 +85,25 @@ function attachDiagnostics(command: ReturnType<typeof Command.sidecar>): void {
   command.on('error', (error) => appendDiagnostic(`error: ${formatDiagnostic(error)}`));
 }
 
-async function waitForReady(base: string, shouldStop: () => boolean): Promise<boolean> {
+async function waitForReady(base: string, shouldStop: () => boolean, isAlive: () => boolean): Promise<boolean> {
   for (let attempt = 0; attempt < READY_ATTEMPTS && !shouldStop(); attempt += 1) {
     try {
       const response = await fetch(`${base}/models?output=json`, { method: 'GET' });
-      if (response.ok) return true;
+      if (response.ok) {
+        const payload = await response.json() as unknown;
+        if (
+          typeof payload === 'object' &&
+          payload !== null &&
+          'models' in payload &&
+          typeof payload.models === 'object' &&
+          payload.models !== null &&
+          BUNDLED_MODEL_ID in payload.models
+        ) {
+          return isAlive();
+        }
+        appendDiagnostic('readiness: response does not contain the bundled model');
+        return false;
+      }
     } catch (error) {
       appendDiagnostic(`readiness: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -118,7 +134,7 @@ async function startInternal(modelDir?: string): Promise<string> {
       const port = DEFAULT_PORT + attempt;
       const modelDirectory = modelDir || joinModelPath(modelsPath, BUNDLED_MODEL_DIRECTORY);
       const modelPath = joinModelPath(modelDirectory, BUNDLED_MODEL_FILE);
-      const command = Command.sidecar('morphodita-server', [
+      const command = Command.sidecar('binaries/morphodita-server', [
         String(port),
         BUNDLED_MODEL_ID,
         modelPath,
@@ -140,8 +156,8 @@ async function startInternal(modelDir?: string): Promise<string> {
       sidecarChild = spawnedChild;
       const candidateBaseUrl = `http://127.0.0.1:${port}`;
       setStatus('starting', { port, baseUrl: candidateBaseUrl });
-      const ready = await waitForReady(candidateBaseUrl, () => stopRequested);
-      if (ready && !stopRequested) {
+      const ready = await waitForReady(candidateBaseUrl, () => stopRequested, () => sidecarChild === spawnedChild);
+      if (ready && !stopRequested && sidecarChild === spawnedChild) {
         offlineBaseUrl = candidateBaseUrl;
         setStatus('ready', { port, baseUrl: candidateBaseUrl, error: null });
         return candidateBaseUrl;

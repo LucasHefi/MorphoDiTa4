@@ -146,11 +146,20 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
     setEditValue(null);
   }, [editingCell, editValue, tableType, onRefresh, onStatusChange]);
 
+  const handleEditCancel = useCallback(() => {
+    setEditingCell(null);
+    setEditValue(null);
+  }, []);
+
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === 'Escape') {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      handleEditCancel();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
       void handleEditComplete();
     }
-  }, [handleEditComplete]);
+  }, [handleEditCancel, handleEditComplete]);
 
   const formatCellValue = (value: unknown, field: string): string => {
     if (value === null || value === undefined) return '-';
@@ -187,6 +196,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
               <th className="px-2 py-2 w-10">
                 <input
                   type="checkbox"
+                  aria-label="Select all records"
                   checked={allSelected}
                   ref={(element) => {
                     if (element) element.indeterminate = someSelected;
@@ -204,6 +214,15 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
                   )}
                   style={{ width: column.width }}
                   onClick={() => column.sortable !== false && handleSort(column.key)}
+                  onKeyDown={(event) => {
+                    if ((event.key === 'Enter' || event.key === ' ') && column.sortable !== false) {
+                      event.preventDefault();
+                      handleSort(column.key);
+                    }
+                  }}
+                  tabIndex={column.sortable !== false ? 0 : undefined}
+                  role={column.sortable !== false ? 'button' : undefined}
+                  aria-sort={sortColumn === column.key ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center gap-1">
                     {column.label}
@@ -229,6 +248,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
                   <td className="px-2 py-1">
                     <input
                       type="checkbox"
+                      aria-label={`Select record ${rowId}`}
                       checked={selectedIds.has(rowId)}
                       onChange={(event) => handleSelectRow(rowId, event.target.checked)}
                       className="w-4 h-4 accent-primary"

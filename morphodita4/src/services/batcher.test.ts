@@ -33,6 +33,12 @@ describe('splitText', () => {
     expect(splitText('hello')).toEqual(['hello']);
   });
 
+  it('rejects zero, negative, fractional and non-finite batch sizes', () => {
+    for (const batchSize of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() => splitText('hello world', batchSize)).toThrow(RangeError);
+    }
+  });
+
   it('trims whitespace from input', () => {
     expect(splitText('  hello world  ')).toEqual(['hello world']);
   });

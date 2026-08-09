@@ -48,7 +48,8 @@ export interface APIResponse<T> {
 // Responses for specific endpoints
 export interface ModelsResponse {
   models: { [key: string]: string[] };
-  acknowledgements: string[];
+  default_model?: string;
+  acknowledgements?: string[];
 }
 
 export interface GenerateResponse {
@@ -58,7 +59,13 @@ export interface GenerateResponse {
 
 export interface AnalyzeResponse {
   model: string;
-  result: Array<MorphologicalTag[]>;
+  result: AnalyzeToken[][];
+}
+
+export interface AnalyzeToken {
+  token: string;
+  analyses: MorphologicalTag[];
+  space?: string;
 }
 
 export interface TagResponse {

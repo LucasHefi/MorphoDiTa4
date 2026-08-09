@@ -1,6 +1,9 @@
 import { useAppStore } from '../store/useAppStore'
 
 export function splitText(input: string, batchSize: number = 50): string[] {
+  if (!Number.isInteger(batchSize) || batchSize <= 0) {
+    throw new RangeError('batchSize must be a positive integer');
+  }
   const trimmed = input.trim()
   if (!trimmed) return []
   const hasNewlines = /\n/.test(trimmed)

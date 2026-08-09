@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs } from '../common/Tabs';
 import { Button } from '../common/Button';
 import { Copy } from 'lucide-react';
-import type { AnalyzerResult, DisplayMorphologicalTag } from '../../types/api';
+import type { AnalyzerResult, DisplayMorphologicalTag, Token } from '../../types/api';
 import type { OperationType } from '../../types/common';
 import { TagParser } from '../../services/tagParser';
 import { Tooltip } from '../common/Tooltip';
@@ -17,7 +17,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
     navigator.clipboard.writeText(JSON.stringify(result, null, 2));
   };
 
-  const renderTable = (data: DisplayMorphologicalTag[][]) => (
+  const renderMorphologicalTable = (data: DisplayMorphologicalTag[][], showGeneratedForm = false) => (
     <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full text-sm text-left text-muted-foreground">
         <thead className="text-xs text-foreground uppercase bg-secondary">
@@ -25,6 +25,8 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
             <th className="px-4 py-3">Token/Slovo</th>
             <th className="px-4 py-3">Lemma</th>
             <th className="px-4 py-3">Tag / Rozbor</th>
+            {showGeneratedForm && <th className="px-4 py-3">Form</th>}
+            {showGeneratedForm && <th className="px-4 py-3">Probability</th>}
           </tr>
         </thead>
         <tbody>
@@ -53,9 +55,32 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
                     </div>
                   </Tooltip>
                 </td>
+                {showGeneratedForm && <td className="px-4 py-2">{item.form || '-'}</td>}
+                {showGeneratedForm && <td className="px-4 py-2">{item.probability ?? '-'}</td>}
               </tr>
             );
           })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderTokenTable = (data: Token[][]) => (
+    <div className="overflow-x-auto rounded-md border border-border">
+      <table className="w-full text-sm text-left text-muted-foreground">
+        <thead className="text-xs text-foreground uppercase bg-secondary">
+          <tr>
+            <th className="px-4 py-3">Token</th>
+            <th className="px-4 py-3">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.flat().map((item, idx) => (
+            <tr key={idx} className="bg-background border-b border-border hover:bg-secondary/50">
+              <td className="px-4 py-2 font-medium text-foreground">{item.token}</td>
+              <td className="px-4 py-2 whitespace-pre-wrap">{item.space || '-'}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -67,15 +92,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
       label: 'Tabulka',
       content: (
         <div className="mt-4">
-          {operation === 'tokenize' ? (
-            <div className="p-4 bg-background border border-border rounded-md">
-              <pre className="text-sm whitespace-pre-wrap">
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            </div>
-          ) : (
-            renderTable(result as DisplayMorphologicalTag[][])
-          )}
+          {operation === 'tokenize'
+            ? renderTokenTable(result as Token[][])
+            : renderMorphologicalTable(result as DisplayMorphologicalTag[][], operation === 'generate')}
         </div>
       ),
     },

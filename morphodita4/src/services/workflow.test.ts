@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const databaseMock = vi.hoisted(() => ({
+  createSession: vi.fn(),
   saveWizardResults: vi.fn(),
+  updateSessionStatus: vi.fn(),
 }));
 
 vi.mock('./database', () => ({ DatabaseService: databaseMock }));
@@ -54,5 +56,40 @@ describe('WorkflowService.saveWizardResults', () => {
     await expect(
       WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
     ).rejects.toBe(failure);
+  });
+});
+
+describe('WorkflowService.saveAnalyzerResult', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('persists tag rows with the selected operation and source type', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '8', savedCount: 1 });
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tag', [[{ token: 'psa', lemma: 'pes', tag: 'Ncms1' }]], 'czech-model', 'psa'),
+    ).resolves.toBe(1);
+
+    expect(databaseMock.saveWizardResults).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'tag', model: 'czech-model', input_text: 'psa' }),
+      [expect.objectContaining({ source_type: 'analysis', original_form: 'psa', lemma: 'pes' })],
+    );
+  });
+
+  it('persists tokenize as a completed session without inventing morphology rows', async () => {
+    databaseMock.createSession.mockResolvedValue({ id: '9' });
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tokenize', [[{ token: 'psa', space: '' }]], 'czech-model', 'psa'),
+    ).resolves.toBe(1);
+
+    expect(databaseMock.createSession).toHaveBeenCalledWith(expect.objectContaining({
+      operation: 'tokenize',
+      result_count: 1,
+      status: 'pending',
+    }));
+    expect(databaseMock.updateSessionStatus).toHaveBeenCalledWith('9', 'completed', 1);
+    expect(databaseMock.saveWizardResults).not.toHaveBeenCalled();
   });
 });

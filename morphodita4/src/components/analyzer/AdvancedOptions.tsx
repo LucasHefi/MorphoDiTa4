@@ -14,6 +14,7 @@ export interface AdvancedOptionsProps {
   onDerivationChange: (value: 'none' | 'root' | 'path' | 'tree') => void;
   convertTagset: string;
   onConvertTagsetChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
@@ -26,6 +27,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   onDerivationChange,
   convertTagset,
   onConvertTagsetChange,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +45,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
     <div className="w-full mt-4 border border-border rounded-md overflow-hidden bg-card">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        disabled={disabled}
         className="w-full flex items-center justify-between p-3 bg-secondary/50 hover:bg-secondary transition-colors"
       >
         <span className="text-sm font-medium text-foreground">
@@ -63,6 +66,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
                 type="checkbox"
                 checked={guesser}
                 onChange={(e) => onGuesserChange(e.target.checked)}
+                disabled={disabled}
                 className="rounded border-input text-primary focus:ring-primary"
               />
               <span className="text-sm text-foreground">{t('analyzer.guesser')}</span>
@@ -73,6 +77,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             <Select
               label={t('analyzer.input_format')}
               value={inputFormat}
+              disabled={disabled}
               onChange={(e) => {
                 if (e.target.value === 'untokenized' || e.target.value === 'vertical') {
                   onInputFormatChange(e.target.value);
@@ -89,6 +94,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             <Select
               label={t('analyzer.derivation')}
               value={derivation}
+              disabled={disabled}
               onChange={(e) => {
                 switch (e.target.value) {
                   case 'none':
@@ -117,6 +123,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
                 type="text"
                 value={convertTagset}
                 onChange={(e) => onConvertTagsetChange(e.target.value)}
+                disabled={disabled}
                 placeholder="pdt_to_conll2009, ..."
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />

@@ -29,7 +29,10 @@ describe('OfflineSidecar platform path handling', () => {
     mocks.command.spawn.mockResolvedValue(mocks.child);
     mocks.sidecar.mockReturnValue(mocks.command);
     mocks.getBundledModelsDir.mockResolvedValue('/opt/morphodita/resources/models');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'] } }),
+  }));
   });
 
   afterEach(async () => {
@@ -40,7 +43,7 @@ describe('OfflineSidecar platform path handling', () => {
   it('passes the Tauri resource path unchanged on Linux-style paths', async () => {
     await expect(OfflineSidecar.start()).resolves.toBe('http://127.0.0.1:8765');
 
-    expect(mocks.sidecar).toHaveBeenCalledWith('morphodita-server', [
+    expect(mocks.sidecar).toHaveBeenCalledWith('binaries/morphodita-server', [
       '8765',
       'czech-250909',
       '/opt/morphodita/resources/models/czech.tagger',
@@ -51,13 +54,24 @@ describe('OfflineSidecar platform path handling', () => {
   it('passes a Windows-style explicit model path unchanged', async () => {
     await expect(OfflineSidecar.start('C:\\Program Files\\MorphoDiTa\\models')).resolves.toBe('http://127.0.0.1:8765');
 
-    expect(mocks.sidecar).toHaveBeenCalledWith('morphodita-server', [
+    expect(mocks.sidecar).toHaveBeenCalledWith('binaries/morphodita-server', [
       '8765',
       'czech-250909',
       'C:\\Program Files\\MorphoDiTa\\models\\czech.tagger',
       'https://hdl.handle.net/11234/1-5985',
     ]);
     expect(mocks.getBundledModelsDir).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unrelated HTTP service that returns 200 without the bundled model', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ models: { unrelated: ['tag'] } }),
+    } as Response);
+
+    await expect(OfflineSidecar.start()).rejects.toMatchObject({ name: 'OfflineSidecarError' });
+    expect(OfflineSidecar.getStatus().state).toBe('failed');
+    expect(mocks.child.kill).toHaveBeenCalled();
   });
 
   it('returns a typed fail-closed error with explicit recovery actions', async () => {

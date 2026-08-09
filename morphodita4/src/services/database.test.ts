@@ -135,4 +135,17 @@ describe('DatabaseService', () => {
       value: 'm2',
     });
   });
+
+  it('passes server-side pagination to database searches', async () => {
+    vi.mocked(tauriApi.invoke).mockResolvedValue([]);
+
+    await DatabaseService.searchRecords('sessions', 'model', ['model'], 50, 100);
+
+    expect(tauriApi.invoke).toHaveBeenCalledWith('search_sessions', {
+      searchTerm: 'model',
+      fields: ['model'],
+      limit: 50,
+      offset: 100,
+    });
+  });
 });

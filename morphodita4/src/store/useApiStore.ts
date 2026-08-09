@@ -32,7 +32,7 @@ export const useApiStore = create<ApiStore>((set, get) => ({
 
       set({
         models: response.models,
-        selectedModel: selectAvailableModel(response.models, get().selectedModel),
+        selectedModel: selectAvailableModel(response.models, get().selectedModel, response.defaultModel ?? null),
       });
     } catch (error) {
       if (requestGeneration !== modelsRequestGeneration) return;

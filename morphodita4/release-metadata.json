@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MPL-2.0",
   "authors": ["MorphoDiTa Client contributors"],
-  "repository": null,
+  "repository": "https://github.com/LucasHefi/MorphoDiTa4",
   "models": [
     {
       "id": "czech-250909",
@@ -18,7 +18,6 @@
     }
   ],
   "openGates": [
-    "repository-mapping",
     "model-commercial-distribution"
   ]
 }

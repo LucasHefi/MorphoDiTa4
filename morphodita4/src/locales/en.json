@@ -54,6 +54,8 @@
     },
     "input_placeholder": "Enter text to analyze...",
     "process": "Process",
+    "save": "Save result",
+    "saveSuccess": "Saved {{count}} result records to the database.",
     "results_title": "Result",
     "no_result_placeholder": "Enter text and run analysis to see results."
   },

@@ -6,7 +6,7 @@ import { Button } from '../common/Button';
 import { RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export const ModelSelector: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> = ({ compact = false, disabled = false }) => {
   const { t } = useTranslation();
   const { models, selectedModel, isLoading, error, setSelectedModel, refreshModels } = useApiStore();
   const automaticRequestStarted = useRef(false);
@@ -31,15 +31,15 @@ export const ModelSelector: React.FC<{ compact?: boolean }> = ({ compact = false
           options={options}
           value={selectedModel || ''}
           onChange={(e) => setSelectedModel(e.target.value)}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           error={error ? `${t('common.error')}: ${error}` : undefined}
         />
       </div>
-      <Button 
-        variant="ghost" 
-        size="md" 
+      <Button
+        variant="ghost"
+        size="md"
         onClick={() => void refreshModels()}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         title="Refresh models"
         className="mb-[2px]"
       >

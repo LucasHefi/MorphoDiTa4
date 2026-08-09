@@ -16,6 +16,7 @@ export const DatabaseEditorPage: React.FC = () => {
   const [data, setData] = useState<DatabaseRow[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<DatabaseId>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -25,19 +26,26 @@ export const DatabaseEditorPage: React.FC = () => {
     setIsLoading(true);
     setStatus(t('common.loading'));
     try {
-      const result = await DatabaseService.getAllData(
-        tableType,
-        DATABASE_PAGE_SIZE,
-        page * DATABASE_PAGE_SIZE,
-      );
+      const searchable = tableType === 'sessions'
+        ? ['operation', 'model', 'input_text', 'status']
+        : ['source_type', 'original_form', 'lemma', 'tag', 'generated_form'];
+      const result = activeSearchTerm
+        ? await DatabaseService.searchRecords(
+          tableType,
+          activeSearchTerm,
+          searchable,
+          DATABASE_PAGE_SIZE,
+          page * DATABASE_PAGE_SIZE,
+        )
+        : await DatabaseService.getAllData(tableType, DATABASE_PAGE_SIZE, page * DATABASE_PAGE_SIZE);
       setData(result);
-      setStatus(`${result.length} záznamů načteno`);
+      setStatus(`${result.length} záznamů ${activeSearchTerm ? 'nalezeno' : 'načteno'}`);
     } catch (error) {
       setStatus(`${t('common.error')}: ${String(error)}`);
     } finally {
       setIsLoading(false);
     }
-  }, [tableType, t, page]);
+  }, [activeSearchTerm, tableType, t, page]);
 
   useEffect(() => {
     loadData();
@@ -60,32 +68,16 @@ export const DatabaseEditorPage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loadData]);
 
-  const handleSearch = useCallback(async () => {
-    if (!searchTerm.trim()) {
-      await loadData();
-      return;
-    }
-
-    setIsLoading(true);
-    setStatus(t('common.loading'));
-    try {
-      const searchable = tableType === 'sessions' 
-        ? ['operation', 'model', 'input_text', 'status']
-        : ['source_type', 'original_form', 'lemma', 'tag', 'generated_form'];
-      const result = await DatabaseService.searchRecords(tableType, searchTerm, searchable);
-      setData(result);
-      setStatus(`${result.length} záznamů nalezeno`);
-    } catch (error) {
-      setStatus(`${t('common.error')}: ${String(error)}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchTerm, tableType, loadData, t]);
+  const handleSearch = useCallback(() => {
+    setPage(0);
+    setActiveSearchTerm(searchTerm.trim());
+  }, [searchTerm]);
 
   const handleClearSearch = useCallback(async () => {
     setSearchTerm('');
-    await loadData();
-  }, [loadData]);
+    setActiveSearchTerm('');
+    setPage(0);
+  }, []);
 
   const handleDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
@@ -123,6 +115,8 @@ export const DatabaseEditorPage: React.FC = () => {
                   value={tableType}
                   onChange={(e) => {
                     setTableType(e.target.value as TableType);
+                    setActiveSearchTerm('');
+                    setSearchTerm('');
                     setPage(0);
                   }}
                   className="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
@@ -196,8 +190,7 @@ export const DatabaseEditorPage: React.FC = () => {
             />
           </div>
 
-          {!searchTerm.trim() && (
-            <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
@@ -218,7 +211,6 @@ export const DatabaseEditorPage: React.FC = () => {
                 {t('database.next')}
               </Button>
             </div>
-          )}
 
           <div className="text-sm text-muted-foreground px-2">
             {status}
