@@ -49,54 +49,62 @@ interface DbStore {
   setError: (error: string | null) => void;
 }
 
-export const useDbStore = create<DbStore>((set) => ({
-  sessions: [],
-  recentActivity: [],
-  isLoading: true,
-  error: null,
-  loadSessions: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const sessions = orderSessionsForActivity(await DatabaseService.getSessions(ACTIVITY_LIMIT));
-      set({ sessions, recentActivity: sessions, isLoading: false, error: null });
-    } catch (error) {
-      set({ isLoading: false, error: databaseErrorMessage(error) });
-      throw error;
-    }
-  },
-  setSessions: (sessions) => {
-    const orderedSessions = orderSessionsForActivity(sessions, sessions.length);
-    set({
-      sessions: orderedSessions,
-      recentActivity: orderedSessions.slice(0, ACTIVITY_LIMIT),
-    });
-  },
-  addSession: (session) =>
-    set((state) => {
-      const newSessions = [session, ...state.sessions];
-      return {
-        sessions: newSessions,
-        recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
-      };
-    }),
-  updateSession: (id, updates) =>
-    set((state) => {
-      const newSessions = state.sessions.map((s) =>
-        s.id === id ? { ...s, ...updates } : s
-      );
-      return {
-        sessions: newSessions,
-        recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
-      };
-    }),
-  removeSession: (id) =>
-    set((state) => {
-      const newSessions = state.sessions.filter((s) => s.id !== id);
-      return {
-        sessions: newSessions,
-        recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
-      };
-    }),
-  setIsLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error }),
-}));
+export const useDbStore = create<DbStore>((set) => {
+  let latestLoadRequest = 0;
+
+  return {
+    sessions: [],
+    recentActivity: [],
+    isLoading: true,
+    error: null,
+    loadSessions: async () => {
+      const requestId = ++latestLoadRequest;
+      set({ isLoading: true, error: null });
+      try {
+        const sessions = orderSessionsForActivity(await DatabaseService.getSessions(ACTIVITY_LIMIT));
+        if (requestId !== latestLoadRequest) return;
+        set({ sessions, recentActivity: sessions, isLoading: false, error: null });
+      } catch (error) {
+        if (requestId === latestLoadRequest) {
+          set({ isLoading: false, error: databaseErrorMessage(error) });
+        }
+        throw error;
+      }
+    },
+    setSessions: (sessions) => {
+      const orderedSessions = orderSessionsForActivity(sessions, sessions.length);
+      set({
+        sessions: orderedSessions,
+        recentActivity: orderedSessions.slice(0, ACTIVITY_LIMIT),
+      });
+    },
+    addSession: (session) =>
+      set((state) => {
+        const newSessions = [session, ...state.sessions];
+        return {
+          sessions: newSessions,
+          recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
+        };
+      }),
+    updateSession: (id, updates) =>
+      set((state) => {
+        const newSessions = state.sessions.map((s) =>
+          s.id === id ? { ...s, ...updates } : s
+        );
+        return {
+          sessions: newSessions,
+          recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
+        };
+      }),
+    removeSession: (id) =>
+      set((state) => {
+        const newSessions = state.sessions.filter((s) => s.id !== id);
+        return {
+          sessions: newSessions,
+          recentActivity: newSessions.slice(0, ACTIVITY_LIMIT),
+        };
+      }),
+    setIsLoading: (isLoading) => set({ isLoading }),
+    setError: (error) => set({ error }),
+  };
+});

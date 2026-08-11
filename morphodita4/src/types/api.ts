@@ -2,7 +2,28 @@ export interface ModelInfo {
   name: string;
   language: string;
   description: string;
-  capabilities: string[];
+  capabilities: ModelCapability[];
+}
+
+export type ModelCapability = 'tag' | 'analyze' | 'generate' | 'tokenize';
+
+export type APIErrorCode =
+  | 'NETWORK'
+  | 'TIMEOUT'
+  | 'HTTP_STATUS'
+  | 'INVALID_JSON'
+  | 'SCHEMA_MISMATCH'
+  | 'OFFLINE_UNAVAILABLE'
+  | 'INVALID_INPUT'
+  | 'UNSUPPORTED_OUTPUT';
+
+export interface APIErrorShape {
+  code: APIErrorCode;
+  endpoint: string;
+  retryable: boolean;
+  retryAfterMs?: number;
+  status?: number;
+  cause?: unknown;
 }
 
 export interface MorphologicalTag {
@@ -33,7 +54,7 @@ export interface TagComponents {
 
 export interface Token {
   token: string;
-  space: string;
+  space?: string;
 }
 
 export type DisplayMorphologicalTag = MorphologicalTag & { token?: string };
@@ -47,7 +68,7 @@ export interface APIResponse<T> {
 
 // Responses for specific endpoints
 export interface ModelsResponse {
-  models: { [key: string]: string[] };
+  models: { [key: string]: ModelCapability[] };
   default_model?: string;
   acknowledgements?: string[];
 }

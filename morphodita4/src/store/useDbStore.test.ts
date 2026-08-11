@@ -83,4 +83,72 @@ describe('activity session loading', () => {
       error: 'database unavailable',
     }));
   });
+
+  it('does not let an older load overwrite a newer result', async () => {
+    let resolveOlder: (sessions: Session[]) => void = () => undefined;
+    let resolveNewer: (sessions: Session[]) => void = () => undefined;
+    const olderRequest = new Promise<Session[]>((resolve) => {
+      resolveOlder = resolve;
+    });
+    const newerRequest = new Promise<Session[]>((resolve) => {
+      resolveNewer = resolve;
+    });
+    const newerSessions = [createSession('newer', '2026-08-10T10:00:00.000Z')];
+    const olderSessions = [createSession('older', '2026-08-09T10:00:00.000Z')];
+    databaseMock.getSessions
+      .mockReturnValueOnce(olderRequest)
+      .mockReturnValueOnce(newerRequest);
+
+    const olderLoad = useDbStore.getState().loadSessions();
+    const newerLoad = useDbStore.getState().loadSessions();
+
+    resolveNewer(newerSessions);
+    await newerLoad;
+    expect(useDbStore.getState()).toEqual(expect.objectContaining({
+      sessions: newerSessions,
+      recentActivity: newerSessions,
+      isLoading: false,
+      error: null,
+    }));
+
+    resolveOlder(olderSessions);
+    await olderLoad;
+    expect(useDbStore.getState()).toEqual(expect.objectContaining({
+      sessions: newerSessions,
+      recentActivity: newerSessions,
+      isLoading: false,
+      error: null,
+    }));
+  });
+
+  it('does not let an older load failure replace a newer result', async () => {
+    let rejectOlder: (error: Error) => void = () => undefined;
+    let resolveNewer: (sessions: Session[]) => void = () => undefined;
+    const olderRequest = new Promise<Session[]>((_, reject) => {
+      rejectOlder = reject;
+    });
+    const newerRequest = new Promise<Session[]>((resolve) => {
+      resolveNewer = resolve;
+    });
+    const newerSessions = [createSession('newer', '2026-08-10T10:00:00.000Z')];
+    const olderFailure = new Error('stale database failure');
+    databaseMock.getSessions
+      .mockReturnValueOnce(olderRequest)
+      .mockReturnValueOnce(newerRequest);
+
+    const olderLoad = useDbStore.getState().loadSessions();
+    const newerLoad = useDbStore.getState().loadSessions();
+
+    resolveNewer(newerSessions);
+    await newerLoad;
+    rejectOlder(olderFailure);
+    await expect(olderLoad).rejects.toBe(olderFailure);
+
+    expect(useDbStore.getState()).toEqual(expect.objectContaining({
+      sessions: newerSessions,
+      recentActivity: newerSessions,
+      isLoading: false,
+      error: null,
+    }));
+  });
 });

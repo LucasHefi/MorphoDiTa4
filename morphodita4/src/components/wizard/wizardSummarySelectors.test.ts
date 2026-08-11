@@ -36,4 +36,32 @@ describe('wizard summary source selection', () => {
 
     expect(result).toEqual({ taggedTokens, forms });
   });
+
+  it('matches NFC sets against NFD tokens and cleaned lemmas without empty lemmas', () => {
+    const result = selectWizardSources(
+      [{ token: 'c\u030Cat', lemma: 'pes', tag: 'N' }, { token: 'old', lemma: 'old', tag: 'N' }],
+      [
+        { form: 'běží', lemma: 'PES_extra-2', tag: 'N' },
+        { form: 'empty', lemma: ' _ignored', tag: 'N' },
+      ],
+      true,
+      new Set(['ČAT', 'čat', 'ČAT']),
+      new Set(['pes', 'PES', '']),
+    );
+
+    expect(result.taggedTokens.map((token) => token.token)).toEqual(['c\u030Cat']);
+    expect(result.forms.map((form) => form.form)).toEqual(['běží']);
+  });
+
+  it('cleans set-supplied lemmas before matching', () => {
+    const result = selectWizardSources(
+      taggedTokens,
+      forms,
+      true,
+      new Set(['psa']),
+      new Set(['  PES_extra-2 ']),
+    );
+
+    expect(result.forms.map((form) => form.form)).toEqual(['psi']);
+  });
 });

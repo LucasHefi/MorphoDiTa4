@@ -6,6 +6,7 @@ import { MorphoDiTaAPI } from '../../services/api';
 import { useApiStore } from '../../store/useApiStore';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelSelector } from './ModelSelector';
+import { MemoryRouter } from 'react-router';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -118,5 +119,26 @@ describe('ModelSelector', () => {
 
     expect(useApiStore.getState().models).toEqual({});
     expect(useApiStore.getState().selectedModel).toBeNull();
+  });
+
+  it('names compact mode and exposes loading and error announcements', async () => {
+    useApiStore.setState({
+      models: { model: { name: 'model', language: 'en', description: 'English', capabilities: [] } },
+      selectedModel: 'model', isLoading: true, error: null,
+    });
+    await flushReactUpdates(() => root.render(<MemoryRouter><ModelSelector compact /></MemoryRouter>));
+    expect(container.querySelector('button[aria-haspopup="listbox"]')?.getAttribute('aria-label')).toBe('analyzer.model_select');
+    expect(container.querySelector('[role="status"]')).not.toBeNull();
+    expect(container.querySelector('svg.motion-safe\\:animate-spin')).not.toBeNull();
+
+    await flushReactUpdates(() => {
+      useApiStore.setState({ isLoading: false, error: 'network down' });
+    });
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain('network down');
+    const refreshButton = [...container.querySelectorAll('button')].find((button) => button.getAttribute('aria-label') === 'database.refresh');
+    expect(refreshButton).not.toBeUndefined();
+    expect(refreshButton?.title).toBe('database.refresh');
+    expect(refreshButton?.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(1);
   });
 });

@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Token } from '../types/api';
 import {
   exportMorphologicalTagsToCsv,
   exportStringArrayToCsv,
   exportToCsv,
   exportToJson,
+  downloadFile,
 } from './export';
 
 function parseCsv(input: string): string[][] {
@@ -47,13 +48,22 @@ function parseCsv(input: string): string[][] {
 }
 
 describe('CSV exports', () => {
-  it.each(['=1+1', '+SUM(A1:A2)', '-cmd', '@payload', ' =hidden', '\t+hidden']) (
+  it.each(['=1+1', '+SUM(A1:A2)', '-cmd', '@payload', ' =hidden', '\t+hidden', '\u00a0=nbsp', '\uFEFF+header']) (
     'neutralizes formula-like text %j',
     (value) => {
       expect(exportToCsv([{ value }], ['value'])).toBe(`value\r\n'${value}`);
       expect(exportStringArrayToCsv([value])).toBe(`value\r\n'${value}`);
     },
   );
+
+  it('preserves ordinary text that only contains whitespace', () => {
+    expect(exportToCsv([{ value: ' ordinary text' }], ['value'])).toBe('value\r\n ordinary text');
+  });
+
+  it('neutralizes a formula after a newline and retains CSV quoting', () => {
+    expect(exportToCsv([{ value: '\n@newline' }], ['value'])).toBe('value\r\n"\'\n@newline"');
+    expect(exportStringArrayToCsv(['\n@newline'])).toBe('value\r\n"\'\n@newline"');
+  });
 
   it('quotes commas, quotes and line breaks after neutralization', () => {
     expect(exportToCsv([{ value: '=A1,"quoted"\r\nnext' }], ['value']))
@@ -108,6 +118,7 @@ describe('CSV exports', () => {
   });
 
   it('serializes a target-size dataset without losing rows', () => {
+    const start = performance.now();
     const rows = Array.from({ length: 10000 }, (_, index) => ({
       token: `slovo-${index}`,
       lemma: `lemma-${index % 100}`,
@@ -118,5 +129,37 @@ describe('CSV exports', () => {
 
     expect(parseCsv(csv)).toHaveLength(rows.length + 1);
     expect(csv.length).toBeGreaterThan(100000);
+    expect(csv.length).toBeLessThan(4 * 1024 * 1024);
+    expect(performance.now() - start).toBeLessThan(5000);
+  });
+
+  it('cleans up the download DOM and URL when clicking throws', () => {
+    const createObjectURL = vi.fn(() => 'blob:test');
+    const revokeObjectURL = vi.fn();
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => { throw new Error('blocked'); });
+
+    expect(() => downloadFile('data', 'result.txt', 'text/plain')).toThrow('blocked');
+    expect(document.querySelector('a[download="result.txt"]')).toBeNull();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:test');
+
+    click.mockRestore();
+    delete (URL as unknown as { createObjectURL?: unknown }).createObjectURL;
+    delete (URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL;
+  });
+
+  it('represents a multi-section wizard export as one round-trippable table', () => {
+    const csv = exportToCsv([
+      { section: 'formsToLemmas', value: 'žluťoučký = kůň' },
+      { section: 'filteredForms', value: '=danger, "quoted"\nřádek' },
+    ], ['section', 'value']);
+
+    expect(parseCsv(csv)).toEqual([
+      ['section', 'value'],
+      ['formsToLemmas', 'žluťoučký = kůň'],
+      ['filteredForms', "'=danger, \"quoted\"\nřádek"],
+    ]);
+    expect(csv.split('\r\n')[0]).toBe('section,value');
   });
 });

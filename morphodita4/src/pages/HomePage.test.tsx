@@ -2,7 +2,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, useLocation } from 'react-router';
 import type { Session } from '../types/database';
 
 const databaseMock = vi.hoisted(() => ({
@@ -157,5 +157,28 @@ describe('HomePage activity states', () => {
     expect(container.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(container.textContent).toContain('model-2');
     expect(container.textContent).toContain('home.table.operation');
+  });
+
+  it('navigates the analyzer link and preserves the heading hierarchy', async () => {
+    const LocationProbe = () => <output data-testid="location">{useLocation().pathname}</output>;
+
+    await flushReactUpdates(() => {
+      root.render(
+        <MemoryRouter>
+          <HomePage />
+          <LocationProbe />
+        </MemoryRouter>,
+      );
+    });
+
+    const headings = [...container.querySelectorAll('h1, h2, h3')];
+    expect(headings.map((heading) => heading.tagName)).toEqual(['H1', 'H2', 'H2', 'H2']);
+    const analyzerLink = [...container.querySelectorAll('a')].find((link) => link.textContent?.includes('home.analyzer.title'));
+    expect(analyzerLink?.getAttribute('href')).toBe('/analyzer');
+    analyzerLink?.focus();
+    expect(document.activeElement).toBe(analyzerLink);
+    analyzerLink?.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(container.querySelector('[data-testid="location"]')?.textContent).toBe('/analyzer');
   });
 });

@@ -210,13 +210,13 @@ pub fn get_morphological_data(
 }
 
 #[tauri::command]
-pub fn word_form_exists(
+pub fn word_forms_exist(
     state: State<'_, DbState>,
-    word: String,
-) -> std::result::Result<bool, String> {
+    words: Vec<String>,
+) -> std::result::Result<Vec<String>, String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
-        db::word_form_exists(conn, &word).map_err(|e| e.to_string())
+        db::word_forms_exist(conn, &words).map_err(|e| e.to_string())
     } else {
         Err("Database not initialized".to_string())
     }
@@ -405,24 +405,65 @@ pub fn restore_database(
     drop(connection);
 
     let restore_result = backup::restore_database(&database_path, backup_path);
-    let reopened = db::open_database_at(&database_path).map_err(|error| error.to_string());
-    match (restore_result, reopened) {
-        (Ok(result), Ok(connection)) => {
-            *conn_guard = Some(connection);
-            Ok(result)
-        }
-        (Err(restore_error), Ok(connection)) => {
-            *conn_guard = Some(connection);
-            Err(restore_error.to_string())
-        }
-        (Ok(result), Err(reopen_error)) => Err(format!(
-            "restore_database: restore succeeded but database could not be reopened; rollback_path={:?}; error={reopen_error}",
-            result.rollback_path
-        )),
-        (Err(restore_error), Err(reopen_error)) => Err(format!(
-            "restore_database: {restore_error}; database reopen also failed: {reopen_error}"
-        )),
+    match restore_result {
+        Ok(result) => match reopen_or_recover(&database_path, &result, |path| {
+            db::open_database_at(path).map_err(|error| error.to_string())
+        }) {
+            Ok((connection, None)) => {
+                *conn_guard = Some(connection);
+                Ok(result)
+            }
+            Ok((connection, Some(message))) => {
+                *conn_guard = Some(connection);
+                Err(message)
+            }
+            Err(error) => Err(error),
+        },
+        Err(restore_error) => match db::open_database_at(&database_path) {
+            Ok(connection) => {
+                *conn_guard = Some(connection);
+                Err(restore_error.to_string())
+            }
+            Err(reopen_error) => Err(format!(
+                "restore_database: {restore_error}; prior database reopen also failed: {reopen_error}"
+            )),
+        },
     }
+}
+
+fn reopen_or_recover<F>(
+    database_path: &Path,
+    restore_result: &RestoreResult,
+    reopen: F,
+) -> std::result::Result<(rusqlite::Connection, Option<String>), String>
+where
+    F: Fn(&Path) -> std::result::Result<rusqlite::Connection, String>,
+{
+    let replacement_error = match reopen(database_path) {
+        Ok(connection) => return Ok((connection, None)),
+        Err(error) => error,
+    };
+    let rollback_path = restore_result.rollback_path.as_deref().ok_or_else(|| {
+        format!(
+            "restore_database: replacement database could not be reopened and no prior database is available; error={replacement_error}"
+        )
+    })?;
+    backup::recover_database(database_path, Path::new(rollback_path)).map_err(|error| {
+        format!(
+            "restore_database: replacement reopen failed: {replacement_error}; prior database recovery failed: {error}"
+        )
+    })?;
+    let connection = reopen(database_path).map_err(|error| {
+        format!(
+            "restore_database: replacement reopen failed: {replacement_error}; prior database was republished but recovery reopen failed: {error}"
+        )
+    })?;
+    Ok((
+        connection,
+        Some(format!(
+            "restore_database: replacement could not be reopened; prior database recovered and remains usable: {replacement_error}"
+        )),
+    ))
 }
 
 #[tauri::command]
@@ -455,8 +496,10 @@ pub async fn download_model(
         .await
         .map_err(|error| format!("model download: cannot create model directory: {error}"))?;
     let target_dir = models_dir.join(&model.id);
-    if tokio::fs::metadata(&target_dir).await.is_ok() {
-        return Err(format!("model is already installed: {}", model.id));
+    if fs::symlink_metadata(&target_dir).is_ok()
+        && validate_installed_model(&target_dir, &model).is_ok()
+    {
+        return Ok(downloaded_model(&target_dir, &model));
     }
 
     let token = Uuid::new_v4();
@@ -526,11 +569,11 @@ pub async fn download_model(
         let model = model.clone();
         let archive_path_for_install = archive_path.clone();
         let models_dir_for_install = models_dir.clone();
-        Ok(tokio::task::spawn_blocking(move || {
+        tokio::task::spawn_blocking(move || {
             install_model_archive(&archive_path_for_install, &models_dir_for_install, &model)
         })
         .await
-        .map_err(|error| format!("model download: installer worker failed: {error}"))??)
+        .map_err(|error| format!("model download: installer worker failed: {error}"))?
     }
     .await;
     let _ = tokio::fs::remove_file(&archive_path).await;
@@ -597,6 +640,27 @@ fn validate_model_catalog(catalog: &ModelCatalog) -> std::result::Result<(), Str
         {
             return Err(format!("model license metadata is invalid: {}", model.id));
         }
+        if !is_semver(&model.version)
+            || !is_semver(&model.server_compatibility.min_server_version)
+            || model
+                .server_compatibility
+                .max_server_version
+                .as_deref()
+                .is_some_and(|version| !is_semver(version))
+            || model.capabilities.is_empty()
+            || model.capabilities.iter().any(|capability| {
+                !matches!(
+                    capability.as_str(),
+                    "tag" | "analyze" | "generate" | "tokenize"
+                )
+            })
+            || model.capabilities.iter().collect::<HashSet<_>>().len() != model.capabilities.len()
+        {
+            return Err(format!(
+                "model semantic version or capability metadata is invalid: {}",
+                model.id
+            ));
+        }
     }
     Ok(())
 }
@@ -605,6 +669,15 @@ fn install_model_archive(
     archive_path: &Path,
     models_dir: &Path,
     model: &ModelCatalogEntry,
+) -> std::result::Result<DownloadedModel, String> {
+    install_model_archive_with_cleanup_failure(archive_path, models_dir, model, false)
+}
+
+fn install_model_archive_with_cleanup_failure(
+    archive_path: &Path,
+    models_dir: &Path,
+    model: &ModelCatalogEntry,
+    fail_staging_cleanup: bool,
 ) -> std::result::Result<DownloadedModel, String> {
     let temporary_dir = models_dir.join(format!(".{}.install-{}", model.id, Uuid::new_v4()));
     let install_result = (|| {
@@ -661,14 +734,19 @@ fn install_model_archive(
             "schemaVersion": 1,
             "id": model.id,
             "version": model.version,
-            "release": "250909",
             "language": model.language,
             "artifact": model.artifact_name,
+            "artifactSizeBytes": model.artifact_size_bytes,
+            "artifactSha256": model.artifact_sha256,
             "sourceUrl": model.source_url,
-            "license": { "spdx": model.license.spdx, "url": model.license.url },
+            "license": {
+                "spdx": model.license.spdx,
+                "name": model.license.name,
+                "url": model.license.url,
+                "commercialUse": model.license.commercial_use
+            },
             "notices": model.notice_entries.iter().map(|notice| notice.file_name.clone()).collect::<Vec<_>>(),
             "serverCompatibility": model.server_compatibility,
-            "description": "Official Czech MorfFlex2.1/PDT-C2.0 MorphoDiTa model downloaded from LINDAT after license consent.",
             "capabilities": model.capabilities,
         });
         let manifest_bytes = serde_json::to_vec_pretty(&manifest)
@@ -676,26 +754,267 @@ fn install_model_archive(
         fs::write(temporary_dir.join("model.json"), manifest_bytes)
             .map_err(|error| format!("model install: cannot write manifest: {error}"))?;
         let target_dir = models_dir.join(&model.id);
-        if target_dir.exists() {
-            return Err(format!(
-                "model install: target already exists: {}",
-                model.id
-            ));
+        validate_installed_model(&temporary_dir, model)?;
+        if fs::symlink_metadata(&target_dir).is_ok()
+            && validate_installed_model(&target_dir, model).is_ok()
+        {
+            let cleanup = if fail_staging_cleanup {
+                Err("injected staging cleanup failure".to_string())
+            } else {
+                remove_target(&temporary_dir)
+            };
+            cleanup.map_err(|error| {
+                format!(
+                    "model install: canonical target is already valid, but temporary staging cleanup failed: {error}"
+                )
+            })?;
+            return Ok(downloaded_model(&target_dir, model));
         }
-        fs::rename(&temporary_dir, &target_dir)
-            .map_err(|error| format!("model install: atomic install failed: {error}"))?;
-        Ok(DownloadedModel {
-            id: model.id.clone(),
-            version: model.version.clone(),
-            path: target_dir.to_string_lossy().into_owned(),
-            artifact: model.artifact_name.clone(),
-            sha256: model.artifact_sha256.clone(),
-        })
+        publish_staged_model(&temporary_dir, &target_dir, model)?;
+        Ok(downloaded_model(&target_dir, model))
     })();
     if install_result.is_err() {
         let _ = fs::remove_dir_all(&temporary_dir);
     }
     install_result
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct InstalledModelManifest {
+    #[serde(rename = "schemaVersion")]
+    schema_version: u32,
+    id: String,
+    version: String,
+    language: String,
+    artifact: String,
+    #[serde(rename = "artifactSizeBytes")]
+    artifact_size_bytes: u64,
+    #[serde(rename = "artifactSha256")]
+    artifact_sha256: String,
+    #[serde(rename = "sourceUrl")]
+    source_url: String,
+    license: ModelCatalogLicense,
+    notices: Vec<String>,
+    #[serde(rename = "serverCompatibility")]
+    server_compatibility: ModelCompatibility,
+    capabilities: Vec<String>,
+}
+
+fn downloaded_model(target_dir: &Path, model: &ModelCatalogEntry) -> DownloadedModel {
+    DownloadedModel {
+        id: model.id.clone(),
+        version: model.version.clone(),
+        path: target_dir.to_string_lossy().into_owned(),
+        artifact: model.artifact_name.clone(),
+        sha256: model.artifact_sha256.clone(),
+    }
+}
+
+fn validate_installed_model(
+    target_dir: &Path,
+    model: &ModelCatalogEntry,
+) -> std::result::Result<(), String> {
+    let target_metadata = fs::symlink_metadata(target_dir)
+        .map_err(|error| format!("installed model target cannot be inspected: {error}"))?;
+    if !target_metadata.is_dir() {
+        return Err("installed model target is not a directory".to_string());
+    }
+    let manifest_path = target_dir.join("model.json");
+    let manifest_metadata = fs::symlink_metadata(&manifest_path)
+        .map_err(|error| format!("installed model manifest is unavailable: {error}"))?;
+    if !manifest_metadata.is_file() {
+        return Err("installed model manifest is not a regular file".to_string());
+    }
+    let manifest: InstalledModelManifest = serde_json::from_slice(
+        &fs::read(&manifest_path)
+            .map_err(|error| format!("installed model manifest cannot be read: {error}"))?,
+    )
+    .map_err(|error| format!("installed model manifest is malformed: {error}"))?;
+    let expected_notices: Vec<String> = model
+        .notice_entries
+        .iter()
+        .map(|notice| notice.file_name.clone())
+        .collect();
+    if manifest.schema_version != 1
+        || manifest.id != model.id
+        || manifest.version != model.version
+        || manifest.language != model.language
+        || manifest.artifact != model.artifact_name
+        || manifest.artifact_size_bytes != model.artifact_size_bytes
+        || manifest.artifact_sha256 != model.artifact_sha256
+        || manifest.source_url != model.source_url
+        || manifest.license.spdx != model.license.spdx
+        || manifest.license.name != model.license.name
+        || manifest.license.url != model.license.url
+        || manifest.license.commercial_use != model.license.commercial_use
+        || manifest.notices != expected_notices
+        || manifest.server_compatibility.min_server_version
+            != model.server_compatibility.min_server_version
+        || manifest.server_compatibility.max_server_version
+            != model.server_compatibility.max_server_version
+        || manifest.capabilities != model.capabilities
+    {
+        return Err("installed model manifest does not match catalog".to_string());
+    }
+    let artifact_path = target_dir.join(&model.artifact_name);
+    validate_regular_file(&artifact_path, "artifact")?;
+    let artifact = fs::read(&artifact_path)
+        .map_err(|error| format!("installed model artifact cannot be read: {error}"))?;
+    if artifact.len() as u64 != model.artifact_size_bytes
+        || hex_digest(Sha256::digest(&artifact)) != model.artifact_sha256
+    {
+        return Err("installed model artifact checksum or size mismatch".to_string());
+    }
+    for notice in &model.notice_entries {
+        validate_regular_file(&target_dir.join(&notice.file_name), "notice")?;
+    }
+    Ok(())
+}
+
+fn validate_regular_file(path: &Path, kind: &str) -> std::result::Result<(), String> {
+    let metadata = fs::symlink_metadata(path)
+        .map_err(|error| format!("installed model {kind} is unavailable: {error}"))?;
+    if !metadata.is_file() {
+        return Err(format!("installed model {kind} is not a regular file"));
+    }
+    Ok(())
+}
+
+#[derive(Default)]
+struct PublishFailures {
+    publish: bool,
+    revalidate: bool,
+    cleanup: bool,
+    restore: bool,
+    before_publish: Option<fn(&Path, &Path)>,
+}
+
+fn publish_staged_model(
+    staging: &Path,
+    target: &Path,
+    model: &ModelCatalogEntry,
+) -> std::result::Result<(), String> {
+    publish_staged_model_with_failures(staging, target, model, PublishFailures::default())
+}
+
+fn publish_staged_model_with_failures(
+    staging: &Path,
+    target: &Path,
+    model: &ModelCatalogEntry,
+    failures: PublishFailures,
+) -> std::result::Result<(), String> {
+    let rollback = target.with_file_name(format!(".{}-rollback-{}", model.id, Uuid::new_v4()));
+    let had_prior = fs::symlink_metadata(target).is_ok();
+    if had_prior {
+        fs::rename(target, &rollback).map_err(|error| {
+            format!("model install: cannot move prior target to {rollback:?}: {error}")
+        })?;
+    }
+    if let Some(before_publish) = failures.before_publish {
+        before_publish(staging, target);
+    }
+    let publish_error = if failures.publish {
+        Some("injected publish failure".to_string())
+    } else {
+        fs::rename(staging, target)
+            .err()
+            .map(|error| format!("model install: atomic publish failed: {error}"))
+    };
+    if let Some(error) = publish_error {
+        if !had_prior {
+            return Err(format!(
+                "{error}; no prior target was published by this install, so the canonical target was preserved"
+            ));
+        }
+        return restore_published_target(target, &rollback, had_prior, error, failures.restore);
+    }
+    let validation = if failures.revalidate {
+        Err("injected canonical revalidation failure".to_string())
+    } else {
+        validate_installed_model(target, model)
+    };
+    if let Err(error) = validation {
+        return restore_published_target(target, &rollback, had_prior, error, failures.restore);
+    }
+    if had_prior {
+        let cleanup = if failures.cleanup {
+            Err("injected rollback cleanup failure".to_string())
+        } else {
+            remove_target(&rollback)
+        };
+        if let Err(error) = cleanup {
+            return restore_published_target(target, &rollback, true, error, failures.restore);
+        }
+    }
+    Ok(())
+}
+
+fn restore_published_target(
+    target: &Path,
+    rollback: &Path,
+    had_prior: bool,
+    publish_error: String,
+    fail_restore: bool,
+) -> std::result::Result<(), String> {
+    if !had_prior {
+        let _ = remove_target(target);
+        return Err(publish_error);
+    }
+    let failed_target = target.with_file_name(format!(
+        ".{}-failed-{}",
+        target
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("model"),
+        Uuid::new_v4()
+    ));
+    let had_new = fs::symlink_metadata(target).is_ok();
+    let move_new = if fail_restore {
+        Err("injected prior-target restoration failure".to_string())
+    } else if had_new {
+        fs::rename(target, &failed_target).map_err(|error| error.to_string())
+    } else {
+        Ok(())
+    };
+    let restore = if fail_restore {
+        Err("injected prior-target restoration failure".to_string())
+    } else if move_new.is_ok() {
+        match fs::rename(rollback, target) {
+            Ok(()) if had_new => remove_target(&failed_target)
+                .map_err(|error| format!("failed published target cleanup failed: {error}")),
+            Ok(()) => Ok(()),
+            Err(error) => {
+                let restore_new = fs::rename(&failed_target, target);
+                Err(match restore_new {
+                    Ok(()) => format!("prior-target restoration failed: {error}"),
+                    Err(restore_error) => format!(
+                        "prior-target restoration failed: {error}; canonical preservation also failed: {restore_error}"
+                    ),
+                })
+            }
+        }
+    } else {
+        Err(format!(
+            "cannot preserve failed canonical target for restoration: {}",
+            move_new.unwrap_err()
+        ))
+    };
+    match restore {
+        Ok(()) => Err(format!("model install: {publish_error}; prior target restored")),
+        Err(error) => Err(format!(
+            "model install: {publish_error}; {error}; evidence retained at target={target:?}, rollback={rollback:?}"
+        )),
+    }
+}
+
+fn remove_target(path: &Path) -> std::result::Result<(), String> {
+    let metadata = fs::symlink_metadata(path).map_err(|error| error.to_string())?;
+    if metadata.is_dir() && !metadata.file_type().is_symlink() {
+        fs::remove_dir_all(path).map_err(|error| error.to_string())
+    } else {
+        fs::remove_file(path).map_err(|error| error.to_string())
+    }
 }
 
 fn extract_zip_entry(
@@ -751,31 +1070,37 @@ fn is_hex(value: &str, length: usize) -> bool {
     value.len() == length && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
+fn is_semver(value: &str) -> bool {
+    let (core, prerelease) = value
+        .split_once('-')
+        .map_or((value, None), |(core, prerelease)| (core, Some(prerelease)));
+    let parts: Vec<&str> = core.split('.').collect();
+    parts.len() == 3
+        && parts.iter().all(|part| {
+            !part.is_empty()
+                && part.chars().all(|character| character.is_ascii_digit())
+                && (*part == "0" || !part.starts_with('0'))
+        })
+        && prerelease.is_none_or(|pre| {
+            !pre.is_empty()
+                && pre.split('.').all(|part| {
+                    !part.is_empty()
+                        && (!part.chars().all(|character| character.is_ascii_digit())
+                            || part == "0"
+                            || !part.starts_with('0'))
+                        && part
+                            .chars()
+                            .all(|character| character.is_ascii_alphanumeric() || character == '-')
+                })
+        })
+}
+
 fn hex_digest<D: AsRef<[u8]>>(digest: D) -> String {
     digest
         .as_ref()
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
-}
-
-#[tauri::command]
-pub fn start_morphodita_server(
-    model_dir: String,
-    port: u16,
-) -> std::result::Result<String, String> {
-    let _ = (model_dir, port);
-    Err("Sidecar managed from frontend".to_string())
-}
-
-#[tauri::command]
-pub fn stop_morphodita_server() -> std::result::Result<(), String> {
-    Ok(())
-}
-
-#[tauri::command]
-pub fn get_offline_models_dir() -> std::result::Result<String, String> {
-    Err("Use app data dir from frontend".to_string())
 }
 
 #[cfg(test)]
@@ -900,8 +1225,277 @@ mod model_download_tests {
 
         assert_eq!(installed.id, "fixture");
         assert!(models_dir.join("fixture/model.tagger").is_file());
-        assert!(models_dir.join("fixture/model.json").is_file());
+        let manifest: serde_json::Value = serde_json::from_slice(
+            &fs::read(models_dir.join("fixture/model.json")).expect("manifest should be readable"),
+        )
+        .expect("manifest should be valid JSON");
+        assert_eq!(manifest["artifactSizeBytes"], serde_json::json!(16));
+        assert_eq!(manifest["artifactSha256"], model.artifact_sha256);
         fs::remove_dir_all(root).expect("fixture directory should be removed");
+    }
+
+    fn write_valid_fixture_install(path: &Path, model: &ModelCatalogEntry) {
+        fs::create_dir_all(path).unwrap();
+        fs::write(path.join(&model.artifact_name), b"fixture-artifact").unwrap();
+        for notice in &model.notice_entries {
+            fs::write(path.join(&notice.file_name), notice.file_name.as_bytes()).unwrap();
+        }
+        let manifest = serde_json::json!({
+            "schemaVersion": 1,
+            "id": model.id,
+            "version": model.version,
+            "language": model.language,
+            "artifact": model.artifact_name,
+            "artifactSizeBytes": model.artifact_size_bytes,
+            "artifactSha256": model.artifact_sha256,
+            "sourceUrl": model.source_url,
+            "license": model.license,
+            "notices": model.notice_entries.iter().map(|notice| notice.file_name.clone()).collect::<Vec<_>>(),
+            "serverCompatibility": model.server_compatibility,
+            "capabilities": model.capabilities,
+        });
+        fs::write(
+            path.join("model.json"),
+            serde_json::to_vec(&manifest).unwrap(),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn detects_a_valid_existing_model_idempotently() {
+        let root = std::env::temp_dir().join(format!("morphodita-model-valid-{}", Uuid::new_v4()));
+        let model = fixture_model(vec![]);
+        write_valid_fixture_install(&root, &model);
+        assert!(validate_installed_model(&root, &model).is_ok());
+        assert_eq!(downloaded_model(&root, &model).id, "fixture");
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn concurrent_valid_target_is_unchanged_and_staging_is_removed() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-concurrent-{}", Uuid::new_v4()));
+        let models_dir = root.join("models");
+        let archive_path = root.join("fixture.zip");
+        let target = models_dir.join("fixture");
+        let model = fixture_model(vec![
+            "root/".to_string(),
+            "root/LICENSE".to_string(),
+            "root/README".to_string(),
+            "root/model.tagger".to_string(),
+        ]);
+        fs::create_dir_all(&models_dir).unwrap();
+        write_valid_fixture_install(&target, &model);
+        let canonical_before = fs::read(target.join("model.json")).unwrap();
+        write_fixture_zip(&archive_path, None);
+
+        install_model_archive(&archive_path, &models_dir, &model)
+            .expect("install should be idempotent");
+
+        assert_eq!(
+            fs::read(target.join("model.json")).unwrap(),
+            canonical_before
+        );
+        assert_eq!(fs::read_dir(&models_dir).unwrap().count(), 1);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn concurrent_target_staging_cleanup_failure_is_not_reported_as_success() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-cleanup-{}", Uuid::new_v4()));
+        let models_dir = root.join("models");
+        let archive_path = root.join("fixture.zip");
+        let target = models_dir.join("fixture");
+        let model = fixture_model(vec![
+            "root/".to_string(),
+            "root/LICENSE".to_string(),
+            "root/README".to_string(),
+            "root/model.tagger".to_string(),
+        ]);
+        fs::create_dir_all(&models_dir).unwrap();
+        write_valid_fixture_install(&target, &model);
+        write_fixture_zip(&archive_path, None);
+
+        let error =
+            install_model_archive_with_cleanup_failure(&archive_path, &models_dir, &model, true)
+                .unwrap_err();
+
+        assert!(error.contains("temporary staging cleanup failed"));
+        assert!(validate_installed_model(&target, &model).is_ok());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    fn publish_valid_competing_target(staging: &Path, target: &Path) {
+        fs::create_dir_all(target).unwrap();
+        for entry in fs::read_dir(staging).unwrap() {
+            let entry = entry.unwrap();
+            fs::copy(entry.path(), target.join(entry.file_name())).unwrap();
+        }
+    }
+
+    #[test]
+    fn first_publish_race_preserves_the_valid_concurrent_winner() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-publish-race-{}", Uuid::new_v4()));
+        let target = root.join("fixture");
+        let staging = root.join(".fixture-install");
+        let model = fixture_model(vec![]);
+        fs::create_dir_all(&root).unwrap();
+        write_valid_fixture_install(&staging, &model);
+        let winner_manifest = {
+            let mut bytes = fs::read(staging.join("model.json")).unwrap();
+            bytes.extend_from_slice(b"\n");
+            bytes
+        };
+        let error = publish_staged_model_with_failures(
+            &staging,
+            &target,
+            &model,
+            PublishFailures {
+                before_publish: Some(publish_valid_competing_target),
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+
+        assert!(error.contains("canonical target was preserved"));
+        assert!(validate_installed_model(&target, &model).is_ok());
+        assert_eq!(
+            fs::read(target.join("model.json")).unwrap(),
+            winner_manifest[..winner_manifest.len() - 1]
+        );
+        assert!(staging.exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn rejects_malformed_hash_and_symlink_files() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-invalid-{}", Uuid::new_v4()));
+        let model = fixture_model(vec![]);
+        write_valid_fixture_install(&root, &model);
+        fs::write(root.join("model.json"), b"not-json").unwrap();
+        assert!(validate_installed_model(&root, &model).is_err());
+        let manifest_path = root.join("model.json");
+        let manifest = serde_json::json!({ "schemaVersion": 1 });
+        fs::write(&manifest_path, serde_json::to_vec(&manifest).unwrap()).unwrap();
+        assert!(validate_installed_model(&root, &model).is_err());
+        let valid_manifest = serde_json::json!({
+            "schemaVersion": 1,
+            "id": model.id,
+            "version": model.version,
+            "language": model.language,
+            "artifact": model.artifact_name,
+            "artifactSizeBytes": model.artifact_size_bytes,
+            "artifactSha256": model.artifact_sha256,
+            "sourceUrl": model.source_url,
+            "license": model.license,
+            "notices": model.notice_entries.iter().map(|notice| notice.file_name.clone()).collect::<Vec<_>>(),
+            "serverCompatibility": model.server_compatibility,
+            "capabilities": model.capabilities,
+        });
+        fs::write(&manifest_path, serde_json::to_vec(&valid_manifest).unwrap()).unwrap();
+        fs::write(root.join(&model.artifact_name), b"wrong-artifact").unwrap();
+        assert!(validate_installed_model(&root, &model).is_err());
+        fs::write(root.join(&model.artifact_name), b"fixture-artifact").unwrap();
+        fs::remove_file(root.join(&model.artifact_name)).unwrap();
+        fs::write(root.join("real-artifact"), b"fixture-artifact").unwrap();
+        #[cfg(unix)]
+        std::os::unix::fs::symlink("real-artifact", root.join(&model.artifact_name)).unwrap();
+        #[cfg(unix)]
+        assert!(validate_installed_model(&root, &model).is_err());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn replaces_a_corrupt_existing_target() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-replace-{}", Uuid::new_v4()));
+        let target = root.join("fixture");
+        let staging = root.join(".fixture-install");
+        let model = fixture_model(vec![]);
+        fs::create_dir_all(&target).unwrap();
+        fs::write(target.join("old"), b"corrupt").unwrap();
+        write_valid_fixture_install(&staging, &model);
+        publish_staged_model(&staging, &target, &model).unwrap();
+        assert!(validate_installed_model(&target, &model).is_ok());
+        assert!(!target.join("old").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn publish_failure_restores_prior_target() {
+        let (root, target, staging, model) = recovery_fixture();
+        let error = publish_staged_model_with_failures(
+            &staging,
+            &target,
+            &model,
+            PublishFailures {
+                publish: true,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+        assert!(error.contains("prior target restored"));
+        assert!(target.join("old").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn cleanup_failure_restores_prior_target() {
+        let (root, target, staging, model) = recovery_fixture();
+        let error = publish_staged_model_with_failures(
+            &staging,
+            &target,
+            &model,
+            PublishFailures {
+                cleanup: true,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+        assert!(error.contains("rollback cleanup failure"));
+        assert!(target.join("old").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn restore_failure_reports_combined_diagnostic_and_evidence() {
+        let (root, target, staging, model) = recovery_fixture();
+        let error = publish_staged_model_with_failures(
+            &staging,
+            &target,
+            &model,
+            PublishFailures {
+                revalidate: true,
+                restore: true,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+        assert!(error.contains("canonical revalidation failure"));
+        assert!(error.contains("restoration failure"));
+        assert!(error.contains("evidence retained"));
+        assert!(error.contains("rollback="));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    fn recovery_fixture() -> (
+        std::path::PathBuf,
+        std::path::PathBuf,
+        std::path::PathBuf,
+        ModelCatalogEntry,
+    ) {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-model-recovery-{}", Uuid::new_v4()));
+        let target = root.join("fixture");
+        let staging = root.join(".fixture-install");
+        let model = fixture_model(vec![]);
+        fs::create_dir_all(&target).unwrap();
+        fs::write(target.join("old"), b"prior").unwrap();
+        write_valid_fixture_install(&staging, &model);
+        (root, target, staging, model)
     }
 
     #[test]
@@ -924,5 +1518,97 @@ mod model_download_tests {
         assert!(result.is_err());
         assert!(!models_dir.join("fixture").exists());
         fs::remove_dir_all(root).expect("fixture directory should be removed");
+    }
+}
+
+#[cfg(test)]
+mod recovery_tests {
+    use super::*;
+    use std::cell::Cell;
+    use std::fs;
+
+    #[test]
+    fn injected_reopen_failure_recovers_and_reopens_the_prior_database() {
+        let root =
+            std::env::temp_dir().join(format!("morphodita-command-recovery-{}", Uuid::new_v4()));
+        fs::create_dir_all(&root).unwrap();
+        let database_path = root.join("morphodita.db");
+        let rollback_path = root.join("rollback.sqlite");
+        let prior = db::open_database_at(&rollback_path).unwrap();
+        db::create_session(
+            &prior,
+            db::Session {
+                id: None,
+                operation: "analyze".to_string(),
+                model: "prior".to_string(),
+                input_text: "input".to_string(),
+                parameters: "{}".to_string(),
+                result_count: 0,
+                processing_time: None,
+                status: "pending".to_string(),
+                error_message: None,
+                created_at: None,
+                completed_at: None,
+            },
+        )
+        .unwrap();
+        drop(prior);
+        fs::write(&database_path, b"replacement that cannot open").unwrap();
+        let restore_result = RestoreResult {
+            metadata: BackupMetadata {
+                format_version: 1,
+                schema_version: db::SCHEMA_VERSION,
+                application_version: "test".to_string(),
+                created_at: "test".to_string(),
+                sessions_count: 0,
+                morphological_data_count: 0,
+            },
+            rollback_path: Some(rollback_path.to_string_lossy().into_owned()),
+        };
+        let attempts = Cell::new(0);
+        let (connection, message) = reopen_or_recover(&database_path, &restore_result, |path| {
+            if attempts.get() == 0 {
+                attempts.set(1);
+                return Err("injected reopen failure".to_string());
+            }
+            db::open_database_at(path).map_err(|error| error.to_string())
+        })
+        .unwrap();
+        assert!(message.unwrap().contains("prior database recovered"));
+        assert_eq!(
+            db::get_sessions(&connection, Some(1), Some(0)).unwrap()[0].model,
+            "prior"
+        );
+        drop(connection);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn recovery_failure_diagnostic_contains_both_failures() {
+        let root = std::env::temp_dir().join(format!(
+            "morphodita-command-recovery-failure-{}",
+            Uuid::new_v4()
+        ));
+        fs::create_dir_all(&root).unwrap();
+        let database_path = root.join("morphodita.db");
+        fs::write(&database_path, b"replacement that cannot open").unwrap();
+        let restore_result = RestoreResult {
+            metadata: BackupMetadata {
+                format_version: 1,
+                schema_version: db::SCHEMA_VERSION,
+                application_version: "test".to_string(),
+                created_at: "test".to_string(),
+                sessions_count: 0,
+                morphological_data_count: 0,
+            },
+            rollback_path: Some(root.join("missing.sqlite").to_string_lossy().into_owned()),
+        };
+        let error = reopen_or_recover(&database_path, &restore_result, |_| {
+            Err("injected reopen failure".to_string())
+        })
+        .unwrap_err();
+        assert!(error.contains("injected reopen failure"));
+        assert!(error.contains("prior database recovery failed"));
+        fs::remove_dir_all(root).unwrap();
     }
 }

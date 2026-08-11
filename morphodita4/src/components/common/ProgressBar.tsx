@@ -21,7 +21,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       case 'gradient':
         return 'bg-gradient-to-r from-primary to-accent';
       case 'striped':
-        return 'bg-primary bg-[length:1rem_1rem] [background-image:linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%,transparent)] animate-[progress-stripes_1s_linear_infinite]';
+        return 'bg-primary bg-[length:1rem_1rem] [background-image:linear-gradient(45deg,hsl(var(--status-info)_/_0.3)_25%,transparent_25%,transparent_50%,hsl(var(--status-info)_/_0.3)_50%,hsl(var(--status-info)_/_0.3)_75%,transparent_75%,transparent)] motion-safe:animate-[progress-stripes_1s_linear_infinite]';
       case 'solid':
       default:
         return 'bg-primary';
@@ -34,9 +34,16 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         {label && <span className="text-sm font-medium text-foreground">{label}</span>}
         <span className="text-sm font-medium text-foreground">{Math.round(safeProgress)}%</span>
       </div>
-      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+      <div
+        aria-label={label ?? 'Progress'}
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={Math.round(safeProgress)}
+        className="h-2 w-full bg-secondary rounded-full overflow-hidden"
+        role="progressbar"
+      >
         <div 
-          className={cn("h-full transition-all duration-300 ease-in-out", getVariantClasses())}
+          className={cn("h-full motion-safe:transition-[width] duration-300 ease-in-out", getVariantClasses())}
           style={{ width: `${safeProgress}%` }}
         />
       </div>

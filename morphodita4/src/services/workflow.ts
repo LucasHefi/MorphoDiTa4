@@ -11,7 +11,11 @@ import type { OperationType } from '../types/common';
 import type { DatabasePayload } from '../types/database';
 
 async function refreshActivity(): Promise<void> {
-  await useDbStore.getState().loadSessions();
+  try {
+    await useDbStore.getState().loadSessions();
+  } catch {
+    // The transaction has already committed; the store retains its refresh error.
+  }
 }
 
 export const WorkflowService = {
@@ -35,7 +39,7 @@ export const WorkflowService = {
           original_form: token.token,
           lemma: cleanLemma(token.lemma),
           tag: token.tag,
-          probability: token.probability || null,
+           probability: token.probability ?? null,
           generated_form: null,
         });
       }
@@ -50,7 +54,7 @@ export const WorkflowService = {
           lemma: cleanLemma(form.lemma),
           tag: form.tag,
           generated_form: form.form,
-          probability: form.probability || null,
+           probability: form.probability ?? null,
         });
       }
     }
@@ -66,6 +70,12 @@ export const WorkflowService = {
       },
       morphData,
     );
+    if (!result.sessionId || !/^[1-9]\d*$/.test(result.sessionId)) {
+      throw new Error('Wizard persistence did not return a valid session id');
+    }
+    if (result.savedCount !== morphData.length) {
+      throw new Error(`Wizard persistence was incomplete: saved ${result.savedCount} of ${morphData.length} rows`);
+    }
 
     await refreshActivity();
     return result.savedCount;
@@ -79,17 +89,24 @@ export const WorkflowService = {
   ): Promise<number> {
     const resultCount = result.reduce((count, row) => count + row.length, 0);
     if (operation === 'tokenize') {
-      const session = await DatabaseService.createSession({
-        operation,
-        model,
-        input_text: inputText,
-        status: 'pending',
-        result_count: resultCount,
-        parameters: {},
-      });
-      if (!session.id) throw new Error('Analyzer session did not return an id');
-      await DatabaseService.updateSessionStatus(session.id, 'completed', resultCount);
-      await refreshActivity();
+      const saved = await DatabaseService.saveWizardResults(
+        {
+          operation,
+          model,
+          input_text: inputText,
+          status: 'pending',
+          result_count: resultCount,
+          parameters: {},
+        },
+        [],
+      );
+      if (!saved.sessionId || !/^[1-9]\d*$/.test(saved.sessionId)) {
+        throw new Error('Analyzer persistence did not return a valid session id');
+      }
+      if (saved.savedCount !== 0) {
+        throw new Error(`Analyzer persistence was incomplete: saved ${saved.savedCount} of 0 rows`);
+      }
+       await refreshActivity();
       return resultCount;
     }
 
@@ -124,6 +141,12 @@ export const WorkflowService = {
       },
       morphData,
     );
+    if (!saved.sessionId || !/^[1-9]\d*$/.test(saved.sessionId)) {
+      throw new Error('Analyzer persistence did not return a valid session id');
+    }
+    if (saved.savedCount !== morphData.length) {
+      throw new Error(`Analyzer persistence was incomplete: saved ${saved.savedCount} of ${morphData.length} rows`);
+    }
     await refreshActivity();
     return saved.savedCount;
   },

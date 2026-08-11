@@ -1,13 +1,23 @@
 {
   "common": {
     "loading": "Loading...",
+    "loadingLabel": "Loading",
     "error": "Error",
     "success": "Success",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
-    "offline": "Offline"
+    "offline": "Offline",
+    "back": "Back",
+    "selectAll": "Select all records",
+    "selectRecord": "Select record {{id}}",
+    "editRecord": "Edit {{field}} for record {{id}}",
+    "noData": "No data to display",
+    "progress": "Progress",
+    "clear": "Clear",
+    "logs": "Logs",
+    "noLogs": "No logs to display"
   },
   "nav": {
     "analyzer": "Analysis",
@@ -73,6 +83,39 @@
     "saveSuccess": "Saved {{count}} result records to the database.",
     "results_title": "Result",
     "no_result_placeholder": "Enter text and run analysis to see results."
+    ,"results": {
+      "title": "Results",
+      "table": "Table",
+      "json": "JSON",
+      "token": "Token",
+      "word": "Token/word",
+      "lemma": "Lemma",
+      "tag": "Tag / analysis",
+      "form": "Form",
+      "probability": "Probability",
+      "space": "Space",
+      "copy": "Copy",
+      "copied": "Copied to clipboard.",
+       "copyError": "Copying failed. Please try again.",
+       "tabsLabel": "Result views"
+       ,"morphologicalTable": "Morphological results"
+       ,"tokenTable": "Token results"
+    },
+    "logs": {
+      "title": "Logs",
+      "filter": "Log filter",
+      "all": "All",
+      "info": "Info",
+      "warning": "Warning",
+      "error": "Error",
+      "clear": "Clear logs",
+      "empty": "No logs to display"
+    },
+    "export": {
+      "label": "Export",
+      "format": "Export format"
+    },
+    "modelRequired": "Select a model for {{operation}}.", "inputRequired": "Enter text for {{operation}}.", "operationUnavailable": "Model {{model}} does not support the {{operation}} operation.", "operationStarted": "Starting operation: {{operation}}.", "operationSuccess": "Operation completed successfully.", "operationError": "Operation failed: {{message}}", "exportSuccess": "{{format}} export completed: {{filename}}"
   },
   "wizard": {
     "steps": {
@@ -83,11 +126,82 @@
     },
     "next": "Next",
     "back": "Back",
+    "cancel": "Cancel processing",
+    "resume": "Retry processing",
+    "processing_error": "Processing could not be completed.",
+    "export_pending": "Exporting...",
+    "export_success": "Export completed.",
+    "export_error": "Export failed",
+    "save_error": "Saving failed",
+    "save_success": "Results were saved successfully.",
+    "process_another": "Process another input",
+    "return_to_input": "Return to input",
     "input_title": "Enter keywords",
     "import_txt": "Import TXT",
     "input_description": "Insert text or a list of words separated by space, comma, or newline.",
     "input_placeholder": "e.g.: dog cat mouse...",
-    "input_label": "Keywords"
+    "input_label": "Keywords",
+    "wordCount": "Words: {{count}}",
+    "input_too_many_words": "The input may contain at most {{maxWords}} words.",
+    "input_too_large": "The input may be at most {{maxMiB}} MiB.",
+    "input_file_too_large": "The TXT file may be at most {{maxMiB}} MiB.",
+    "input_file_read_failed": "The TXT file could not be read."
+    ,"processing": {
+      "title": "Processing",
+      "working": "Your data is being processed. Please wait...",
+      "complete": "Processing completed.",
+      "preparing": "Preparing...",
+      "progress": "Overall progress",
+      "start": "Starting keyword processing...",
+      "wordCount": "Words to analyze: {{count}}",
+      "lookup": "Checking which words exist in the database...",
+      "newWords": "Found {{count}} new words.",
+      "analyzing": "Sending data for morphological analysis...",
+      "tagged": "Tagging completed: {{count}} tokens.",
+      "lemmas": "Obtained {{count}} unique lemmas. Generating forms...",
+      "generated": "Form generation completed.",
+      "success": "Processing completed successfully.",
+      "cancelled": "Processing was cancelled. It can be resumed.",
+      "error": "Processing error: {{message}}",
+      "taggingContractMismatch": "The morphological tagging response did not match the unique input words.",
+      "tooManyWords": "The input contains more than {{maxWords}} words.",
+      "inputReadFailed": "The input file could not be read."
+    },
+    "summary": {
+      "title": "Summary and export",
+      "description": "Review and filter results",
+      "empty": "No results are available to summarize.",
+      "backToInput": "Back to input",
+      "formsToLemmas": "Forms = lemmas ({{count}})",
+      "lemmas": "Processed lemmas ({{count}})",
+      "forms": "Processed forms ({{count}})",
+      "filters": "Filter results",
+      "removeDuplicates": "Remove duplicates",
+      "removeDiacritics": "Remove diacritics",
+      "removeSpecialCharacters": "Remove special characters",
+      "removeStopWords": "Remove stop words",
+      "showOnlyNew": "New words only",
+      "customStopWords": "Custom stop words (comma-separated)",
+      "stopWordsPlaceholder": "a, and, the...",
+      "applyFilters": "Apply filters",
+      "exportCsv": "Export CSV",
+      "exportJson": "Export JSON",
+      "exportTxt": "Export TXT",
+      "saving": "Saving...",
+      "finishSave": "Finish and save",
+      "exportFormsToLemmas": "Forms to lemmas",
+      "exportFilteredLemmas": "Filtered lemmas",
+      "exportFilteredForms": "Filtered forms"
+    },
+    "results": {
+      "lemmasTable": "Analyzed lemmas",
+      "formsTable": "Generated forms",
+      "lemmasTab": "Found lemmas ({{count}})",
+      "formsTab": "Generated forms ({{count}})",
+      "lemmasPreview": "Preview of found lemmas",
+      "formsPreview": "Preview of generated forms",
+      "tabsLabel": "Wizard result views"
+    }
   },
   "settings": {
     "title": "Application Settings",
@@ -122,7 +236,9 @@
   },
   "transport": {
     "offline-explicit": "Local MorphoDiTa is active because offline mode was selected in Settings.",
-    "offline-fallback": "The online API is unavailable. Local MorphoDiTa fallback is active."
+    "offline-fallback": "The online API is unavailable. Local MorphoDiTa fallback is active.",
+    "lifecycle-error": "The application could not initialize its close handler. Reload or restart the application.",
+    "restart": "Reload application"
   },
   "database": {
     "title": "Database Editor",
@@ -132,12 +248,30 @@
       "morphological_data": "Morphological Data"
     },
     "searchPlaceholder": "Search...",
+    "searchLabel": "Search database records",
     "search": "Search",
     "refresh": "Refresh",
     "delete": "Delete Selected",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "recordsLoaded": "Loaded {{count}} records.",
+    "recordsFound": "Found {{count}} records.",
+    "deletePrompt": "Are you sure you want to delete {{count}} selected records? This action cannot be undone.",
+    "deleteMismatch": "The database reported {{actual}} deleted records instead of {{expected}}.",
+    "deleteDeleting": "Deleting {{count}} records...",
+    "deleteSuccess": "Successfully deleted {{count}} records.",
+    "deleteError": "Deletion failed: {{message}} Please retry or cancel.",
+    "deleteCancelled": "Deletion cancelled."
+    ,"columns": {
+      "id": "ID", "operation": "Operation", "model": "Model", "input": "Input", "parameters": "Parameters", "results": "Results", "time": "Time (s)", "status": "Status", "error": "Error", "created": "Created", "completed": "Completed", "type": "Type", "originalForm": "Original form", "lemma": "Lemma", "tag": "Tag", "generatedForm": "Generated form", "probability": "Probability", "relationId": "Relation ID"
+    },
+    "caption": { "sessions": "Database sessions", "morphological_data": "Morphological data" },
+    "editInvalid": "Enter a valid value.",
+    "notChanged": "The record was not changed",
+    "saved": "Saved",
+    "saveFailed": "Save failed: {{message}}",
+    "errorStatus": "Error: {{message}}", "saveRefreshFailed": "The record was saved, but refreshing the data failed. Refresh manually: {{message}}", "deleteReloadFailed": "{{count}} records were deleted, but reloading failed. Refresh manually: {{message}}", "deletePartial": "{{actual}} of {{expected}} records were deleted. Check the data and refresh manually."
   },
   "tagset": {
     "unknown": "Unknown '{{val}}'",

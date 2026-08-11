@@ -24,8 +24,8 @@ export const WizardPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container max-w-4xl py-6 sm:py-8 px-4 sm:px-8 flex flex-col gap-6 animate-in fade-in duration-300">
+    <div className="flex flex-col">
+      <main className="flex-1 container max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-8 flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
         
         <div className="flex flex-col space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">

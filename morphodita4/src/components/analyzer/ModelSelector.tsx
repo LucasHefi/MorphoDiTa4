@@ -29,13 +29,15 @@ export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> 
       <div className="flex-1">
         <Select
           label={compact ? undefined : t('analyzer.model_select')}
+          aria-label={compact ? t('analyzer.model_select') : undefined}
           options={options}
           value={selectedModel || ''}
-          onChange={(e) => setSelectedModel(e.target.value)}
+           onValueChange={setSelectedModel}
           disabled={isLoading || disabled}
           error={error ? `${t('common.error')}: ${error}` : undefined}
         />
       </div>
+      {isLoading && <span role="status" className="sr-only">{t('common.loading')}</span>}
       {error && (
         <Link to="/settings" className="mb-2 text-sm text-primary underline underline-offset-4">
           {t('settings.modelDownloadTitle')}
@@ -46,10 +48,11 @@ export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> 
         size="md"
         onClick={() => void refreshModels()}
         disabled={isLoading || disabled}
-        title="Refresh models"
+        aria-label={t('database.refresh')}
+        title={t('database.refresh')}
         className="mb-[2px]"
       >
-        <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw aria-hidden="true" className={`h-4 w-4 ${isLoading ? 'motion-safe:animate-spin' : ''}`} />
       </Button>
     </div>
   );

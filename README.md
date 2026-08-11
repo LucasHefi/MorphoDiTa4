@@ -1,169 +1,66 @@
 # MorphoDiTa Client v4
 
-Multi-platformní desktopová aplikace pro morfologickou analýzu českého jazyka postavená na React + Tauri + TypeScript.
+MorphoDiTa Client is a React/Tauri desktop application for morphological
+analysis, generation, tokenization, and local result storage. The application
+directory is [`morphodita4/`](morphodita4/).
 
-## Funkce
+## Development
 
-- **Analýza textu**: Morfologické tagování, detailní analýza a generování forem slov
-- **Průvodce klíčových slov**: Hromadné zpracování slov s generováním forem a filtry
-- **Databáze**: Lokální ukládání výsledků s SQLite
-- **Export**: CSV, JSON, TXT formáty
-- **Platformní release rozsah**: Linux x86_64 (testovací `.deb`, lokálně ověřený rozsah); Windows x86_64 OPEN; macOS mimo aktuální release scope
-- **Multi-language**: Čeština (CZ), Angličtina (EN), Polština (PL)
-- **Témata**: Dark/Light mode s glassmorphism efekty
+Use Node/npm in `morphodita4/`:
 
-## Dokumentace
-
-Kompletní dokumentace je v [docs/](docs/):
-
-| Dokument | Popis |
-|----------|-------|
-| [spec.md](docs/spec.md) | Kompletní specifikace funkcí |
-| [api_spec.md](docs/api_spec.md) | API reference pro MorphoDiTa REST API |
-| [database_schema.md](docs/database_schema.md) | Schema databáze a CRUD operace |
-| [ui_guide.md](docs/ui_guide.md) | UI/UX design guidelines |
-| [development_guide.md](docs/development_guide.md) | Kódovací konvence a pravidla |
-| [release-linux.md](docs/release-linux.md) | Linux testovací balíček a platformní release hranice |
-
-## Aktuální release strategie
-
-- Online LINDA MorphoDiTa API je výchozí transport.
-- Lokální MorphoDiTa je explicitní offline režim nebo fallback při nedostupnosti online API.
-- Linux `.deb` je testovací artefakt vytvářený na Linuxu.
-- Windows je kandidátní cíl: vyžaduje Windows runner, Windows sidecar `x86_64-pc-windows-msvc.exe` a přímý test buildu, instalace, spuštění a offline sidecaru; stav zůstává OPEN.
-- Linux build není důkazem Windows kompatibility.
-
-### Podporovaná platformní matice
-
-Toto je aktuální release rozhodnutí. „Lokálně ověřený rozsah“ není veřejný,
-produkční ani dlouhodobý závazek podpory.
-
-| Platforma | Minimum OS | Architektura | Stav a závazek |
-|-----------|------------|--------------|----------------|
-| Linux | **OPEN / neověřeno**; minimální distribuce ani kernel nejsou ověřeným release baseline | x86_64 (`amd64`) | Lokálně podporovaný/ověřený testovací `.deb`; bez veřejného či produkčního závazku podpory |
-| Windows | **OPEN / neověřeno**; minimální verze Windows není ověřeným release baseline | x86_64 kandidát | **OPEN** do přímého testu na Windows runneru s Windows sidecarem; zatím bez závazku podpory |
-| macOS | Není stanoveno; macOS není v aktuálním release scope | Release architektura není rozhodnuta | Mimo aktuální release scope; bez závazku podpory |
-
-Podepisování a distribuční kanály jsou samostatné release gates:
-
-- **Podepisování:** **OPEN / neověřeno**; v repozitáři není evidence podepsaného artefaktu ani podepisovací konfigurace. `sha256sum` je pouze záznam integrity, ne podpis.
-- **Notarizace:** **OPEN / neověřeno**; macOS notarizace není v aktuálním release scope.
-- **Update kanál:** **OPEN / neověřeno**; je doložen pouze ručně vytvořený testovací `.deb`, nikoli updater, update feed nebo publikační kanál.
-
-## Technological Stack
-
-### Frontend
-- **React 18+** - UI framework
-- **TypeScript 5+** - Statická typová kontrola
-- **Vite** - Build tool
-- **TailwindCSS** - CSS framework
-- **shadcn/ui** - Komponenty
-- **Zustand** - State management
-- **react-i18next** - Internacionalizace
-
-### Backend
-- **Tauri** - Desktop framework
-- **Rust** - Backend logika
-- **SQLite** - Databáze
-
-## Struktura Projektu
-
-```
-MorphoDiTa4/
-├── docs/                          # Dokumentace
-│   ├── spec.md
-│   ├── api_spec.md
-│   ├── database_schema.md
-│   ├── ui_guide.md
-│   ├── development_guide.md
-│   └── README.md
-│
-├── morphodita4/                   # Nová aplikace
-│   ├── src/
-│   │   ├── pages/                 # Hlavní stránky
-│   │   ├── components/            # React komponenty
-│   │   ├── services/              # Business logic
-│   │   ├── store/                 # Zustand stores
-│   │   ├── hooks/                 # Custom hooks
-│   │   ├── locales/               # i18n
-│   │   ├── types/                 # TypeScript typy
-│   │   └── styles/                # Globální styly
-│   └── src-tauri/                 # Tauri backend
-│
-└── README.md
+```bash
+npm ci
+npm run check
+npm run test -- --run
+npm run build
+npm run version:check
 ```
 
-## Implementační Stav
+Use Rust in `morphodita4/src-tauri/`:
 
-Všechny specifikace jsou kompletní. Aplikace čeká na implementaci.
-
-### Dokončené Dokumenty
-- [x] spec.md - Kompletní specifikace všech funkcí
-- [x] api_spec.md - Všechny endpointy s příklady
-- [x] database_schema.md - Schema, CRUD, migrace
-- [x] ui_guide.md - Design, animace, komponenty
-- [x] development_guide.md - Konvence, příklady kódu
-
-### Čeká na Implementaci
-- [x] Základní struktura projektu (Fáze 1)
-- [x] Typy a modely (Fáze 2)
-- [x] API service (Fáze 3)
-- [x] Database service (Fáze 4)
-- [x] Text filters (Fáze 5)
-- [x] State management (Fáze 6)
-- [x] I18N (Fáze 7)
-- [x] UI komponenty (Fáze 8-10)
-- [x] Stránky (Fáze 11)
-- [x] Layout a téma (Fáze 12)
-- [x] Tauri backend (Fáze 13)
-- [x] Testování (Fáze 14)
-- [ ] Balení (Fáze 15)
-
-## Rychlý Start Pro Vývojáře
-
-1. **Přečtěte si dokumentaci v pořadí:**
-   ```
-   docs/spec.md → docs/api_spec.md → docs/database_schema.md
-   → docs/ui_guide.md → docs/development_guide.md
-   ```
-
-2. **Implementujte fázi po fázi**
-
-## Klíčové Funkce Z Původní Aplikace
-
-### Operace MorphoDiTa API
-| Operace | Popis |
-|---------|-------|
-| **Tag** | Morfologické tagování textu |
-| **Analyze** | Detailní morfologická analýza s odvozením |
-| **Generate** | Generování slovních forem z lemmat |
-| **Tokenize** | Tokenizace textu |
-
-### Průvodce Klíčových Slov
-4krokový proces:
-1. **Zadání** - Vstup klíčových slov
-2. **Zpracování** - Automatické tagování + generování
-3. **Výsledky** - Náhled s filtry
-4. **Souhrn** - Finální výstupy s exportem
-
-### Filtry Textu (Pořadí je KRITICKÉ!)
-```
-1. remove_diacritics → automatické remove_duplicates
-2. remove_duplicates
-3. remove_stop_words
-4. remove_special_characters (vždy)
+```bash
+cargo fmt --check
+cargo check --locked
+cargo clippy --locked --all-targets --all-features
+cargo test --locked
+cargo build --locked
 ```
 
-### Databázová Kompatibilita
-- **sessions** tabulka: přímo převzata z původní aplikace
-- **morphological_data** tabulka: sjednocená z words/analyses/forms
-- Foreign keys s ON DELETE CASCADE
+The manifests are authoritative for versions: React 19, TypeScript 5.7,
+Vite 6, Tauri 2.11.2, Rust 1.88 minimum supported, and `rusqlite` 0.31.0.
+The reproducible development and CI toolchain is pinned to Rust 1.97.1. The
+npm package manager is npm 10.9.8.
 
-## License
+## Runtime boundaries
 
-Morfologická data podléhají licenci původního MorphoDiTa projektu.
+- Online LINDA is the default transport. Offline mode is an explicit user
+  decision; an eligible network/HTTP server failure may use the configured
+  local fallback. See [ADR-0001](docs/adr/0001-online-first-explicit-offline.md).
+- Offline startup is fail-closed: it does not silently switch back to LINDA.
+- SQLite is local Rust `rusqlite`, not SQLx. The canonical schema uses
+  `PRAGMA user_version = 4`; versions 0 through 2 are rebuilt transactionally
+  into the version-4 tables and indexes, and version 3 replaces its two ASCII
+  `NOCASE` lookup indexes with Unicode-aware indexed collation. This is the
+  canonical schema version 4 contract. Backup and
+  restore validate the full
+  schema contract before replacement. See [database recovery](docs/database-recovery.md).
+- Linux x86_64 is the locally verified test scope. Windows remains **OPEN**
+  until direct Windows evidence exists; macOS is outside the current scope.
+- This repository makes no production, signing, notarization, updater, or
+  public support claim.
 
-## Acknowledgements
+## Documentation
 
-- MorphoDiTa / UFAL - Morfologický analyzor českého jazyka
-- LINDAUT/ČVUT - REST API infrastruktura
+- [Developer guide](docs/development_guide.md): setup, checks, architecture,
+  transport and database boundaries.
+- [API specification](docs/api_spec.md)
+- [Database schema](docs/database_schema.md)
+- [Offline sidecar](docs/offline-sidecar.md)
+- [Database recovery](docs/database-recovery.md)
+- [Linux test-release boundary](docs/release-linux.md)
+- [Feature specification](docs/spec.md) and [UI guide](docs/ui_guide.md)
+
+Known blockers are the missing distributable model/license owner gate and
+RustSec's allowed upstream unmaintained/unsound warnings. After the lockfile
+update, the vulnerability count is zero; those warnings are not represented
+as zero risk.

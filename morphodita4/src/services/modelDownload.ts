@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import type { ModelCapability } from '../types/api';
 
 export interface ModelCatalogLicense {
   spdx: string;
@@ -34,7 +35,7 @@ export interface ModelCatalogEntry {
     minServerVersion: string;
     maxServerVersion?: string;
   };
-  capabilities: string[];
+  capabilities: ModelCapability[];
 }
 
 export interface ModelCatalog {
@@ -78,21 +79,29 @@ function parseModelCatalogEntry(value: unknown): ModelCatalogEntry {
     throw new ModelDownloadError('model catalog entry has missing string metadata');
   }
   if (
-    typeof value.archiveSizeBytes !== 'number' || value.archiveSizeBytes <= 0 ||
-    typeof value.artifactSizeBytes !== 'number' || value.artifactSizeBytes <= 0 ||
+    !isSafeInteger(value.archiveSizeBytes) || !isSafeInteger(value.artifactSizeBytes) ||
     !Array.isArray(value.archiveEntries) || value.archiveEntries.length === 0 ||
     !value.archiveEntries.every((entry) => typeof entry === 'string') ||
     typeof value.artifactPath !== 'string' || !value.archiveEntries.includes(value.artifactPath) ||
     !isRecord(value.license) || typeof value.license.spdx !== 'string' ||
     typeof value.license.name !== 'string' || typeof value.license.url !== 'string' ||
+    !isHttpsUrl(value.license.url) ||
     value.license.commercialUse !== false || !Array.isArray(value.noticeEntries) ||
     !value.noticeEntries.every((notice) => isRecord(notice) && typeof notice.archivePath === 'string' && typeof notice.fileName === 'string') ||
     !isRecord(value.serverCompatibility) || typeof value.serverCompatibility.minServerVersion !== 'string' ||
-    !Array.isArray(value.capabilities) || !value.capabilities.every((capability) => typeof capability === 'string')
+    !isHttpsUrl(value.sourceUrl) || !isHttpsUrl(value.downloadUrl) ||
+    !isVersion(value.version) || !isVersion(value.serverCompatibility.minServerVersion) ||
+    (value.serverCompatibility.maxServerVersion !== undefined && !isVersion(value.serverCompatibility.maxServerVersion)) ||
+    !isHex(value.archiveMd5, 32) || !isSha256(value.archiveSha256) || !isSha256(value.artifactSha256) ||
+    !isCapabilityArray(value.capabilities)
   ) {
     throw new ModelDownloadError('model catalog entry has invalid integrity or license metadata');
   }
-  return value as unknown as ModelCatalogEntry;
+  return {
+    ...(value as unknown as ModelCatalogEntry),
+    archiveSha256: String(value.archiveSha256).toLowerCase(),
+    artifactSha256: String(value.artifactSha256).toLowerCase(),
+  };
 }
 
 export const MODEL_CATALOG = parseModelCatalog({
@@ -154,4 +163,34 @@ export async function downloadModel(modelId: string, consent: boolean): Promise<
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isSafeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
+}
+
+function isHttpsUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try { return new URL(value).protocol === 'https:'; } catch { return false; }
+}
+
+function isSha256(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-fA-F]{64}$/.test(value);
+}
+
+function isHex(value: unknown, length: number): value is string {
+  return typeof value === 'string' && new RegExp(`^[0-9a-fA-F]{${length}}$`).test(value);
+}
+
+function isVersion(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(value)) return false;
+  return (value.split('-')[1]?.split('.') ?? []).every((identifier) =>
+    !/^\d+$/.test(identifier) || identifier === '0' || !identifier.startsWith('0'),
+  );
+}
+
+function isCapabilityArray(value: unknown): value is ModelCapability[] {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  const allowed = new Set<ModelCapability>(['tag', 'analyze', 'generate', 'tokenize']);
+  return value.every((capability) => allowed.has(capability as ModelCapability)) && new Set(value).size === value.length;
 }

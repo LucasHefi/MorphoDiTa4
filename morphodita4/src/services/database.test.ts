@@ -5,6 +5,7 @@ import {
   DatabaseService,
   NotInTauriError,
   ValidationError,
+  MAX_DATABASE_INPUT_BYTES,
 } from './database';
 import * as tauriApi from '@tauri-apps/api/core';
 
@@ -88,6 +89,30 @@ describe('DatabaseService', () => {
     delete (window as TauriWindow).__TAURI_INTERNALS__;
 
     await expect(DatabaseService.getSessions()).rejects.toBeInstanceOf(NotInTauriError);
+    expect(tauriApi.invoke).not.toHaveBeenCalled();
+  });
+
+  it('uses one batch invoke for a 10,000-word existing-form lookup', async () => {
+    const words = Array.from({ length: 10_000 }, (_, index) => `word${index}`);
+    vi.mocked(tauriApi.invoke).mockResolvedValue(['word1', 'word9999']);
+
+    await expect(DatabaseService.wordFormsExist(words)).resolves.toEqual(['word1', 'word9999']);
+    expect(tauriApi.invoke).toHaveBeenCalledTimes(1);
+    expect(tauriApi.invoke).toHaveBeenCalledWith('word_forms_exist', { words });
+  });
+
+  it('rejects direct IPC lookup input above the shared 5 MiB budget', async () => {
+    const words = ['a'.repeat(MAX_DATABASE_INPUT_BYTES + 1)];
+
+    await expect(DatabaseService.wordFormsExist(words)).rejects.toMatchObject({
+      code: 'VALIDATION',
+      command: 'word_forms_exist',
+    });
+    expect(tauriApi.invoke).not.toHaveBeenCalled();
+  });
+
+  it('does not invoke Tauri for an empty existing-form lookup', async () => {
+    await expect(DatabaseService.wordFormsExist([])).resolves.toEqual([]);
     expect(tauriApi.invoke).not.toHaveBeenCalled();
   });
 

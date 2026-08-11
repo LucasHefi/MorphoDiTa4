@@ -1,13 +1,14 @@
 {
   "common": {
-    "loading": "Načítání...",
+    "loading": "Načítání...", "loadingLabel": "Načítání",
     "error": "Chyba",
     "success": "Úspěch",
     "save": "Uložit",
     "cancel": "Zrušit",
     "delete": "Smazat",
     "edit": "Upravit",
-    "offline": "Offline"
+    "offline": "Offline",
+    "back": "Zpět", "selectAll": "Vybrat všechny záznamy", "selectRecord": "Vybrat záznam {{id}}", "editRecord": "Upravit {{field}} záznamu {{id}}", "noData": "Žádná data k zobrazení", "progress": "Postup", "clear": "Vymazat", "logs": "Logy", "noLogs": "Žádné logy k zobrazení"
   },
   "nav": {
     "analyzer": "Analýza",
@@ -72,7 +73,11 @@
     "save": "Uložit výsledek",
     "saveSuccess": "Do databáze uloženo {{count}} řádků výsledku.",
     "results_title": "Výsledek",
-    "no_result_placeholder": "Zadejte text a spusťte analýzu pro zobrazení výsledků."
+    "no_result_placeholder": "Zadejte text a spusťte analýzu pro zobrazení výsledků.",
+     "results": { "title": "Výsledky", "table": "Tabulka", "json": "JSON", "token": "Token", "word": "Token/slovo", "lemma": "Lemma", "tag": "Tag / rozbor", "form": "Forma", "probability": "Pravděpodobnost", "space": "Mezera", "copy": "Kopírovat", "copied": "Zkopírováno do schránky.", "copyError": "Kopírování se nezdařilo. Zkuste to prosím znovu.", "morphologicalTable": "Morfologické výsledky", "tokenTable": "Tokenové výsledky", "tabsLabel": "Pohledy na výsledky" },
+    "logs": { "title": "Logy", "filter": "Filtr logů", "all": "Vše", "info": "Info", "warning": "Varování", "error": "Chyba", "clear": "Vymazat logy", "empty": "Žádné logy k zobrazení" },
+    "export": { "label": "Export", "format": "Formát exportu" },
+    "modelRequired": "Vyberte model pro {{operation}}.", "inputRequired": "Zadejte text pro {{operation}}.", "operationUnavailable": "Model {{model}} nepodporuje operaci {{operation}}.", "operationStarted": "Zahajuji operaci: {{operation}}.", "operationSuccess": "Operace byla úspěšně dokončena.", "operationError": "Operace selhala: {{message}}", "exportSuccess": "Export {{format}} byl dokončen: {{filename}}"
   },
   "wizard": {
     "steps": {
@@ -83,11 +88,28 @@
     },
     "next": "Další",
     "back": "Zpět",
+    "cancel": "Zrušit zpracování",
+    "resume": "Opakovat zpracování",
+    "processing_error": "Zpracování se nepodařilo dokončit.",
+    "export_pending": "Exportuji...",
+    "export_success": "Export dokončen.",
+    "export_error": "Export se nepodařil",
+    "save_error": "Uložení se nepodařilo",
+    "save_success": "Výsledky byly úspěšně uloženy.",
+    "process_another": "Zpracovat další vstup",
+    "return_to_input": "Zpět na zadání",
     "input_title": "Zadejte klíčová slova",
     "import_txt": "Importovat TXT",
     "input_description": "Vložte text nebo seznam slov oddělených mezerou, čárkou nebo novým řádkem.",
     "input_placeholder": "Např: pes kočka myš...",
-    "input_label": "Klíčová slova"
+     "input_label": "Klíčová slova", "wordCount": "Slova: {{count}}",
+    "input_too_many_words": "Vstup může obsahovat nejvýše {{maxWords}} slov.",
+    "input_too_large": "Vstup může mít nejvýše {{maxMiB}} MiB.",
+    "input_file_too_large": "TXT soubor může mít nejvýše {{maxMiB}} MiB.",
+    "input_file_read_failed": "TXT soubor se nepodařilo načíst.",
+    "processing": { "title": "Zpracování", "working": "Vaše data se zpracovávají. Čekejte prosím...", "complete": "Zpracování dokončeno.", "preparing": "Připravuji...", "progress": "Celkový postup", "start": "Zahajuji zpracování klíčových slov...", "wordCount": "Počet slov k analýze: {{count}}", "lookup": "Kontroluji existenci slov v databázi...", "newWords": "Nalezeno {{count}} nových slov.", "analyzing": "Odesílám data k morfologické analýze...", "tagged": "Tagování dokončeno: {{count}} tokenů.", "lemmas": "Získáno {{count}} unikátních lemmat. Generuji formy...", "generated": "Generování dokončeno.", "success": "Zpracování úspěšně dokončeno.", "cancelled": "Zpracování bylo zrušeno. Lze jej obnovit.", "error": "Chyba při zpracování: {{message}}", "taggingContractMismatch": "Odpověď morfologického tagování neodpovídá jedinečným vstupním slovům.", "tooManyWords": "Vstup obsahuje více než {{maxWords}} slov.", "inputReadFailed": "Vstupní soubor se nepodařilo načíst." },
+    "summary": { "title": "Souhrn a export", "description": "Přehled a filtrace výsledků", "empty": "Nejsou k dispozici žádné výsledky k shrnutí.", "backToInput": "Zpět na zadání", "formsToLemmas": "Formy = lemmata ({{count}})", "lemmas": "Zpracovaná lemmata ({{count}})", "forms": "Zpracované formy ({{count}})", "filters": "Filtrace výsledků", "removeDuplicates": "Odstranit duplicity", "removeDiacritics": "Odstranit diakritiku", "removeSpecialCharacters": "Odstranit speciální znaky", "removeStopWords": "Odstranit stop slova", "showOnlyNew": "Jen nová slova", "customStopWords": "Vlastní stop slova (oddělená čárkou)", "stopWordsPlaceholder": "a, i, se, na...", "applyFilters": "Aplikovat filtry", "exportCsv": "Export CSV", "exportJson": "Export JSON", "exportTxt": "Export TXT", "saving": "Ukládám...", "finishSave": "Dokončit a uložit", "exportFormsToLemmas": "Formy na lemmata", "exportFilteredLemmas": "Filtrovaná lemmata", "exportFilteredForms": "Filtrované formy" },
+     "results": { "lemmasTable": "Analyzovaná lemmata", "formsTable": "Vygenerované formy", "lemmasTab": "Nalezená lemmata ({{count}})", "formsTab": "Vygenerované formy ({{count}})", "lemmasPreview": "Náhled nalezených lemmat", "formsPreview": "Náhled vygenerovaných forem", "tabsLabel": "Pohledy na výsledky" }
   },
   "settings": {
     "title": "Nastavení aplikace",
@@ -122,7 +144,9 @@
   },
   "transport": {
     "offline-explicit": "Lokální MorphoDiTa je aktivní, protože byl v nastavení zvolen offline režim.",
-    "offline-fallback": "Online API není dostupné. Je aktivní lokální fallback MorphoDiTa."
+    "offline-fallback": "Online API není dostupné. Je aktivní lokální fallback MorphoDiTa.",
+    "lifecycle-error": "Aplikaci se nepodařilo inicializovat obsluhu zavření. Načtěte aplikaci znovu nebo ji restartujte.",
+    "restart": "Načíst aplikaci znovu"
   },
   "database": {
     "title": "Databázový editor",
@@ -132,12 +156,23 @@
       "morphological_data": "Morfologická data"
     },
     "searchPlaceholder": "Hledat...",
+    "searchLabel": "Hledat záznamy v databázi",
     "search": "Hledat",
     "refresh": "Obnovit",
     "delete": "Smazat vybrané",
     "previous": "Předchozí",
     "next": "Další",
-    "page": "Strana"
+    "page": "Strana",
+    "recordsLoaded": "Načteno záznamů: {{count}}.",
+    "recordsFound": "Nalezeno záznamů: {{count}}.",
+    "deletePrompt": "Opravdu chcete smazat {{count}} vybraných záznamů? Tuto akci nelze vrátit zpět.",
+    "deleteMismatch": "Databáze oznámila smazání {{actual}} záznamů místo {{expected}}.",
+    "deleteDeleting": "Mažu {{count}} záznamů...",
+    "deleteSuccess": "Úspěšně smazáno záznamů: {{count}}.",
+    "deleteError": "Mazání se nezdařilo: {{message}} Zkuste to znovu, nebo akci zrušte.",
+    "deleteCancelled": "Mazání bylo zrušeno.",
+    "columns": { "id": "ID", "operation": "Operace", "model": "Model", "input": "Vstup", "parameters": "Parametry", "results": "Výsledků", "time": "Čas (s)", "status": "Stav", "error": "Chyba", "created": "Vytvořeno", "completed": "Dokončeno", "type": "Typ", "originalForm": "Původní forma", "lemma": "Lemma", "tag": "Tag", "generatedForm": "Vygenerovaná forma", "probability": "Pravděpodobnost", "relationId": "Relace ID" },
+    "caption": { "sessions": "Databázové relace", "morphological_data": "Morfologická data" }, "editInvalid": "Zadejte platnou hodnotu.", "notChanged": "Záznam nebyl změněn", "saved": "Uloženo", "saveFailed": "Uložení se nezdařilo: {{message}}", "errorStatus": "Chyba: {{message}}", "saveRefreshFailed": "Záznam byl uložen, ale obnovení dat se nezdařilo. Obnovte data ručně: {{message}}", "deleteReloadFailed": "Bylo smazáno {{count}} záznamů, ale opětovné načtení se nezdařilo. Obnovte data ručně: {{message}}", "deletePartial": "Bylo smazáno {{actual}} z {{expected}} záznamů. Zkontrolujte data a obnovte je ručně."
   },
   "tagset": {
     "unknown": "Neznámý '{{val}}'",

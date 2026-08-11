@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Select } from '../common/Select';
@@ -31,6 +31,10 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const panelId = `advanced-options-${useId()}`;
+  const buttonId = `${panelId}-button`;
+  const guesserId = `${panelId}-guesser`;
+  const convertTagsetId = `${panelId}-convert-tagset`;
 
   const showGuesser = ['analyze', 'generate'].includes(operation);
   const showInputFormat = operation === 'analyze';
@@ -44,8 +48,12 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   return (
     <div className="w-full mt-4 border border-border rounded-md overflow-hidden bg-card">
       <button
+        id={buttonId}
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between p-3 bg-secondary/50 hover:bg-secondary transition-colors"
       >
         <span className="text-sm font-medium text-foreground">
@@ -59,17 +67,18 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
       </button>
 
       {isOpen && (
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
+        <div id={panelId} role="region" aria-labelledby={buttonId} className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 motion-safe:animate-in motion-safe:slide-in-from-top-2 motion-safe:duration-200">
           {showGuesser && (
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
+                id={guesserId}
                 checked={guesser}
                 onChange={(e) => onGuesserChange(e.target.checked)}
                 disabled={disabled}
                 className="rounded border-input text-primary focus:ring-primary"
               />
-              <span className="text-sm text-foreground">{t('analyzer.guesser')}</span>
+               <span className="text-sm text-foreground">{t('analyzer.guesser')}</span>
             </label>
           )}
 
@@ -78,9 +87,9 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               label={t('analyzer.input_format')}
               value={inputFormat}
               disabled={disabled}
-              onChange={(e) => {
-                if (e.target.value === 'untokenized' || e.target.value === 'vertical') {
-                  onInputFormatChange(e.target.value);
+               onValueChange={(value) => {
+                 if (value === 'untokenized' || value === 'vertical') {
+                   onInputFormatChange(value);
                 }
               }}
               options={[
@@ -95,13 +104,13 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               label={t('analyzer.derivation')}
               value={derivation}
               disabled={disabled}
-              onChange={(e) => {
-                switch (e.target.value) {
+               onValueChange={(value) => {
+                 switch (value) {
                   case 'none':
                   case 'root':
                   case 'path':
                   case 'tree':
-                    onDerivationChange(e.target.value);
+                     onDerivationChange(value);
                     break;
                 }
               }}
@@ -116,11 +125,12 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
 
           {showConvertTagset && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-muted-foreground leading-none">
+               <label htmlFor={convertTagsetId} className="text-xs font-semibold text-muted-foreground leading-none">
                 {t('analyzer.convert_tagset')}
               </label>
               <input
                 type="text"
+                id={convertTagsetId}
                 value={convertTagset}
                 onChange={(e) => onConvertTagsetChange(e.target.value)}
                 disabled={disabled}

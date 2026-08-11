@@ -1,9 +1,17 @@
 import type { MorphologicalTag, TaggedToken, Token } from '../types/api';
 
 type CsvValue = string | number | boolean | null | undefined;
-type MorphologicalExportItem = MorphologicalTag | TaggedToken | Token | string;
+export type MorphologicalExportItem = MorphologicalTag | TaggedToken | Token | string;
+export type MorphologicalExportRow = {
+  token: string;
+  lemma: string;
+  tag: string;
+  form: string;
+  probability: number | undefined;
+  space: string;
+};
 
-const FORMULA_PREFIX = /^[\t\r ]*[=+\-@]/;
+const FORMULA_PREFIX = /^[\p{White_Space}\uFEFF]*[=+\-@]/u;
 const CSV_RECORD_SEPARATOR = '\r\n';
 
 const encodeCsvCell = (value: CsvValue): string => {
@@ -17,14 +25,45 @@ const encodeCsvCell = (value: CsvValue): string => {
     : text;
 };
 
-const flattenMorphologicalData = (
+const collectMorphologicalData = (
   data: MorphologicalExportItem[] | MorphologicalExportItem[][],
-): MorphologicalExportItem[] => data.flatMap((item) => Array.isArray(item) ? item : [item]);
+): MorphologicalExportItem[] => {
+  const result: MorphologicalExportItem[] = [];
+  for (const item of data) {
+    if (Array.isArray(item)) {
+      for (const nested of item) result.push(nested);
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
+};
 
-const exportField = (item: MorphologicalExportItem, field: string): CsvValue => {
-  if (typeof item === 'string') return field === 'token' ? item : '';
-  if (field in item) return (item as unknown as Record<string, CsvValue>)[field];
-  return '';
+const toMorphologicalRow = (item: MorphologicalExportItem): MorphologicalExportRow => {
+  if (typeof item === 'string') {
+    return { token: item, lemma: '', tag: '', form: '', probability: undefined, space: '' };
+  }
+  if ('token' in item && 'lemma' in item) {
+    return {
+      token: item.token,
+      lemma: item.lemma,
+      tag: item.tag,
+      form: item.form ?? '',
+      probability: item.probability,
+      space: item.space ?? '',
+    };
+  }
+  if ('lemma' in item) {
+    return {
+      token: '',
+      lemma: item.lemma,
+      tag: item.tag,
+      form: item.form ?? '',
+      probability: item.probability,
+      space: item.space ?? '',
+    };
+  }
+  return { token: item.token, lemma: '', tag: '', form: '', probability: undefined, space: item.space ?? '' };
 };
 
 export const exportToCsv = (
@@ -48,30 +87,31 @@ export const downloadFile = (content: string, filename: string, mimeType: string
   anchor.download = filename;
   anchor.style.display = 'none';
   document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
+  try {
+    anchor.click();
+  } finally {
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
 };
 
 export const exportMorphologicalTagsToCsv = (
   data: MorphologicalExportItem[] | MorphologicalExportItem[][],
 ): string => {
-  const allItems = flattenMorphologicalData(data);
+  const allItems = collectMorphologicalData(data);
   const columns = ['token', 'lemma', 'tag', 'form', 'probability', 'space'];
-  const rows = allItems.map((item) => Object.fromEntries(
-    columns.map((column) => [column, exportField(item, column)]),
-  ));
+  const rows = allItems.map(toMorphologicalRow);
   return exportToCsv(rows, columns);
 };
 
 export const exportMorphologicalTagsToTxt = (
   data: MorphologicalExportItem[] | MorphologicalExportItem[][],
 ): string => {
-  const allItems = flattenMorphologicalData(data);
+  const allItems = collectMorphologicalData(data);
   const lines = allItems.map((item) => {
-    return ['token', 'lemma', 'tag', 'form', 'space']
-      .map((field) => exportField(item, field))
-      .filter(Boolean)
+    const row = toMorphologicalRow(item);
+    return [row.token, row.lemma, row.tag, row.form, row.space]
+      .filter((field) => field.length > 0)
       .join('\t');
   });
   return lines.join('\n');

@@ -26,6 +26,13 @@ jobs:
       - run: npm run test -- --run
       - run: npm run build
       - run: npm audit --audit-level=high
+      - name: Upload frontend dist
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: morphodita4/dist
+          retention-days: 7
 
   rust:
     runs-on: ubuntu-latest
@@ -38,8 +45,42 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.97.1
           components: rustfmt, clippy
-      - run: cargo fmt --check
-      - run: cargo check --locked
-      - run: cargo clippy --locked -- -D warnings
-      - run: cargo test --locked
+      - run: mkdir -p rust-logs
+      - name: Check Rust formatting
+        run: |
+          set -o pipefail
+          cargo fmt --all -- --check 2>&1 | tee rust-logs/fmt.log
+      - name: Check Rust dependencies
+        run: |
+          set -o pipefail
+          cargo check --locked 2>&1 | tee rust-logs/check.log
+      - name: Run Rust clippy
+        run: |
+          set -o pipefail
+          cargo clippy --locked --all-targets -- -D warnings 2>&1 | tee rust-logs/clippy.log
+      - name: Run Rust tests
+        run: |
+          set -o pipefail
+          cargo test --locked --all-targets 2>&1 | tee rust-logs/test.log
+      - name: Upload Rust logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-logs
+          path: morphodita4/src-tauri/rust-logs
+          retention-days: 7
+
+  rustsec:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit Rust dependencies
+        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: morphodita4/src-tauri

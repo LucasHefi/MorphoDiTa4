@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MorphoDiTaAPI } from '../services/api';
+import type { ModelCapability, ModelInfo } from '../types/api';
 import { useApiStore } from './useApiStore';
 
 vi.mock('../services/api', () => ({
@@ -8,13 +9,13 @@ vi.mock('../services/api', () => ({
   },
 }));
 
-const response = (name: string) => ({
+const response = (name: string): { models: Record<string, ModelInfo> } => ({
   models: {
     [name]: {
       name,
       language: 'cs',
       description: name,
-      capabilities: ['tag'],
+       capabilities: ['tag' satisfies ModelCapability],
     },
   },
 });

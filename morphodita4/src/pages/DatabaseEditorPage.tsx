@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatabaseService } from '../services/database';
 import { DATABASE_PAGE_SIZE, hasExpectedAffectedRows } from '../components/database/databaseEditorContracts';
 import type { DatabaseId, DatabaseRow } from '../types/database';
 import { DatabaseTable } from '../components/database/DatabaseTable';
-import { Button, Input } from '../components/common';
+import { Button, Input, Select } from '../components/common';
 import { cn } from '../components/common/utils';
 import { RefreshCw, Search, Trash2, X } from 'lucide-react';
 
 type TableType = 'sessions' | 'morphological_data';
+type Feedback = { message: string; kind: 'status' | 'alert' } | null;
 
 export const DatabaseEditorPage: React.FC = () => {
   const { t } = useTranslation();
@@ -17,206 +18,250 @@ export const DatabaseEditorPage: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<Set<DatabaseId>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
-  const [status, setStatus] = useState('');
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteSnapshot, setDeleteSnapshot] = useState<DatabaseId[]>([]);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const deleteTriggerRef = useRef<HTMLButtonElement>(null);
+  const refreshTriggerRef = useRef<HTMLButtonElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogWasOpen = useRef(false);
+  const committedDeleteRef = useRef(false);
+  const requestGenerationRef = useRef(0);
+  const supportsModal = typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototype.showModal === 'function';
+  const [useNativeModal, setUseNativeModal] = useState(supportsModal);
 
   const loadData = useCallback(async () => {
+    const requestGeneration = ++requestGenerationRef.current;
+    const isCurrentRequest = () => requestGeneration === requestGenerationRef.current;
     setIsLoading(true);
-    setStatus(t('common.loading'));
+    setFeedback({ message: t('common.loading'), kind: 'status' });
     try {
       const searchable = tableType === 'sessions'
         ? ['operation', 'model', 'input_text', 'status']
         : ['source_type', 'original_form', 'lemma', 'tag', 'generated_form'];
       const result = activeSearchTerm
-        ? await DatabaseService.searchRecords(
-          tableType,
-          activeSearchTerm,
-          searchable,
-          DATABASE_PAGE_SIZE,
-          page * DATABASE_PAGE_SIZE,
-        )
+        ? await DatabaseService.searchRecords(tableType, activeSearchTerm, searchable, DATABASE_PAGE_SIZE, page * DATABASE_PAGE_SIZE)
         : await DatabaseService.getAllData(tableType, DATABASE_PAGE_SIZE, page * DATABASE_PAGE_SIZE);
-      setData(result);
-      setStatus(`${result.length} záznamů ${activeSearchTerm ? 'nalezeno' : 'načteno'}`);
+      if (isCurrentRequest()) {
+        setData(result);
+        setFeedback({
+          message: t(activeSearchTerm ? 'database.recordsFound' : 'database.recordsLoaded', { count: result.length }),
+          kind: 'status',
+        });
+      }
     } catch (error) {
-      setStatus(`${t('common.error')}: ${String(error)}`);
+      if (isCurrentRequest()) {
+        setFeedback({ message: t('database.errorStatus', { message: String(error) }), kind: 'alert' });
+      }
+      throw error;
     } finally {
-      setIsLoading(false);
+      if (isCurrentRequest()) setIsLoading(false);
     }
   }, [activeSearchTerm, tableType, t, page]);
 
   useEffect(() => {
-    loadData();
+    void loadData().catch(() => undefined);
     setSelectedIds(new Set());
   }, [tableType, loadData]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'f') {
-        e.preventDefault();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (deleteDialogOpen) return;
+      if (event.ctrlKey && event.key === 'f') {
+        event.preventDefault();
         searchInputRef.current?.focus();
       }
-      if (e.key === 'F5') {
-        e.preventDefault();
-        loadData();
+      if (event.key === 'F5') {
+        event.preventDefault();
+        void loadData().catch(() => undefined);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loadData]);
+  }, [deleteDialogOpen, loadData]);
+
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (deleteDialogOpen) {
+      if (useNativeModal && !dialog.open) {
+        try {
+          dialog.showModal();
+          if (!dialog.open) {
+            setUseNativeModal(false);
+            return;
+          }
+        } catch {
+          setUseNativeModal(false);
+          return;
+        }
+      } else if (!useNativeModal) {
+        dialog.setAttribute('open', '');
+      }
+      if (!dialog.open) dialog.setAttribute('open', '');
+      cancelButtonRef.current?.focus();
+      dialogWasOpen.current = true;
+    } else {
+      if (dialog.open && typeof dialog.close === 'function') dialog.close();
+      if (dialogWasOpen.current) {
+        if (!committedDeleteRef.current || !isLoading) {
+          (committedDeleteRef.current ? refreshTriggerRef.current : deleteTriggerRef.current)?.focus();
+          committedDeleteRef.current = false;
+          dialogWasOpen.current = false;
+        }
+      }
+    }
+  }, [deleteDialogOpen, isLoading, useNativeModal]);
 
   const handleSearch = useCallback(() => {
     setPage(0);
     setActiveSearchTerm(searchTerm.trim());
   }, [searchTerm]);
 
-  const handleClearSearch = useCallback(async () => {
+  const handleClearSearch = useCallback(() => {
     setSearchTerm('');
     setActiveSearchTerm('');
     setPage(0);
   }, []);
 
+  const openDeleteDialog = useCallback(() => {
+    if (selectedIds.size === 0 || isLoading) return;
+    committedDeleteRef.current = false;
+    setDeleteSnapshot(Array.from(selectedIds));
+    setDeleteError(null);
+    setDeleteDialogOpen(true);
+  }, [isLoading, selectedIds]);
+
+  const closeDeleteDialog = useCallback((announce = true) => {
+    if (deletePending) return;
+    setDeleteDialogOpen(false);
+    setDeleteSnapshot([]);
+    setDeleteError(null);
+    if (announce) setFeedback({ message: t('database.deleteCancelled'), kind: 'status' });
+  }, [deletePending, t]);
+
   const handleDelete = useCallback(async () => {
-    if (selectedIds.size === 0) return;
-
-    if (!confirm(`${t('database.delete')} ${selectedIds.size} záznamů?`)) return;
-
-    setIsLoading(true);
-    setStatus(t('common.loading'));
+    if (deleteSnapshot.length === 0 || deletePending) return;
+    const ids = [...deleteSnapshot];
+    setDeletePending(true);
+    setDeleteError(null);
+    setFeedback({ message: t('database.deleteDeleting', { count: ids.length }), kind: 'status' });
     try {
-      const ids = Array.from(selectedIds);
       const affectedRows = await DatabaseService.deleteRecords(tableType, ids);
-      if (!hasExpectedAffectedRows(affectedRows, ids.length)) {
-        throw new Error(`Změněno bylo ${affectedRows} z ${ids.length} záznamů`);
-      }
-      await loadData();
+      committedDeleteRef.current = true;
       setSelectedIds(new Set());
-      setStatus(`${t('common.success')}: ${t('database.delete')} ${ids.length} záznamů`);
+      setDeleteDialogOpen(false);
+      setDeleteSnapshot([]);
+      setDeleteError(null);
+      setDeletePending(false);
+      if (!hasExpectedAffectedRows(affectedRows, ids.length)) {
+        setFeedback({
+          message: t('database.deletePartial', { actual: affectedRows, expected: ids.length }),
+          kind: 'alert',
+        });
+        return;
+      }
+      try {
+        await loadData();
+        setFeedback({ message: t('database.deleteSuccess', { count: ids.length }), kind: 'status' });
+      } catch (error) {
+        setFeedback({
+          message: t('database.errorStatus', {
+            message: t('database.deleteReloadFailed', { count: ids.length, message: String(error) }),
+          }),
+          kind: 'alert',
+        });
+      }
     } catch (error) {
-      setStatus(`${t('common.error')}: ${String(error)}`);
-    } finally {
-      setIsLoading(false);
+      const message = t('database.deleteError', { message: String(error) });
+      setDeleteError(message);
+      setFeedback({ message, kind: 'alert' });
+      setDeletePending(false);
     }
-  }, [selectedIds, tableType, t, loadData]);
+  }, [deletePending, deleteSnapshot, loadData, t, tableType]);
+
+  const handleDialogKeyDown = useCallback((event: React.KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeDeleteDialog();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled])'));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }, [closeDeleteDialog]);
+
+  const handleTableStatus = useCallback((message: string) => {
+    const errorPrefix = t('database.errorStatus', { message: '' }).trim();
+    setFeedback({ message, kind: message.startsWith(errorPrefix) ? 'alert' : 'status' });
+  }, [t]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col">
+      <main className="flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
         <h1 className="text-3xl font-bold mb-6 text-foreground">{t('database.title')}</h1>
-
         <div className="space-y-4">
           <div className="glass-panel rounded-lg p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                <select
-                  value={tableType}
-                  onChange={(e) => {
-                    setTableType(e.target.value as TableType);
-                    setActiveSearchTerm('');
-                    setSearchTerm('');
-                    setPage(0);
-                  }}
-                  className="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                >
-                  <option value="sessions">{t('database.table.sessions')}</option>
-                  <option value="morphological_data">{t('database.table.morphological_data')}</option>
-                </select>
-
-                <div className="flex gap-2 items-center">
+            <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+              <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center min-w-0">
+                <Select aria-label={t('database.title')} value={tableType} onValueChange={(value) => {
+                  setTableType(value as TableType);
+                  setActiveSearchTerm('');
+                  setSearchTerm('');
+                  setPage(0);
+                }} options={[{ value: 'sessions', label: t('database.table.sessions') }, { value: 'morphological_data', label: t('database.table.morphological_data') }]} />
+                <div className="flex flex-wrap gap-2 items-center">
                   <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      ref={searchInputRef}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder={t('database.searchPlaceholder')}
-                      className="pl-8 w-64"
-                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    />
+                    <Search aria-hidden="true" className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input ref={searchInputRef} aria-label={t('database.searchLabel')} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder={t('database.searchPlaceholder')} className="pl-8 w-full min-w-0 sm:w-64" onKeyDown={(event) => event.key === 'Enter' && handleSearch()} />
                   </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleSearch}
-                    disabled={isLoading}
-                  >
-                    {t('database.search')}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClearSearch}
-                    disabled={isLoading || !searchTerm}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  <Button variant="secondary" size="sm" onClick={handleSearch} disabled={isLoading}>{t('database.search')}</Button>
+                  <Button variant="ghost" size="sm" aria-label={t('common.cancel')} onClick={handleClearSearch} disabled={isLoading || !searchTerm}><X aria-hidden="true" className="w-4 h-4" /></Button>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={loadData}
-                  disabled={isLoading}
-                >
-                  <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                  <span className="ml-1">{t('database.refresh')}</span>
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={selectedIds.size === 0 || isLoading}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="ml-1">{t('database.delete')}</span>
-                </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button ref={refreshTriggerRef} variant="secondary" size="sm" onClick={() => void loadData().catch(() => undefined)} disabled={isLoading}><RefreshCw aria-hidden="true" className={cn('w-4 h-4', isLoading && 'motion-safe:animate-spin')} /><span className="ml-1">{t('database.refresh')}</span></Button>
+                <Button ref={deleteTriggerRef} variant="danger" size="sm" onClick={openDeleteDialog} disabled={selectedIds.size === 0 || isLoading}><Trash2 aria-hidden="true" className="w-4 h-4" /><span className="ml-1">{t('database.delete')}</span></Button>
               </div>
             </div>
           </div>
-
           <div className="glass-panel rounded-lg p-4">
-            <DatabaseTable
-              tableType={tableType}
-              data={data}
-              selectedIds={selectedIds}
-              onSelectChange={setSelectedIds}
-              onStatusChange={setStatus}
-              onRefresh={loadData}
-            />
+            <DatabaseTable tableType={tableType} data={data} selectedIds={selectedIds} onSelectChange={setSelectedIds} onStatusChange={handleTableStatus} onRefresh={loadData} />
           </div>
-
           <div className="flex items-center justify-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-                disabled={page === 0 || isLoading}
-              >
-                {t('database.previous')}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {t('database.page')} {page + 1}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setPage((current) => current + 1)}
-                disabled={isLoading || data.length < DATABASE_PAGE_SIZE}
-              >
-                {t('database.next')}
-              </Button>
-            </div>
-
-          <div className="text-sm text-muted-foreground px-2">
-            {status}
+            <Button variant="ghost" size="sm" onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0 || isLoading}>{t('database.previous')}</Button>
+            <span className="text-sm text-muted-foreground">{t('database.page')} {page + 1}</span>
+            <Button variant="ghost" size="sm" onClick={() => setPage((current) => current + 1)} disabled={isLoading || data.length < DATABASE_PAGE_SIZE}>{t('database.next')}</Button>
           </div>
+          {feedback?.kind === 'alert' && <div role="alert" aria-live="assertive" className="text-sm text-muted-foreground px-2">{feedback.message}</div>}
+          {feedback?.kind === 'status' && <div role="status" aria-live="polite" className="text-sm text-muted-foreground px-2">{feedback.message}</div>}
         </div>
       </main>
+      <dialog ref={dialogRef} open={!useNativeModal && deleteDialogOpen} aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" onCancel={(event) => { event.preventDefault(); closeDeleteDialog(); }} onKeyDown={handleDialogKeyDown} className="rounded-lg border border-border bg-background p-6 text-foreground shadow-xl backdrop:bg-black/50">
+        <h2 id="delete-dialog-title" className="text-xl font-semibold">{t('database.delete')}</h2>
+        <p id="delete-dialog-description" className="mt-3">{t('database.deletePrompt', { count: deleteSnapshot.length })}</p>
+        {deleteError && <p role="alert" aria-live="assertive" className="mt-3 text-sm text-destructive">{deleteError}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button ref={cancelButtonRef} type="button" variant="secondary" onClick={() => closeDeleteDialog()} disabled={deletePending}>{t('common.cancel')}</Button>
+          <Button type="button" variant="danger" onClick={() => void handleDelete()} disabled={deletePending}>{deletePending ? t('database.deleteDeleting', { count: deleteSnapshot.length }) : t('common.delete')}</Button>
+        </div>
+      </dialog>
     </div>
   );
 };

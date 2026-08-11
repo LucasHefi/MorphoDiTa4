@@ -17,6 +17,7 @@
     "fs:allow-read-dir",
     "fs:allow-read-file",
     "fs:allow-read-text-file",
+    "fs:allow-open",
     "fs:allow-write-file",
     "fs:allow-mkdir",
     "fs:allow-rename",
@@ -32,7 +33,7 @@
           "args": [
             { "validator": "^876[5-9]$" },
             "czech-250909",
-            { "validator": ".+" },
+            { "validator": "^(?:/(?:[A-Za-z0-9 _-][A-Za-z0-9._ -]*/)*models/czech-250909/czech\\.tagger|[A-Za-z]:\\\\(?:[A-Za-z0-9 _-][A-Za-z0-9._ -]*\\\\)*models\\\\czech-250909\\\\czech\\.tagger)$" },
             "https://hdl.handle.net/11234/1-5985"
           ]
         }

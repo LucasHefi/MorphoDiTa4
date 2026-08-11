@@ -54,18 +54,22 @@ export const AnalyzerPage: React.FC = () => {
   };
 
   const handleProcess = async () => {
+    const operationLabel = t(`analyzer.operations.${operation}`);
     if (!selectedModel) {
-      addLog('ERROR', 'Vyberte model pro analýzu.');
+      addLog('ERROR', t('analyzer.modelRequired', { operation: operationLabel }));
       return;
     }
     if (!inputText.trim()) {
-      addLog('WARNING', 'Zadejte text k analýze.');
+      addLog('WARNING', t('analyzer.inputRequired', { operation: operationLabel }));
       return;
     }
     try {
       assertModelSupportsOperation(models, selectedModel, operation);
-    } catch (error) {
-      addLog('ERROR', error instanceof Error ? error.message : String(error));
+    } catch {
+      addLog('ERROR', t('analyzer.operationUnavailable', {
+        model: selectedModel,
+        operation: operationLabel,
+      }));
       return;
     }
 
@@ -73,7 +77,7 @@ export const AnalyzerPage: React.FC = () => {
     requestController.current = controller;
     setIsProcessing(true);
     setResult(null);
-    addLog('INFO', `Zahajuji operaci: ${operation}`);
+    addLog('INFO', t('analyzer.operationStarted', { operation: operationLabel }));
 
     try {
       const batchSize = getBatchSize();
@@ -132,12 +136,14 @@ export const AnalyzerPage: React.FC = () => {
       }
 
       setResult(processedResult);
-      addLog('INFO', 'Operace úspěšně dokončena.');
+      addLog('INFO', t('analyzer.operationSuccess'));
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         addLog('WARNING', t('common.cancel'));
       } else {
-        addLog('ERROR', `Chyba: ${error instanceof Error ? error.message : String(error)}`);
+        addLog('ERROR', t('analyzer.operationError', {
+          message: error instanceof Error ? error.message : String(error),
+        }));
       }
     } finally {
       requestController.current = null;
@@ -172,7 +178,7 @@ export const AnalyzerPage: React.FC = () => {
         downloadFile(exportMorphologicalTagsToTxt(result), filename, 'text/plain');
         break;
     }
-    addLog('INFO', `Export do ${format.toUpperCase()} dokončen: ${filename}`);
+    addLog('INFO', t('analyzer.exportSuccess', { format: format.toUpperCase(), filename }));
   };
 
   const handleSave = async () => {
@@ -194,11 +200,11 @@ export const AnalyzerPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container max-w-7xl py-6 sm:py-8 px-4 sm:px-8 flex flex-col lg:flex-row gap-6 animate-in fade-in duration-300">
-        <div className="flex flex-col gap-4 w-full lg:w-[45%] xl:w-[35%] lg:max-h-[calc(100vh-8rem)] lg:sticky lg:top-20">
+    <div className="flex flex-col">
+      <main className="flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+        <div className="min-w-0 flex flex-col gap-4">
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h2>
+             <h1 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h1>
 
             <ModelSelector disabled={isProcessing} />
             <OperationSelector selectedOperation={operation} onOperationChange={setOperation} disabled={isProcessing} />
@@ -237,12 +243,12 @@ export const AnalyzerPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-[250px] lg:flex-1">
+          <div className="min-h-[clamp(10rem,25vh,18rem)] max-h-[50vh] min-w-0">
             <LogPanel logs={logs} onClear={() => setLogs([])} />
           </div>
         </div>
 
-        <div className="flex flex-col w-full lg:flex-1 min-h-[400px]">
+        <div className="flex min-w-0 flex-col w-full min-h-[clamp(18rem,60vh,42rem)]">
           {result ? (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col h-full">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
@@ -259,8 +265,8 @@ export const AnalyzerPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-card border border-border border-dashed rounded-xl p-6 shadow-sm flex flex-col items-center justify-center h-full text-muted-foreground min-h-[400px]">
-              <svg className="w-12 h-12 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-card border border-border border-dashed rounded-xl p-6 shadow-sm flex flex-col items-center justify-center h-full text-muted-foreground min-h-[clamp(18rem,60vh,42rem)]">
+               <svg aria-hidden="true" className="w-12 h-12 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
               </svg>
               <p className="text-center">{t('analyzer.no_result_placeholder')}</p>

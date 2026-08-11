@@ -6,6 +6,7 @@ import type {
   MorphologicalData,
   Session,
 } from '../types/database';
+import { MAX_WIZARD_INPUT_BYTES, MAX_WIZARD_INPUT_WORDS } from './wizardInput';
 
 type PaginationArgs = { limit?: number; offset?: number };
 type SessionWritePayload = {
@@ -52,7 +53,7 @@ export type DatabaseCommandContract = {
   insert_morphological_data: { args: { data: DatabasePayload[] }; result: number };
   get_morphological_data: { args: { sessionId: number }; result: MorphologicalData[] };
   search_lemmas: { args: { query: string }; result: MorphologicalData[] };
-  word_form_exists: { args: { word: string }; result: boolean };
+  word_forms_exist: { args: { words: string[] }; result: string[] };
   get_all_morphological_data: { args: PaginationArgs; result: MorphologicalData[] };
   delete_sessions: { args: { ids: number[] }; result: number };
   delete_morphological_data: { args: { ids: number[] }; result: number };
@@ -65,6 +66,8 @@ export type DatabaseCommandContract = {
   restore_database: { args: { backupPath: string }; result: RestoreResult };
 };
 
+export const MAX_DATABASE_INPUT_BYTES = MAX_WIZARD_INPUT_BYTES;
+
 export const DATABASE_COMMANDS = [
   'create_session',
   'save_wizard_results',
@@ -75,7 +78,7 @@ export const DATABASE_COMMANDS = [
   'insert_morphological_data',
   'get_morphological_data',
   'search_lemmas',
-  'word_form_exists',
+  'word_forms_exist',
   'get_all_morphological_data',
   'delete_sessions',
   'delete_morphological_data',
@@ -266,8 +269,21 @@ export const DatabaseService = {
     return safeInvoke('search_lemmas', { query });
   },
 
-  async wordFormExists(word: string): Promise<boolean> {
-    return safeInvoke('word_form_exists', { word });
+  async wordFormsExist(words: string[]): Promise<string[]> {
+    if (words.length === 0) return [];
+    if (words.length > MAX_WIZARD_INPUT_WORDS) {
+      throw new ValidationError('word_forms_exist', `word lookup is limited to ${MAX_WIZARD_INPUT_WORDS} words`);
+    }
+    const inputBytes = words.reduce((total, word) => total + new TextEncoder().encode(word).byteLength, 0);
+    if (inputBytes > MAX_DATABASE_INPUT_BYTES) {
+      throw new ValidationError('word_forms_exist', `word lookup input is limited to ${MAX_DATABASE_INPUT_BYTES} bytes`);
+    }
+
+    const matched = await safeInvoke('word_forms_exist', { words });
+    if (!Array.isArray(matched) || matched.some((word) => typeof word !== 'string')) {
+      throw new ValidationError('word_forms_exist', 'Tauri returned an invalid word lookup result');
+    }
+    return matched;
   },
 
   async getAllData(

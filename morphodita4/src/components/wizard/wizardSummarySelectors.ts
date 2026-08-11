@@ -1,5 +1,5 @@
 import type { GeneratedForm, TaggedToken } from '../../types/api';
-import { cleanLemma } from '../../services/filters';
+import { canonicalKey, cleanLemma } from '../../services/filters';
 
 export interface WizardSourceSelection {
   taggedTokens: TaggedToken[];
@@ -15,8 +15,19 @@ export function selectWizardSources(
 ): WizardSourceSelection {
   if (!showOnlyNew) return { taggedTokens, forms };
 
+  const newWordKeys = new Set([...newWordsSet].map(canonicalKey));
+  const newLemmaKeys = new Set(
+    [...newLemmasSet]
+      .map(cleanLemma)
+      .filter((lemma) => lemma.length > 0)
+      .map(canonicalKey),
+  );
+
   return {
-    taggedTokens: taggedTokens.filter((token) => newWordsSet.has(token.token.toLowerCase())),
-    forms: forms.filter((form) => newLemmasSet.has(cleanLemma(form.lemma).toLowerCase())),
+    taggedTokens: taggedTokens.filter((token) => newWordKeys.has(canonicalKey(token.token))),
+    forms: forms.filter((form) => {
+      const lemma = cleanLemma(form.lemma);
+      return lemma.length > 0 && newLemmaKeys.has(canonicalKey(lemma));
+    }),
   };
 }

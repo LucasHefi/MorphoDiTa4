@@ -4,6 +4,8 @@
 
 Aplikace využívá SQLite databázi pro ukládání výsledků morfologického zpracování. Schema bylo navrženo s ohledem na normalizaci, výkon a kompatibilitu s původní Python aplikací.
 
+Aktuální verze schématu je `4` (`PRAGMA user_version`). Schéma se inicializuje a migruje v Rustu v `morphodita4/src-tauri/src/db.rs`.
+
 ---
 
 ## Schema Definice
@@ -51,9 +53,12 @@ CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status);
 CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at);
 CREATE INDEX IF NOT EXISTS idx_sessions_model ON sessions(model);
 CREATE INDEX IF NOT EXISTS idx_morphological_data_session_id ON morphological_data(session_id);
+DROP INDEX IF EXISTS idx_morphological_data_original_form;
+CREATE INDEX idx_morphological_data_original_form ON morphological_data(original_form COLLATE MORPHODITA_UNICODE);
 CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma ON morphological_data(lemma);
 CREATE INDEX IF NOT EXISTS idx_morphological_data_source_type ON morphological_data(source_type);
-CREATE INDEX IF NOT EXISTS idx_morphological_data_generated_form ON morphological_data(generated_form);
+DROP INDEX IF EXISTS idx_morphological_data_generated_form;
+CREATE INDEX idx_morphological_data_generated_form ON morphological_data(generated_form COLLATE MORPHODITA_UNICODE);
 CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma_tag ON morphological_data(lemma, tag);
 ```
 
@@ -549,66 +554,24 @@ async function getTopTagsForLemma(lemma: string, limit: number = 10): Promise<Ar
 
 ---
 
-## Migrace Schema
+## Migrace Schématu
 
-### Verze 1.0 (Současné schema)
+`initialize_schema` v `src-tauri/src/db.rs` nejprve zapne a ověří cizí klíče a načte
+`PRAGMA user_version`. Verze vyšší než aktuální `4` se odmítají.
 
-```sql
--- Základní schema (viz výše CREATE TABLE statements)
--- První verze s sessions a morphological_data tabulkami
-```
+- Verze `0` vytvoří nové tabulky a zachovává kompatibilitu s neoznačenými staršími databázemi.
+- Verze `0`, `1` a `2` se v jedné transakci kanonikalizují na verzi `4`; obě
+  tabulky se znovu vytvoří se správnými kontrolami a FK `ON DELETE CASCADE`.
+  Všechny sloupce, řádky a ID se kopírují beze ztráty.
+- Verze `3` v jedné atomické migraci nahradí pouze indexy
+  `original_form` a `generated_form`: SQLite `NOCASE` se nahradí kolací
+  `MORPHODITA_UNICODE`. Klíče používají NFKC, lowercase, převod final sigma,
+  `ß` na `ss` a NFC; diakritika se neodstraňuje a dotless-I zůstává odlišné.
+  Řádky a ID se nemění. Zálohy a rollback kandidáti musí projít stejnou
+  kontrolou před publikováním a validace zálohy ji implicitně nemigruje.
 
-### Budoucí Migrace
-
-```sql
--- Příklad migrace na verzi 1.1 (offline cache)
--- ALTER TABLE morphological_data ADD COLUMN cached_at TIMESTAMP;
--- ALTER TABLE morphological_data ADD COLUMN api_hash TEXT;
-
--- Příklad migrace na verzi 1.2 (vícejazyčnost)
--- CREATE TABLE IF NOT EXISTS language_models (
---     id INTEGER PRIMARY KEY,
---     language TEXT NOT NULL,
---     model_name TEXT NOT NULL,
---     is_active INTEGER DEFAULT 1
--- );
-```
-
-### Aplikace Migrací
-
-```typescript
-interface Migration {
-  version: number;
-  name: string;
-  up: (db: Database) => void;
-  down?: (db: Database) => void;
-}
-
-const migrations: Migration[] = [
-  {
-    version: 1,
-    name: 'Initial schema',
-    up: (db) => {
-      db.exec(CREATE_TABLES_SQL);  // Viz výše
-    }
-  }
-  // Přidat další migrace podle potřeby
-];
-
-async function applyMigrations(): Promise<void> {
-  const currentVersion = await db.get(
-    'SELECT value FROM pragma_user_version'
-  );
-  
-  for (const migration of migrations) {
-    if (migration.version > (currentVersion?.value || 0)) {
-      console.log(`Applying migration ${migration.version}: ${migration.name}`);
-      migration.up(db);
-      await db.run(`PRAGMA user_version = ${migration.version}`);
-    }
-  }
-}
-```
+Po úspěšné inicializaci se nastaví `PRAGMA user_version = 4`. Budoucí verze se
+odmítají fail-closed.
 
 ---
 
@@ -660,7 +623,7 @@ async function checkIntegrity(): Promise<boolean> {
 | Původní | Nové | Důvod |
 |---------|------|-------|
 | Oddělené tabulky words/analyses/forms | Sjednocená morphological_data | Jednodušší správa |
-| Python sqlite3 | Tauri SQLx/Dexie.js | Multi-platform |
+| Python sqlite3 | Rust rusqlite | Multi-platform |
 | File-based config | Built-in config | Tauri standard |
 
 ### Migrace z Původní DB

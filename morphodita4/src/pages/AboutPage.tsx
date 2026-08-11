@@ -10,11 +10,11 @@ export const AboutPage: React.FC = () => {
   const version = '0.1.0';
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container max-w-2xl py-12 px-4 sm:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col">
+      <main className="flex-1 container max-w-2xl mx-auto py-8 sm:py-12 px-4 sm:px-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
         <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-secondary">
-            <ArrowLeft className="w-5 h-5" />
+           <button type="button" aria-label={t('common.back')} onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-secondary">
+             <ArrowLeft aria-hidden="true" className="w-5 h-5" />
           </button>
           <h1 className="text-3xl font-bold text-foreground">{t('about.title')}</h1>
         </div>
@@ -22,7 +22,7 @@ export const AboutPage: React.FC = () => {
         <Card glass>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-primary" />
+               <Info aria-hidden="true" className="w-5 h-5 text-primary" />
               <CardTitle>{t('about.name')}</CardTitle>
             </div>
           </CardHeader>

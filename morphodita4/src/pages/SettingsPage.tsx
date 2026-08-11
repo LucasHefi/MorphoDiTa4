@@ -39,9 +39,9 @@ export const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container max-w-2xl py-12 px-4 sm:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="text-3xl font-bold mb-8 text-foreground">{t('settings.title')}</h1>
+    <div className="flex flex-col">
+      <main className="flex-1 container max-w-2xl mx-auto py-8 sm:py-12 px-4 sm:px-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+        <h1 className="text-3xl font-bold mb-6 sm:mb-8 text-foreground">{t('settings.title')}</h1>
 
         {settingsRecoveryNotice && (
           <div role="alert" className="mb-6 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm">
@@ -60,7 +60,7 @@ export const SettingsPage: React.FC = () => {
           <Card glass>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Monitor className="w-5 h-5 text-primary" />
+                 <Monitor aria-hidden="true" className="w-5 h-5 text-primary" />
                 <CardTitle>{t('settings.theme')}</CardTitle>
               </div>
             </CardHeader>
@@ -72,13 +72,13 @@ export const SettingsPage: React.FC = () => {
                     type="button"
                     aria-pressed={theme === option.value}
                     onClick={() => setTheme(option.value)}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
+                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border motion-safe:transition-colors ${
                       theme === option.value
                         ? 'bg-primary text-primary-foreground border-primary shadow-md'
                         : 'bg-secondary/50 text-foreground border-border hover:border-primary/50'
                     }`}
                   >
-                    {option.icon}
+                     <span aria-hidden="true">{option.icon}</span>
                     <span className="font-medium">{option.label}</span>
                   </button>
                 ))}
@@ -89,7 +89,7 @@ export const SettingsPage: React.FC = () => {
           <Card glass>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5 text-primary" />
+                 <Globe aria-hidden="true" className="w-5 h-5 text-primary" />
                 <CardTitle>{t('settings.language')}</CardTitle>
               </div>
             </CardHeader>
@@ -101,7 +101,7 @@ export const SettingsPage: React.FC = () => {
                     type="button"
                     aria-pressed={language === option.value}
                     onClick={() => setLanguage(option.value)}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all ${
+                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border motion-safe:transition-colors ${
                       language === option.value
                         ? 'bg-primary text-primary-foreground border-primary shadow-md'
                         : 'bg-secondary/50 text-foreground border-border hover:border-primary/50'
@@ -124,7 +124,8 @@ export const SettingsPage: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input
+                   <input
+                     id="settings-offline-mode"
                     type="checkbox"
                     checked={useOfflineMode}
                     onChange={(e) => {
@@ -138,7 +139,8 @@ export const SettingsPage: React.FC = () => {
                 <p className="text-sm text-muted-foreground -mt-2">{t('settings.offlineModeDesc')}</p>
 
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input
+                   <input
+                     id="settings-offline-fallback"
                     type="checkbox"
                     checked={offlineFallbackEnabled}
                     onChange={(e) => {
@@ -152,8 +154,9 @@ export const SettingsPage: React.FC = () => {
                 <p className="text-sm text-muted-foreground -mt-2">{t('settings.offlineFallbackDesc')}</p>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">{t('settings.batchSize')}</label>
-                  <input
+                   <label htmlFor="settings-batch-size" className="block text-sm font-medium mb-1">{t('settings.batchSize')}</label>
+                   <input
+                     id="settings-batch-size"
                     type="number"
                     min={10}
                     max={500}
@@ -172,7 +175,7 @@ export const SettingsPage: React.FC = () => {
 <Card glass>
              <CardHeader>
                <div className="flex items-center gap-2">
-                 <Info className="w-5 h-5 text-primary" />
+                 <Info aria-hidden="true" className="w-5 h-5 text-primary" />
                  <CardTitle>{t('settings.aboutLink')}</CardTitle>
                </div>
              </CardHeader>
@@ -180,7 +183,7 @@ export const SettingsPage: React.FC = () => {
                <p className="text-sm text-muted-foreground mb-3">{t('about.name')} — {t('about.description')}</p>
                <button
                  onClick={() => navigate('/about')}
-                 className="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
+                  className="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground motion-safe:transition-colors"
                >
                  {t('settings.aboutLink')}
                </button>
@@ -190,7 +193,7 @@ export const SettingsPage: React.FC = () => {
           <Card glass>
              <CardHeader>
                <div className="flex items-center gap-2">
-                 <Info className="w-5 h-5 text-primary" />
+                  <Info aria-hidden="true" className="w-5 h-5 text-primary" />
                  <CardTitle>{t('database.title')}</CardTitle>
                </div>
              </CardHeader>
@@ -198,7 +201,7 @@ export const SettingsPage: React.FC = () => {
                <p className="text-sm text-muted-foreground mb-3">{t('database.description')}</p>
                <button
                  onClick={() => navigate('/database')}
-                 className="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
+                  className="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground motion-safe:transition-colors"
                >
                  {t('settings.databaseEditor')}
                </button>

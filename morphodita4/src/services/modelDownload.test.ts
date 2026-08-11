@@ -28,6 +28,17 @@ describe('model download contract', () => {
     expect(() => parseModelCatalog({ schemaVersion: 1, models: [{}] })).toThrow(ModelDownloadError);
   });
 
+  it.each([
+    ['invalid semantic version', { version: '1.0' }],
+    ['invalid hash', { artifactSha256: 'not-a-hash' }],
+    ['duplicate capabilities', { capabilities: ['tag', 'tag'] }],
+    ['empty capabilities', { capabilities: [] }],
+    ['HTTP provenance', { sourceUrl: 'http://example.test/source' }],
+  ])('rejects catalog entries with %s', (_name, override) => {
+    const base = MODEL_CATALOG.models[0];
+    expect(() => parseModelCatalog({ schemaVersion: 1, models: [{ ...base, ...override }] })).toThrow(ModelDownloadError);
+  });
+
   it('does not invoke a download when consent is absent', async () => {
     await expect(downloadModel('czech-250909', false)).rejects.toThrow('explicit license consent');
     expect(mocks.invoke).not.toHaveBeenCalled();

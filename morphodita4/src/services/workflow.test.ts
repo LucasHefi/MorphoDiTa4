@@ -67,14 +67,33 @@ describe('WorkflowService.saveWizardResults', () => {
     ).rejects.toBe(failure);
   });
 
-  it('does not report Wizard persistence success when refreshing activity fails', async () => {
+  it('returns committed Wizard persistence success when refreshing activity fails', async () => {
     const refreshFailure = new Error('activity refresh failed');
     databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '7', savedCount: 2 });
     dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
 
     await expect(
       WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
-    ).rejects.toBe(refreshFailure);
+    ).resolves.toBe(2);
+    expect(databaseMock.saveWizardResults).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects an incomplete transactional response as a failed save', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '7', savedCount: 1 });
+
+    await expect(
+      WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
+    ).rejects.toThrow('saved 1 of 2 rows');
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
+  });
+
+  it('rejects a transactional response without a valid session id', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '', savedCount: 2 });
+
+    await expect(
+      WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'czech-model', 'psa'),
+    ).rejects.toThrow('session id');
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
   });
 });
 
@@ -98,40 +117,58 @@ describe('WorkflowService.saveAnalyzerResult', () => {
     expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
   });
 
-  it('persists tokenize as a completed session without inventing morphology rows', async () => {
-    databaseMock.createSession.mockResolvedValue({ id: '9' });
+  it('persists tokenize atomically with its count and no morphology rows', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '9', savedCount: 0 });
 
     await expect(
-      WorkflowService.saveAnalyzerResult('tokenize', [[{ token: 'psa', space: '' }]], 'czech-model', 'psa'),
-    ).resolves.toBe(1);
+      WorkflowService.saveAnalyzerResult('tokenize', [[{ token: 'psa', space: '' }], [{ token: 'pes', space: '' }]], 'czech-model', 'psa'),
+    ).resolves.toBe(2);
 
-    expect(databaseMock.createSession).toHaveBeenCalledWith(expect.objectContaining({
-      operation: 'tokenize',
-      result_count: 1,
-      status: 'pending',
-    }));
-    expect(databaseMock.updateSessionStatus).toHaveBeenCalledWith('9', 'completed', 1);
-    expect(databaseMock.saveWizardResults).not.toHaveBeenCalled();
+    expect(databaseMock.saveWizardResults).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'tokenize', result_count: 2, status: 'pending' }),
+      [],
+    );
+    expect(databaseMock.createSession).not.toHaveBeenCalled();
+    expect(databaseMock.updateSessionStatus).not.toHaveBeenCalled();
     expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
   });
 
-  it('does not report tokenize persistence success when refreshing activity fails', async () => {
-    const refreshFailure = new Error('activity refresh failed');
-    databaseMock.createSession.mockResolvedValue({ id: '9' });
-    dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
+  it('rejects tokenize when the transactional response has the wrong saved count', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '9', savedCount: 1 });
 
     await expect(
       WorkflowService.saveAnalyzerResult('tokenize', [[{ token: 'psa', space: '' }]], 'czech-model', 'psa'),
-    ).rejects.toBe(refreshFailure);
+    ).rejects.toThrow('saved 1 of 0 rows');
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
   });
 
-  it('does not report Analyzer persistence success when refreshing activity fails', async () => {
+  it('rejects an analyzer response without a valid session id', async () => {
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '', savedCount: 1 });
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tag', [[{ token: 'psa', lemma: 'pes', tag: 'Ncms1' }]], 'czech-model', 'psa'),
+    ).rejects.toThrow('session id');
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
+  });
+
+  it('does not refresh activity when analyzer persistence fails', async () => {
+    const failure = new Error('transaction rolled back');
+    databaseMock.saveWizardResults.mockRejectedValue(failure);
+
+    await expect(
+      WorkflowService.saveAnalyzerResult('tag', [[{ token: 'psa', lemma: 'pes', tag: 'Ncms1' }]], 'czech-model', 'psa'),
+    ).rejects.toBe(failure);
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
+  });
+
+  it('returns committed Analyzer persistence success when refreshing activity fails', async () => {
     const refreshFailure = new Error('activity refresh failed');
     databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '8', savedCount: 1 });
     dbStoreMock.loadSessions.mockRejectedValue(refreshFailure);
 
     await expect(
       WorkflowService.saveAnalyzerResult('tag', [[{ token: 'psa', lemma: 'pes', tag: 'Ncms1' }]], 'czech-model', 'psa'),
-    ).rejects.toBe(refreshFailure);
+    ).resolves.toBe(1);
+    expect(databaseMock.saveWizardResults).toHaveBeenCalledTimes(1);
   });
 });

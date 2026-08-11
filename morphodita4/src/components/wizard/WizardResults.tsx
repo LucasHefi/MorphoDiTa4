@@ -13,9 +13,9 @@ export const WizardResults: React.FC = () => {
 
   if (!processingResult) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center animate-in fade-in">
-        <p className="text-muted-foreground mb-4">Nejsou k dispozici žádné výsledky.</p>
-        <Button onClick={() => setStep(1)}>Zpět na zadání</Button>
+        <div className="flex flex-col items-center justify-center p-8 text-center motion-safe:animate-in motion-safe:fade-in">
+         <p className="text-muted-foreground mb-4">{t('analyzer.no_result_placeholder')}</p>
+         <Button onClick={() => setStep(1)}>{t('wizard.back')}</Button>
       </div>
     );
   }
@@ -23,14 +23,15 @@ export const WizardResults: React.FC = () => {
   const { forms, uniqueLemmas, taggedTokens } = processingResult;
 
   const renderLemmasTable = () => (
-    <div className="overflow-x-auto border border-border rounded-md mt-4 max-h-[400px] overflow-y-auto">
-      <table className="w-full text-sm text-left">
+    <div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
+       <table aria-label={t('wizard.results.lemmasTable')} className="min-w-[34rem] w-full text-sm text-left">
+         <caption className="sr-only">{t('wizard.results.lemmasTable')}</caption>
         <thead className="text-xs uppercase bg-secondary text-muted-foreground sticky top-0">
           <tr>
-            <th className="px-4 py-3">#</th>
-            <th className="px-4 py-3">Forma</th>
-            <th className="px-4 py-3">Lemma</th>
-            <th className="px-4 py-3">Tag</th>
+             <th scope="col" className="px-4 py-3">#</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.form')}</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.lemma')}</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.tag')}</th>
           </tr>
         </thead>
         <tbody>
@@ -48,13 +49,14 @@ export const WizardResults: React.FC = () => {
   );
 
   const renderFormsTable = () => (
-    <div className="overflow-x-auto border border-border rounded-md mt-4 max-h-[400px] overflow-y-auto">
-      <table className="w-full text-sm text-left">
+    <div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
+       <table aria-label={t('wizard.results.formsTable')} className="min-w-[30rem] w-full text-sm text-left">
+         <caption className="sr-only">{t('wizard.results.formsTable')}</caption>
         <thead className="text-xs uppercase bg-secondary text-muted-foreground sticky top-0">
           <tr>
-            <th className="px-4 py-3">Lemma</th>
-            <th className="px-4 py-3">Forma</th>
-            <th className="px-4 py-3">Tag</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.lemma')}</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.form')}</th>
+             <th scope="col" className="px-4 py-3">{t('analyzer.results.tag')}</th>
           </tr>
         </thead>
         <tbody>
@@ -73,44 +75,45 @@ export const WizardResults: React.FC = () => {
   const tabsData = [
     {
       id: 'lemmas',
-      label: `Nalezená Lemmata (${uniqueLemmas})`,
+       label: t('wizard.results.lemmasTab', { count: uniqueLemmas }),
       content: renderLemmasTable()
     },
     {
       id: 'forms',
-      label: `Vygenerované Formy (${forms?.length || 0})`,
+       label: t('wizard.results.formsTab', { count: forms?.length || 0 }),
       content: renderFormsTable()
     }
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Výsledky</h2>
+           <h2 className="text-xl font-semibold text-foreground">{t('analyzer.results.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            {activeTab === 'lemmas' ? 'Náhled nalezených lemmat' : 'Náhled vygenerovaných forem'}
+             {activeTab === 'lemmas' ? t('wizard.results.lemmasPreview') : t('wizard.results.formsPreview')}
           </p>
         </div>
       </div>
 
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-        <Tabs 
-          tabs={tabsData} 
-          defaultTabId="lemmas" 
+         <Tabs
+           tabs={tabsData}
+           ariaLabel={t('wizard.results.tabsLabel')}
+           defaultTabId="lemmas"
           onTabChange={setActiveTab}
         />
       </div>
 
       <div className="flex justify-end gap-2 mt-4">
-        <Button 
-          variant="secondary" 
+        <Button
+          variant="secondary"
           onClick={() => setStep(2)}
         >
           {t('wizard.back')}
         </Button>
-        <Button 
-          onClick={() => setStep(4)} 
+        <Button
+          onClick={() => setStep(4)}
           className="min-w-[120px]"
         >
           {t('wizard.next')}

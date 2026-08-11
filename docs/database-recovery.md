@@ -31,7 +31,7 @@ A backup contains a `morphodita_backup_metadata` table with:
 - `sessions` row count;
 - `morphological_data` row count.
 
-The current accepted schema version is `2`. A backup with another schema version is rejected rather than migrated implicitly during restore.
+The current accepted schema version is `4`. A backup with another schema version is rejected rather than migrated implicitly during validation or restore. Database initialization upgrades versions 0 and 1 by creating the current schema, upgrades version 2 by rebuilding the tables and indexes, and upgrades version 3 by replacing only the two ASCII `NOCASE` word-form indexes with `MORPHODITA_UNICODE` indexes. The collation canonicalizes with NFKC, Unicode lowercase, final-sigma folding, sharp-s to `ss`, and NFC without removing diacritics or conflating dotless-I. Each migration and `PRAGMA user_version = 4` update occurs in one transaction; a failed transaction does not publish a partially upgraded schema.
 
 ## Safe backup procedure
 

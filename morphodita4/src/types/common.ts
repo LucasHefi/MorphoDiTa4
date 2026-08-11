@@ -37,6 +37,45 @@ export interface WizardTokenRelation {
   lemma: string;
   tag: string;
   generatedForms: GeneratedForm[];
+  sourceIndex?: number;
+  rawLemma?: string;
+  sessionId?: string;
+}
+
+export interface WizardPipelineInput {
+  token: TaggedToken;
+  sourceIndex: number;
+  rawLemma: string;
+  cleanLemma: string;
+  generatedForms: GeneratedForm[];
+  sessionId: string;
+}
+
+export type WizardRunStatus = 'idle' | 'processing' | 'cancelled' | 'failed' | 'ready' | 'saved';
+
+export interface WizardRunState {
+  status: WizardRunStatus;
+  sessionId: string;
+  completedPhase: 'none' | 'lookup' | 'analysis' | 'generation' | 'ready' | 'saved';
+  error?: string;
+  checkpoint?: WizardCheckpoint;
+}
+
+export interface WizardCheckpoint {
+  source: {
+    input: string;
+    model: string;
+  };
+  lookup: {
+    newWords: string[];
+  };
+  analysis?: {
+    taggedTokens: TaggedToken[];
+    lemmas: string[];
+  };
+  generation?: {
+    forms: GeneratedForm[];
+  };
 }
 
 export interface WizardProcessingResult {

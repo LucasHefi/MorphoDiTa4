@@ -25,21 +25,9 @@ Accept: application/json
 ```json
 {
   "models": {
-    "czech-morfflex2.1-pdtc2.0-250909": {
-      "capabilities": ["tag", "analyze", "generate", "tokenize"],
-      "language": "czech",
-      "description": "Czech morphological analyzer v2.1"
-    },
-    "czech-combi2.0-pdtc2.0-230621": {
-      "capabilities": ["tag", "analyze", "generate"],
-      "language": "czech",
-      "description": "Czech combinatorial tagger"
-    },
-    "slovak-ssj2.0-pdt-230621": {
-      "capabilities": ["tag", "analyze", "generate"],
-      "language": "slovak",
-      "description": "Slovak morphological analyzer"
-    }
+    "czech-morfflex2.1-pdtc2.0-250909": ["tag", "analyze", "generate", "tokenize"],
+    "czech-combi2.0-pdtc2.0-230621": ["tag", "analyze", "generate"],
+    "slovak-ssj2.0-pdt-230621": ["tag", "analyze", "generate"]
   }
 }
 ```
@@ -48,11 +36,7 @@ Accept: application/json
 ```typescript
 interface ModelsResponse {
   models: {
-    [modelName: string]: {
-      capabilities: string[];
-      language: string;
-      description?: string;
-    };
+    [modelName: string]: Array<'tag' | 'analyze' | 'generate' | 'tokenize'>;
   };
 }
 
@@ -321,11 +305,11 @@ data=To%20je%20test.&model=czech-morfflex2.1-pdtc2.0-250909&output=json
 {
   "result": [
     [
-      "To",
-      "je",
-      "test",
-      ".",
-      "!"
+      { "token": "To", "space": " " },
+      { "token": "je", "space": " " },
+      { "token": "test", "space": "" },
+      { "token": ".", "space": "" },
+      { "token": "!", "space": "" }
     ]
   ]
 }
@@ -334,11 +318,11 @@ data=To%20je%20test.&model=czech-morfflex2.1-pdtc2.0-250909&output=json
 #### TypeScript Type
 ```typescript
 interface TokenizeResponse {
-  result: string[][];
+  result: Array<Array<{ token: string; space?: string }>>;
 }
 
 // Parsováno do aplikace:
-type TokenizedText = string[][];  // [sentence][token]
+type TokenizedText = Array<Array<{ token: string; space?: string }>>;
 ```
 
 ---

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { HomePage } from './pages/HomePage';
@@ -11,6 +11,7 @@ import { useAppStore } from './store/useAppStore';
 import { useApiStore } from './store/useApiStore';
 import { useDbStore } from './store/useDbStore';
 import { Settings as SettingsIcon } from 'lucide-react';
+import { registerAppCloseHook } from './services/appLifecycle';
 
 // Simple Layout wrapper
 export const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -18,6 +19,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { theme, language, transportNotice } = useAppStore();
   const { loadSessions } = useDbStore();
   const location = useLocation();
+  const hasLoadedSessions = useRef(false);
 
   // Apply theme
   useEffect(() => {
@@ -46,8 +48,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    void loadSessions().catch(() => undefined);
-  }, [loadSessions]);
+    if (!hasLoadedSessions.current || location.pathname === '/') {
+      hasLoadedSessions.current = true;
+      void loadSessions().catch(() => undefined);
+    }
+  }, [location.pathname, loadSessions]);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -112,9 +117,45 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  const { t } = useTranslation();
+  const [lifecycleError, setLifecycleError] = useState(false);
+
+  useEffect(() => {
+    let disposed = false;
+    let cleanup: (() => void) | null = null;
+
+    void registerAppCloseHook()
+      .then((unlisten) => {
+        if (disposed) {
+          unlisten?.();
+        } else {
+          cleanup = unlisten;
+        }
+      })
+      .catch(() => {
+        if (!disposed) {
+          console.error('Application lifecycle registration failed.');
+          setLifecycleError(true);
+        }
+      });
+
+    return () => {
+      disposed = true;
+      cleanup?.();
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <Layout>
+        {lifecycleError && (
+          <div role="alert" className="border-b border-destructive/50 bg-destructive/10 px-4 py-3 text-center text-sm text-foreground">
+            <p>{t('transport.lifecycle-error')}</p>
+            <button type="button" className="mt-2 underline" onClick={() => window.location.reload()}>
+              {t('transport.restart')}
+            </button>
+          </div>
+        )}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/analyzer" element={<AnalyzerPage />} />

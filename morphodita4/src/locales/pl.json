@@ -1,13 +1,14 @@
 {
   "common": {
-    "loading": "Ładowanie...",
+    "loading": "Ładowanie...", "loadingLabel": "Ładowanie",
     "error": "Błąd",
     "success": "Sukces",
     "save": "Zapisz",
     "cancel": "Anuluj",
     "delete": "Usuń",
     "edit": "Edytuj",
-    "offline": "Offline"
+    "offline": "Offline",
+    "back": "Wstecz", "selectAll": "Zaznacz wszystkie rekordy", "selectRecord": "Zaznacz rekord {{id}}", "editRecord": "Edytuj {{field}} w rekordzie {{id}}", "noData": "Brak danych do wyświetlenia", "progress": "Postęp", "clear": "Wyczyść", "logs": "Logi", "noLogs": "Brak logów do wyświetlenia"
   },
   "nav": {
     "analyzer": "Analiza",
@@ -72,7 +73,11 @@
     "save": "Zapisz wynik",
     "saveSuccess": "Zapisano {{count}} rekordów wyniku do bazy danych.",
     "results_title": "Wynik",
-    "no_result_placeholder": "Wprowadź tekst i uruchom analizę, aby zobaczyć wyniki."
+    "no_result_placeholder": "Wprowadź tekst i uruchom analizę, aby zobaczyć wyniki.",
+     "results": { "title": "Wyniki", "table": "Tabela", "json": "JSON", "token": "Token", "word": "Token/słowo", "lemma": "Lemma", "tag": "Tag / analiza", "form": "Forma", "probability": "Prawdopodobieństwo", "space": "Spacja", "copy": "Kopiuj", "copied": "Skopiowano do schowka.", "copyError": "Kopiowanie nie powiodło się. Spróbuj ponownie.", "morphologicalTable": "Wyniki morfologiczne", "tokenTable": "Wyniki tokenów", "tabsLabel": "Widoki wyników" },
+    "logs": { "title": "Logi", "filter": "Filtr logów", "all": "Wszystkie", "info": "Informacje", "warning": "Ostrzeżenie", "error": "Błąd", "clear": "Wyczyść logi", "empty": "Brak logów do wyświetlenia" },
+    "export": { "label": "Eksportuj", "format": "Format eksportu" },
+    "modelRequired": "Wybierz model dla operacji {{operation}}.", "inputRequired": "Wprowadź tekst dla operacji {{operation}}.", "operationUnavailable": "Model {{model}} nie obsługuje operacji {{operation}}.", "operationStarted": "Rozpoczynam operację: {{operation}}.", "operationSuccess": "Operacja została ukończona pomyślnie.", "operationError": "Operacja nie powiodła się: {{message}}", "exportSuccess": "Eksport {{format}} ukończono: {{filename}}"
   },
   "wizard": {
     "steps": {
@@ -83,11 +88,28 @@
     },
     "next": "Dalej",
     "back": "Wstecz",
+    "cancel": "Anuluj przetwarzanie",
+    "resume": "Ponów przetwarzanie",
+    "processing_error": "Nie udało się ukończyć przetwarzania.",
+    "export_pending": "Eksportowanie...",
+    "export_success": "Eksport ukończony.",
+    "export_error": "Eksport nie powiódł się",
+    "save_error": "Nie udało się zapisać",
+    "save_success": "Wyniki zostały pomyślnie zapisane.",
+    "process_another": "Przetwórz kolejne dane",
+    "return_to_input": "Wróć do wprowadzania",
     "input_title": "Wprowadź słowa kluczowe",
     "import_txt": "Importuj TXT",
     "input_description": "Wstaw tekst lub listę słów oddzielonych spacją, przecinkiem lub nowym wierszem.",
     "input_placeholder": "np.: pies kot mysz...",
-    "input_label": "Słowa kluczowe"
+     "input_label": "Słowa kluczowe", "wordCount": "Słowa: {{count}}",
+    "input_too_many_words": "Wpis może zawierać najwyżej {{maxWords}} słów.",
+    "input_too_large": "Dane wejściowe mogą mieć najwyżej {{maxMiB}} MiB.",
+    "input_file_too_large": "Plik TXT może mieć najwyżej {{maxMiB}} MiB.",
+    "input_file_read_failed": "Nie udało się odczytać pliku TXT.",
+    "processing": { "title": "Przetwarzanie", "working": "Trwa przetwarzanie danych. Proszę czekać...", "complete": "Przetwarzanie ukończone.", "preparing": "Przygotowywanie...", "progress": "Ogólny postęp", "start": "Rozpoczynam przetwarzanie słów kluczowych...", "wordCount": "Liczba słów do analizy: {{count}}", "lookup": "Sprawdzam, które słowa istnieją w bazie danych...", "newWords": "Znaleziono {{count}} nowych słów.", "analyzing": "Wysyłam dane do analizy morfologicznej...", "tagged": "Tagowanie ukończone: {{count}} tokenów.", "lemmas": "Uzyskano {{count}} unikalnych lematów. Generowanie form...", "generated": "Generowanie form ukończone.", "success": "Przetwarzanie ukończone pomyślnie.", "cancelled": "Przetwarzanie anulowano. Można je wznowić.", "error": "Błąd przetwarzania: {{message}}", "taggingContractMismatch": "Odpowiedź tagowania morfologicznego nie odpowiada unikalnym słowom wejściowym.", "tooManyWords": "Dane wejściowe zawierają więcej niż {{maxWords}} słów.", "inputReadFailed": "Nie udało się odczytać danych wejściowych." },
+    "summary": { "title": "Podsumowanie i eksport", "description": "Przeglądanie i filtrowanie wyników", "empty": "Brak wyników do podsumowania.", "backToInput": "Wróć do wprowadzania", "formsToLemmas": "Formy = lematy ({{count}})", "lemmas": "Przetworzone lematy ({{count}})", "forms": "Przetworzone formy ({{count}})", "filters": "Filtrowanie wyników", "removeDuplicates": "Usuń duplikaty", "removeDiacritics": "Usuń znaki diakrytyczne", "removeSpecialCharacters": "Usuń znaki specjalne", "removeStopWords": "Usuń słowa stop", "showOnlyNew": "Tylko nowe słowa", "customStopWords": "Własne słowa stop (oddzielone przecinkami)", "stopWordsPlaceholder": "a, i, się, na...", "applyFilters": "Zastosuj filtry", "exportCsv": "Eksportuj CSV", "exportJson": "Eksportuj JSON", "exportTxt": "Eksportuj TXT", "saving": "Zapisywanie...", "finishSave": "Zakończ i zapisz", "exportFormsToLemmas": "Formy na lematy", "exportFilteredLemmas": "Przefiltrowane lematy", "exportFilteredForms": "Przefiltrowane formy" },
+     "results": { "lemmasTable": "Analizowane lematy", "formsTable": "Wygenerowane formy", "lemmasTab": "Znalezione lematy ({{count}})", "formsTab": "Wygenerowane formy ({{count}})", "lemmasPreview": "Podgląd znalezionych lematów", "formsPreview": "Podgląd wygenerowanych form", "tabsLabel": "Widoki wyników" }
   },
   "settings": {
     "title": "Ustawienia aplikacji",
@@ -122,7 +144,9 @@
   },
   "transport": {
     "offline-explicit": "Lokalne MorphoDiTa jest aktywne, ponieważ wybrano tryb offline w ustawieniach.",
-    "offline-fallback": "Internetowe API jest niedostępne. Aktywny jest lokalny fallback MorphoDiTa."
+    "offline-fallback": "Internetowe API jest niedostępne. Aktywny jest lokalny fallback MorphoDiTa.",
+    "lifecycle-error": "Nie udało się zainicjować obsługi zamykania aplikacji. Załaduj aplikację ponownie lub ją uruchom ponownie.",
+    "restart": "Załaduj aplikację ponownie"
   },
   "database": {
     "title": "Edytor bazy danych",
@@ -132,12 +156,23 @@
       "morphological_data": "Dane morfologiczne"
     },
     "searchPlaceholder": "Szukaj...",
+    "searchLabel": "Szukaj rekordów w bazie danych",
     "search": "Szukaj",
     "refresh": "Odśwież",
     "delete": "Usuń zaznaczone",
     "previous": "Poprzednia",
     "next": "Następna",
-    "page": "Strona"
+    "page": "Strona",
+    "recordsLoaded": "Załadowano rekordów: {{count}}.",
+    "recordsFound": "Znaleziono rekordów: {{count}}.",
+    "deletePrompt": "Czy na pewno chcesz usunąć {{count}} zaznaczonych rekordów? Tej operacji nie można cofnąć.",
+    "deleteMismatch": "Baza danych zgłosiła usunięcie {{actual}} rekordów zamiast {{expected}}.",
+    "deleteDeleting": "Usuwanie {{count}} rekordów...",
+    "deleteSuccess": "Pomyślnie usunięto rekordów: {{count}}.",
+    "deleteError": "Usuwanie nie powiodło się: {{message}} Spróbuj ponownie lub anuluj.",
+    "deleteCancelled": "Usuwanie anulowano.",
+    "columns": { "id": "ID", "operation": "Operacja", "model": "Model", "input": "Wejście", "parameters": "Parametry", "results": "Wyniki", "time": "Czas (s)", "status": "Status", "error": "Błąd", "created": "Utworzono", "completed": "Ukończono", "type": "Typ", "originalForm": "Forma oryginalna", "lemma": "Lemma", "tag": "Tag", "generatedForm": "Wygenerowana forma", "probability": "Prawdopodobieństwo", "relationId": "Identyfikator relacji" },
+    "caption": { "sessions": "Sesje bazy danych", "morphological_data": "Dane morfologiczne" }, "editInvalid": "Wprowadź prawidłową wartość.", "notChanged": "Rekord nie został zmieniony", "saved": "Zapisano", "saveFailed": "Nie udało się zapisać: {{message}}", "errorStatus": "Błąd: {{message}}", "saveRefreshFailed": "Rekord zapisano, ale odświeżenie danych nie powiodło się. Odśwież dane ręcznie: {{message}}", "deleteReloadFailed": "Usunięto {{count}} rekordów, ale ponowne ładowanie nie powiodło się. Odśwież dane ręcznie: {{message}}", "deletePartial": "Usunięto {{actual}} z {{expected}} rekordów. Sprawdź dane i odśwież je ręcznie."
   },
   "tagset": {
     "unknown": "Nieznany '{{val}}'",

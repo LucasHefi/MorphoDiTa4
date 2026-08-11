@@ -7,6 +7,9 @@ import {
   MorphologicalTag,
   TagResponse,
   TokenizeResponse,
+  APIErrorCode,
+  APIErrorShape,
+  ModelCapability,
 } from '../types/api'
 import { useAppStore } from '../store/useAppStore'
 import { OfflineSidecar } from './offlineSidecar'
@@ -14,6 +17,13 @@ import type { TransportNotice, TransportStatus } from '../types/common'
 import type { OperationType } from '../types/common'
 
 const ONLINE_API_BASE_URL = 'https://lindat.mff.cuni.cz/services/morphodita/api';
+// Keep server-provided retry delays bounded so one response cannot stall retries indefinitely.
+const MAX_RETRY_AFTER_MS = 30_000;
+const MAX_RESPONSE_BODY_BYTES = 64 * 1024 * 1024;
+const MAX_SCHEMA_DEPTH = 256;
+const MAX_SCHEMA_NODES = 100_000;
+const MAX_SCHEMA_STRING_BYTES = 16 * 1024 * 1024;
+const MAX_SCHEMA_ARRAY_LENGTH = 100_000;
 
 function setTransportStatus(status: TransportStatus, notice: TransportNotice | null = null): void {
   useAppStore.getState().setTransportStatus?.(status, notice);
@@ -34,30 +44,35 @@ async function getBaseUrl(): Promise<string> {
   return ONLINE_API_BASE_URL;
 }
 
-export class APIError extends Error {
-  constructor(message: string, public status?: number, public retryAfterMs?: number) {
+export class APIError extends Error implements APIErrorShape {
+  constructor(
+    message: string,
+    public readonly code: APIErrorCode,
+    public readonly endpoint: string,
+    public readonly retryable: boolean,
+    public readonly status?: number,
+    public readonly retryAfterMs?: number,
+    public readonly cause?: unknown,
+  ) {
     super(message)
     this.name = 'APIError'
+    Object.setPrototypeOf(this, new.target.prototype)
   }
 }
 
-export class APIContractError extends Error {
-  readonly code = 'INVALID_RESPONSE' as const;
+export class APIContractError extends APIError {
 
-  constructor(readonly endpoint: string, detail: string, readonly cause?: unknown) {
-    super(`Invalid ${endpoint} response: ${detail}`);
+  constructor(endpoint: string, detail: string, code: 'INVALID_JSON' | 'SCHEMA_MISMATCH' = 'SCHEMA_MISMATCH', cause?: unknown) {
+    super(`Invalid ${endpoint} response: ${detail}`, code, endpoint, false, undefined, undefined, cause);
     this.name = 'APIContractError';
-    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
-export class APIInputError extends Error {
-  readonly code = 'INVALID_INPUT' as const;
+export class APIInputError extends APIError {
 
-  constructor(readonly operation: string, detail: string) {
-    super(`${operation}: ${detail}`);
+  constructor(readonly operation: string, detail: string, code: 'INVALID_INPUT' | 'UNSUPPORTED_OUTPUT' = 'INVALID_INPUT') {
+    super(`${operation}: ${detail}`, code, `/${operation}`, false);
     this.name = 'APIInputError';
-    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -73,13 +88,12 @@ export function assertModelSupportsOperation(
   }
 }
 
-export class APITransportError extends Error {
-  readonly code = 'ONLINE_AND_OFFLINE_UNAVAILABLE' as const;
+export class APITransportError extends APIError {
   readonly onlineError: unknown;
   readonly offlineError: unknown;
 
-  constructor(onlineError: unknown, offlineError: unknown) {
-    super('The online API is unavailable and the local MorphoDiTa fallback could not be started.');
+  constructor(endpoint: string, onlineError: unknown, offlineError: unknown) {
+    super('The online API is unavailable and the local MorphoDiTa fallback could not be started.', 'OFFLINE_UNAVAILABLE', endpoint, false, undefined, undefined, offlineError);
     this.name = 'APITransportError';
     this.onlineError = onlineError;
     this.offlineError = offlineError;
@@ -90,21 +104,36 @@ export class APITransportError extends Error {
 type ApiRequestOptions = { signal?: AbortSignal };
 
 function parseRetryAfter(value: string | null): number | undefined {
-  if (!value) return undefined;
+  if (!value || !value.trim()) return undefined;
   const seconds = Number(value);
-  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  if (Number.isFinite(seconds)) return Math.min(MAX_RETRY_AFTER_MS, Math.max(0, seconds * 1000));
   const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : undefined;
+  return Number.isFinite(timestamp)
+    ? Math.min(MAX_RETRY_AFTER_MS, Math.max(0, timestamp - Date.now()))
+    : undefined;
 }
 
 function isRetryable(error: unknown): boolean {
   if (error instanceof APIContractError) return false;
-  if (!(error instanceof APIError)) return true;
-  return error.status === 429 || (error.status !== undefined && error.status >= 500 && error.status <= 599);
+  if (!(error instanceof APIError)) return false;
+  return error.retryable;
 }
 
 function createAbortError(): DOMException {
   return new DOMException('The operation was aborted', 'AbortError');
+}
+
+function jitteredBackoff(backoff: number): number {
+  const safeBackoff = Number.isFinite(backoff) ? Math.max(0, backoff) : 0;
+  const sample = Math.min(1, Math.max(0, Math.random()));
+  const delay = safeBackoff * (0.5 + sample);
+  return Number.isFinite(delay) ? Math.max(0, delay) : 0;
+}
+
+function endpointFromUrl(url: string): string {
+  const pathname = new URL(url).pathname;
+  const endpoint = ['/models', '/tag', '/analyze', '/generate', '/tokenize'].find((suffix) => pathname.endsWith(suffix));
+  return endpoint ?? pathname;
 }
 
 function waitForRetry(delay: number, signal?: AbortSignal): Promise<void> {
@@ -129,8 +158,9 @@ async function fetchWithRetryOnce<T>(url: string, options: RequestInit = {}, ret
 
   for (;;) {
     const controller = new AbortController();
+    let timedOut = false;
     const abortFromCaller = () => controller.abort();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => { timedOut = true; controller.abort(); }, 30000);
     externalSignal?.addEventListener('abort', abortFromCaller, { once: true });
 
     try {
@@ -139,29 +169,113 @@ async function fetchWithRetryOnce<T>(url: string, options: RequestInit = {}, ret
         signal: controller.signal,
       });
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'No error detail');
+        const endpoint = endpointFromUrl(url);
+        const errorText = await readResponseBody(response, endpoint).catch(() => 'No error detail');
         throw new APIError(
           `HTTP error! status: ${response.status}. Detail: ${errorText}`,
+          'HTTP_STATUS',
+          endpoint,
+          response.status === 429 || (response.status >= 500 && response.status <= 599),
           response.status,
           parseRetryAfter(response.headers?.get('retry-after') ?? null),
         );
       }
       try {
-        return await response.json() as T;
+        const body = await readResponseBody(response, endpointFromUrl(url));
+        const parsed = JSON.parse(body) as unknown;
+        preflightSchema(parsed, endpointFromUrl(url));
+        return parsed as T;
       } catch (error) {
-        throw new APIContractError(new URL(url).pathname, 'body is not valid JSON', error);
+        if (error instanceof APIContractError) throw error;
+        throw new APIContractError(endpointFromUrl(url), 'body is not valid JSON', 'INVALID_JSON', error);
       }
     } catch (error) {
       if (externalSignal?.aborted) throw createAbortError();
-      if (retries <= 0 || !isRetryable(error)) throw error;
-      const retryAfter = error instanceof APIError ? error.retryAfterMs : undefined;
-      const delay = Math.max(backoff, retryAfter ?? 0);
+      const endpoint = endpointFromUrl(url);
+      const normalizedError = error instanceof APIError ? error : new APIError(
+        timedOut ? `Request to ${endpoint} timed out` : `Network request to ${endpoint} failed`,
+        timedOut ? 'TIMEOUT' : 'NETWORK', endpoint, true, undefined, undefined, error,
+      );
+      if (retries <= 0 || !isRetryable(normalizedError)) throw normalizedError;
+      const retryAfter = normalizedError.retryAfterMs;
+      const delay = Math.max(jitteredBackoff(backoff), Number.isFinite(retryAfter) ? Math.max(0, retryAfter!) : 0);
       retries -= 1;
       backoff *= 2;
       await waitForRetry(delay, externalSignal);
     } finally {
       clearTimeout(timeoutId);
       externalSignal?.removeEventListener('abort', abortFromCaller);
+    }
+  }
+}
+
+async function readResponseBody(response: Response, endpoint: string): Promise<string> {
+  const declaredLength = response.headers?.get('content-length');
+  const contentLength = declaredLength === null || declaredLength === undefined ? NaN : Number(declaredLength);
+  if (Number.isFinite(contentLength) && contentLength > MAX_RESPONSE_BODY_BYTES) {
+    throw contractError(endpoint, 'response body exceeds the 64 MiB maximum');
+  }
+  if (response.body) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let bytesRead = 0;
+    let body = '';
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytesRead += value.byteLength;
+        if (bytesRead > MAX_RESPONSE_BODY_BYTES) {
+          throw contractError(endpoint, 'response body exceeds the 64 MiB maximum');
+        }
+        body += decoder.decode(value, { stream: true });
+      }
+      return body + decoder.decode();
+    } catch (error) {
+      try { await reader.cancel(error); } catch { /* best effort cleanup */ }
+      throw error;
+    } finally {
+      reader.releaseLock();
+    }
+  }
+  if (typeof response.text !== 'function') {
+    // Keep compatibility with lightweight test transports that only implement json().
+    return JSON.stringify(await response.json());
+  }
+  const body = await response.text();
+  if (new TextEncoder().encode(body).byteLength > MAX_RESPONSE_BODY_BYTES) {
+    throw contractError(endpoint, 'response body exceeds the 64 MiB maximum');
+  }
+  return body;
+}
+
+function preflightSchema(value: unknown, endpoint: string): void {
+  const pending: Array<{ value: unknown; depth: number }> = [{ value, depth: 0 }];
+  let nodes = 0;
+  while (pending.length > 0) {
+    const item = pending.pop()!;
+    nodes += 1;
+    if (nodes > MAX_SCHEMA_NODES || item.depth > MAX_SCHEMA_DEPTH) {
+      throw contractError(endpoint, 'response exceeds schema depth or node limits');
+    }
+    if (typeof item.value === 'string') {
+      if (new TextEncoder().encode(item.value).byteLength > MAX_SCHEMA_STRING_BYTES) {
+        throw contractError(endpoint, 'response contains an oversized string');
+      }
+      continue;
+    }
+    if (Array.isArray(item.value)) {
+      if (item.value.length > MAX_SCHEMA_ARRAY_LENGTH) {
+        throw contractError(endpoint, 'response contains an oversized array');
+      }
+      for (const child of item.value) pending.push({ value: child, depth: item.depth + 1 });
+    } else if (isRecord(item.value)) {
+      for (const [key, child] of Object.entries(item.value)) {
+        if (new TextEncoder().encode(key).byteLength > MAX_SCHEMA_STRING_BYTES) {
+          throw contractError(endpoint, 'response contains an oversized property name');
+        }
+        pending.push({ value: child, depth: item.depth + 1 });
+      }
     }
   }
 }
@@ -178,8 +292,14 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(isString);
 }
 
+function isCapabilityArray(value: unknown): value is ModelCapability[] {
+  return Array.isArray(value) && value.length > 0 && value.every((item) =>
+    item === 'tag' || item === 'analyze' || item === 'generate' || item === 'tokenize'
+  ) && new Set(value).size === value.length;
+}
+
 function contractError(endpoint: string, detail: string): APIContractError {
-  return new APIContractError(endpoint, detail);
+  return new APIContractError(endpoint, detail, 'SCHEMA_MISMATCH');
 }
 
 function parseModelsResponse(value: unknown): ModelsResponse {
@@ -187,7 +307,7 @@ function parseModelsResponse(value: unknown): ModelsResponse {
     throw contractError('/models', 'models must be an object');
   }
   for (const [name, capabilities] of Object.entries(value.models)) {
-    if (!name || !isStringArray(capabilities)) {
+    if (!name || !isCapabilityArray(capabilities)) {
       throw contractError('/models', 'each model must have a string capability list');
     }
   }
@@ -201,7 +321,10 @@ function parseModelsResponse(value: unknown): ModelsResponse {
 }
 
 function parseMorphologicalTag(value: unknown): value is MorphologicalTag {
-  return isRecord(value) && isString(value.lemma) && isString(value.tag);
+  return isRecord(value) && isString(value.lemma) && isString(value.tag) &&
+    (value.form === undefined || isString(value.form)) &&
+    (value.probability === undefined || typeof value.probability === 'number') &&
+    (value.space === undefined || isString(value.space));
 }
 
 function parseOperationResponse<T>(
@@ -209,7 +332,8 @@ function parseOperationResponse<T>(
   endpoint: string,
   rowValidator: (row: unknown) => boolean,
 ): T {
-  if (!isRecord(value) || !isString(value.model) || !Array.isArray(value.result)) {
+  if (!isRecord(value) || !isString(value.model) || !Array.isArray(value.result) ||
+    (value.acknowledgements !== undefined && !isStringArray(value.acknowledgements))) {
     throw contractError(endpoint, 'model and result are required');
   }
   if (!value.result.every((row) => Array.isArray(row) && row.every(rowValidator))) {
@@ -237,7 +361,9 @@ function parseAnalyzeResponse(value: unknown): AnalyzeResponse {
 
 function parseGenerateResponse(value: unknown): GenerateResponse {
   return parseOperationResponse<GenerateResponse>(value, '/generate', (row) =>
-    isRecord(row) && isString(row.form) && isString(row.lemma) && isString(row.tag)
+    isRecord(row) && isString(row.form) && isString(row.lemma) && isString(row.tag) &&
+    (row.probability === undefined || typeof row.probability === 'number') &&
+    (row.space === undefined || isString(row.space))
   );
 }
 
@@ -256,6 +382,10 @@ function requireOption<T extends string>(operation: string, name: string, value:
   if (!allowed.includes(value)) throw new APIInputError(operation, `${name} is not supported`);
 }
 
+function requireJsonOutput(operation: string, output: string): asserts output is 'json' {
+  if (output !== 'json') throw new APIInputError(operation, 'only JSON output is supported by this adapter', 'UNSUPPORTED_OUTPUT');
+}
+
 export function normalizeAnalyzeResult(
   result: AnalyzeResponse['result'],
 ): Array<Array<MorphologicalTag & { token: string; space?: string }>> {
@@ -270,14 +400,22 @@ function isOfflineFallbackEligible(error: unknown): boolean {
   if (error instanceof Error && error.name === 'AbortError') return false;
   if (error instanceof APIContractError) return false;
   if (error instanceof APIError) {
-    return error.status === 429 || (error.status !== undefined && error.status >= 500 && error.status <= 599);
+    return error.code === 'NETWORK' || error.code === 'TIMEOUT' || error.retryable;
   }
   return true;
 }
 
 function replaceBaseUrl(url: string, baseUrl: string): string {
   const parsed = new URL(url);
-  return `${baseUrl}${parsed.pathname}${parsed.search}`;
+  const onlinePath = new URL(ONLINE_API_BASE_URL).pathname;
+  const endpoint = parsed.pathname.startsWith(`${onlinePath}/`)
+    ? parsed.pathname.slice(onlinePath.length)
+    : undefined;
+  const allowedEndpoints = ['/models', '/tag', '/analyze', '/generate', '/tokenize'];
+  if (!endpoint || !allowedEndpoints.includes(endpoint)) {
+    throw new Error(`Cannot construct offline URL for unknown endpoint: ${parsed.pathname}`);
+  }
+  return `${baseUrl.replace(/\/$/, '')}${endpoint}${parsed.search}`;
 }
 
 async function fetchWithRetry<T>(url: string, options: RequestInit = {}, retries = 3, backoff = 1000): Promise<T> {
@@ -302,7 +440,7 @@ async function fetchWithRetry<T>(url: string, options: RequestInit = {}, retries
       setTransportStatus('offline', 'offline-fallback');
       return response;
     } catch (offlineError) {
-      throw new APITransportError(onlineError, offlineError);
+      throw new APITransportError(endpointFromUrl(url), onlineError, offlineError);
     }
   }
 }
@@ -334,7 +472,7 @@ export const MorphoDiTaAPI = {
 
   async tagText(data: string, model: string, output: 'json' | 'xml' | 'vertical' = 'json', options: ApiRequestOptions = {}): Promise<TagResponse> {
     requireOperationInput('tag', data, model);
-    requireOption('tag', 'output', output, ['json', 'xml', 'vertical']);
+    requireJsonOutput('tag', output);
     const base = await getBaseUrl()
     const params = new URLSearchParams()
     params.append('data', data)
@@ -362,7 +500,7 @@ export const MorphoDiTaAPI = {
     requireOperationInput('analyze', data, model);
     requireOption('analyze', 'input', inputFormat, ['untokenized', 'vertical']);
     requireOption('analyze', 'derivation', derivation, ['none', 'root', 'path', 'tree']);
-    requireOption('analyze', 'output', output, ['json', 'xml', 'vertical']);
+    requireJsonOutput('analyze', output);
     const base = await getBaseUrl()
     const params = new URLSearchParams()
     params.append('data', data)
@@ -390,7 +528,7 @@ export const MorphoDiTaAPI = {
     options: ApiRequestOptions = {},
   ): Promise<GenerateResponse> {
     requireOperationInput('generate', data, model);
-    requireOption('generate', 'output', output, ['json', 'xml', 'vertical']);
+    requireJsonOutput('generate', output);
     const base = await getBaseUrl()
     const params = new URLSearchParams()
     params.append('data', data)
@@ -409,7 +547,7 @@ export const MorphoDiTaAPI = {
 
   async tokenizeText(data: string, model: string, output: 'json' | 'xml' | 'vertical' = 'json', options: ApiRequestOptions = {}): Promise<TokenizeResponse> {
     requireOperationInput('tokenize', data, model);
-    requireOption('tokenize', 'output', output, ['json', 'xml', 'vertical']);
+    requireJsonOutput('tokenize', output);
     const base = await getBaseUrl()
     const params = new URLSearchParams()
     params.append('data', data)

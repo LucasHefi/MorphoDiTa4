@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cn } from './utils';
 
 export interface Tab {
@@ -11,12 +11,23 @@ export interface TabsProps {
   tabs: Tab[];
   defaultTabId?: string;
   className?: string;
+  ariaLabel?: string;
   onTabChange?: (tabId: string) => void;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTabChange }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, ariaLabel, onTabChange }) => {
   const [activeTab, setActiveTab] = useState<string>(defaultTabId || tabs[0]?.id || '');
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const effectiveActiveTab = tabs.some((tab) => tab.id === activeTab)
+    ? activeTab
+    : (tabs.some((tab) => tab.id === defaultTabId) ? defaultTabId! : tabs[0]?.id ?? '');
+
+  useEffect(() => {
+    if (activeTab !== effectiveActiveTab) {
+      setActiveTab(effectiveActiveTab);
+      if (effectiveActiveTab) onTabChange?.(effectiveActiveTab);
+    }
+  }, [activeTab, effectiveActiveTab, onTabChange]);
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
@@ -45,7 +56,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTab
 
   return (
     <div className={cn("w-full", className)}>
-      <div role="tablist" aria-label="Tabs" className="flex border-b border-border mb-4">
+      <div role="tablist" aria-label={ariaLabel ?? tabs[0]?.label ?? ''} className="flex border-b border-border mb-4">
         {tabs.map((tab, tabIndex) => (
           <button
             key={tab.id}
@@ -54,33 +65,29 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId, className, onTab
             role="tab"
             id={`${tab.id}-tab`}
             aria-controls={`${tab.id}-panel`}
-            aria-selected={activeTab === tab.id}
-            tabIndex={activeTab === tab.id ? 0 : -1}
+            aria-selected={effectiveActiveTab === tab.id}
+            tabIndex={effectiveActiveTab === tab.id ? 0 : -1}
             onClick={() => handleTabClick(tab.id)}
             onKeyDown={(event) => handleTabKeyDown(event, tabIndex)}
             className={cn(
-              "px-4 py-2 font-medium text-sm transition-colors relative",
-              activeTab === tab.id
+              "px-4 py-2 font-medium text-sm motion-safe:transition-colors relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              effectiveActiveTab === tab.id
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             {tab.label}
-            {activeTab === tab.id && (
+            {effectiveActiveTab === tab.id && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>
         ))}
       </div>
-      <div
-        className="mt-2"
-        role="tabpanel"
-        id={`${activeTab}-panel`}
-        aria-labelledby={`${activeTab}-tab`}
-        tabIndex={0}
-      >
-        {tabs.find((tab) => tab.id === activeTab)?.content}
-      </div>
+      {effectiveActiveTab && (
+        <div className="mt-2" role="tabpanel" id={`${effectiveActiveTab}-panel`} aria-labelledby={`${effectiveActiveTab}-tab`} tabIndex={0}>
+          {tabs.find((tab) => tab.id === effectiveActiveTab)?.content}
+        </div>
+      )}
     </div>
   );
 };

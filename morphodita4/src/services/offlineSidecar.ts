@@ -1,6 +1,6 @@
 import { Command } from '@tauri-apps/plugin-shell';
 import type { Child } from '@tauri-apps/plugin-shell';
-import { exists } from '@tauri-apps/plugin-fs';
+import { validateLocalModelDirectory } from './localModels';
 import { getLocalModelsDir } from './platformPaths';
 
 const DEFAULT_PORT = 8765;
@@ -74,6 +74,22 @@ function formatDiagnostic(value: unknown): string {
   return serialized ?? String(value);
 }
 
+function isAddressInUse(error: unknown): boolean {
+  const values = typeof error === 'string'
+    ? [error]
+    : error !== null && typeof error === 'object'
+      ? [
+          (error as { code?: unknown }).code,
+          (error as { message?: unknown }).message,
+        ].filter((value): value is string => typeof value === 'string')
+      : [];
+
+  return values.some((value) => {
+    const normalized = value.toLowerCase();
+    return normalized.includes('eaddrinuse') || normalized.includes('address already in use');
+  });
+}
+
 function joinModelPath(directory: string, fileName: string): string {
   const separator = directory.includes('\\') ? '\\' : '/';
   return `${directory.replace(/[\\/]$/, '')}${separator}${fileName}`;
@@ -87,18 +103,12 @@ function attachDiagnostics(command: ReturnType<typeof Command.sidecar>): void {
 
 async function waitForReady(base: string, shouldStop: () => boolean, isAlive: () => boolean): Promise<boolean> {
   for (let attempt = 0; attempt < READY_ATTEMPTS && !shouldStop(); attempt += 1) {
+    if (!isAlive()) return false;
     try {
       const response = await fetch(`${base}/models?output=json`, { method: 'GET' });
       if (response.ok) {
         const payload = await response.json() as unknown;
-        if (
-          typeof payload === 'object' &&
-          payload !== null &&
-          'models' in payload &&
-          typeof payload.models === 'object' &&
-          payload.models !== null &&
-          BUNDLED_MODEL_ID in payload.models
-        ) {
+        if (hasRequiredBundledCapabilities(payload)) {
           return isAlive();
         }
         appendDiagnostic('readiness: response does not contain the bundled model');
@@ -107,9 +117,23 @@ async function waitForReady(base: string, shouldStop: () => boolean, isAlive: ()
     } catch (error) {
       appendDiagnostic(`readiness: ${error instanceof Error ? error.message : String(error)}`);
     }
+    if (!isAlive()) return false;
     await new Promise((resolve) => setTimeout(resolve, READY_DELAY_MS));
   }
   return false;
+}
+
+function hasRequiredBundledCapabilities(payload: unknown): boolean {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) return false;
+  const models = (payload as { models?: unknown }).models;
+  if (typeof models !== 'object' || models === null || Array.isArray(models)) return false;
+  const capabilities = (models as Record<string, unknown>)[BUNDLED_MODEL_ID];
+  if (!Array.isArray(capabilities) || capabilities.length === 0 || new Set(capabilities).size !== capabilities.length) {
+    return false;
+  }
+  const allowed = new Set(['tag', 'analyze', 'generate', 'tokenize']);
+  return capabilities.every((capability) => typeof capability === 'string' && allowed.has(capability)) &&
+    allowed.size === capabilities.length && capabilities.every((capability) => allowed.has(capability));
 }
 
 async function killCurrentChild(): Promise<void> {
@@ -124,21 +148,31 @@ async function killCurrentChild(): Promise<void> {
   }
 }
 
-async function startInternal(modelDir?: string): Promise<string> {
+async function startInternal(): Promise<string> {
   setStatus('starting', { baseUrl: null, port: null, error: null });
   stopRequested = false;
 
   try {
-    const modelsPath = modelDir || await getLocalModelsDir();
-    for (let attempt = 0; attempt < MAX_PORT_ATTEMPTS && !stopRequested; attempt += 1) {
-      const port = DEFAULT_PORT + attempt;
-      const modelDirectory = modelDir || joinModelPath(modelsPath, BUNDLED_MODEL_ID);
-      const modelPath = joinModelPath(modelDirectory, BUNDLED_MODEL_FILE);
-      if (!(await exists(modelPath))) {
-        throw new OfflineSidecarError(
-          `local model ${BUNDLED_MODEL_ID} is not installed; open Settings and consent to the official model download`,
+    const modelsPath = await getLocalModelsDir();
+    const modelDirectory = joinModelPath(modelsPath, BUNDLED_MODEL_ID);
+    let modelPath: string;
+    try {
+      const model = await validateLocalModelDirectory(modelDirectory, BUNDLED_MODEL_ID);
+      if (model.manifest.id !== BUNDLED_MODEL_ID || model.manifest.artifact !== BUNDLED_MODEL_FILE) {
+        throw new Error(
+          `local model ${BUNDLED_MODEL_ID} has an unexpected id or artifact; reinstall the official model`,
         );
       }
+      modelPath = joinModelPath(modelDirectory, model.manifest.artifact);
+    } catch (error) {
+      throw new OfflineSidecarError(
+        `local model ${BUNDLED_MODEL_ID} is missing or invalid (${error instanceof Error ? error.message : String(error)}); open Settings and consent to the official model download`,
+        error,
+      );
+    }
+
+    for (let attempt = 0; attempt < MAX_PORT_ATTEMPTS && !stopRequested; attempt += 1) {
+      const port = DEFAULT_PORT + attempt;
       const command = Command.sidecar('binaries/morphodita-server', [
         String(port),
         BUNDLED_MODEL_ID,
@@ -157,7 +191,13 @@ async function startInternal(modelDir?: string): Promise<string> {
           }
         }
       });
-      spawnedChild = await command.spawn();
+      try {
+        spawnedChild = await command.spawn();
+      } catch (error) {
+        appendDiagnostic(`spawn: ${formatDiagnostic(error)}`);
+        if (isAddressInUse(error)) continue;
+        throw error;
+      }
       sidecarChild = spawnedChild;
       const candidateBaseUrl = `http://127.0.0.1:${port}`;
       setStatus('starting', { port, baseUrl: candidateBaseUrl });
@@ -185,10 +225,10 @@ async function startInternal(modelDir?: string): Promise<string> {
 }
 
 export const OfflineSidecar = {
-  async start(modelDir?: string): Promise<string> {
+  async start(): Promise<string> {
     if (status.state === 'ready' && offlineBaseUrl && sidecarChild) return offlineBaseUrl;
     if (startPromise) return startPromise;
-    startPromise = startInternal(modelDir).finally(() => {
+    startPromise = startInternal().finally(() => {
       startPromise = null;
     });
     return startPromise;
@@ -205,6 +245,11 @@ export const OfflineSidecar = {
       await killCurrentChild();
     }
     setStatus('stopped', { port: null, baseUrl: null, error: null });
+  },
+
+  async restart(): Promise<string> {
+    await this.stop();
+    return this.start();
   },
 
   getCurrentOfflineBaseUrl(): string | null {
