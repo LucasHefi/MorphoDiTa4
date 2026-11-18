@@ -10,15 +10,14 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[cfg(test)]
 pub(crate) mod test_seams {
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
     use std::path::PathBuf;
-    use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Mutex;
 
-    pub static CLEANUP_ATTEMPTS: AtomicUsize = AtomicUsize::new(0);
-    pub static CLEANUP_FAILURES: AtomicUsize = AtomicUsize::new(0);
     pub static TEST_LOCK: Mutex<()> = Mutex::new(());
     thread_local! {
+        pub static CLEANUP_ATTEMPTS: Cell<usize> = const { Cell::new(0) };
+        pub static CLEANUP_FAILURES: Cell<usize> = const { Cell::new(0) };
         static SYNC_EVENTS: RefCell<Vec<PathBuf>> = const { RefCell::new(Vec::new()) };
         static SYNC_FAILURE_PHASE: RefCell<Option<String>> = const { RefCell::new(None) };
     }
@@ -47,8 +46,8 @@ pub(crate) mod test_seams {
     }
 
     pub fn reset() {
-        CLEANUP_ATTEMPTS.store(0, Ordering::SeqCst);
-        CLEANUP_FAILURES.store(0, Ordering::SeqCst);
+        CLEANUP_ATTEMPTS.set(0);
+        CLEANUP_FAILURES.set(0);
         SYNC_EVENTS.with_borrow_mut(Vec::clear);
         set_sync_failure_phase(None);
     }
@@ -175,11 +174,10 @@ impl Drop for TemporaryPath {
 fn remove_temporary_file(path: &Path) -> std::io::Result<()> {
     #[cfg(test)]
     {
-        use std::sync::atomic::Ordering;
-        test_seams::CLEANUP_ATTEMPTS.fetch_add(1, Ordering::SeqCst);
-        let remaining = test_seams::CLEANUP_FAILURES.load(Ordering::SeqCst);
+        test_seams::CLEANUP_ATTEMPTS.set(test_seams::CLEANUP_ATTEMPTS.get() + 1);
+        let remaining = test_seams::CLEANUP_FAILURES.get();
         if remaining > 0 {
-            test_seams::CLEANUP_FAILURES.fetch_sub(1, Ordering::SeqCst);
+            test_seams::CLEANUP_FAILURES.set(remaining - 1);
             return Err(std::io::Error::other("injected temporary cleanup failure"));
         }
     }
@@ -900,6 +898,25 @@ mod tests {
     }
 
     #[test]
+    fn cleanup_failure_injection_is_isolated_from_other_test_threads() {
+        test_seams::reset();
+        test_seams::CLEANUP_FAILURES.set(1);
+        std::thread::spawn(|| {
+            let root = test_root("cleanup-thread-isolation");
+            let path = root.join("temporary");
+            fs::write(&path, b"temporary").unwrap();
+            remove_temporary_file(&path).unwrap();
+            assert_eq!(test_seams::CLEANUP_ATTEMPTS.get(), 1);
+            fs::remove_dir_all(root).unwrap();
+        })
+        .join()
+        .unwrap();
+        assert_eq!(test_seams::CLEANUP_ATTEMPTS.get(), 0);
+        assert_eq!(test_seams::CLEANUP_FAILURES.get(), 1);
+        test_seams::reset();
+    }
+
+    #[test]
     fn publication_survives_cleanup_failure_and_drop_retries_without_retrying_commit() {
         let _lock = test_seams::TEST_LOCK.lock().unwrap();
         test_seams::reset();
@@ -908,18 +925,12 @@ mod tests {
         let temporary = TemporaryPath::create(&target, "test").unwrap();
         let bytes = b"exact backup bytes";
         fs::write(&temporary.path, bytes).unwrap();
-        test_seams::CLEANUP_FAILURES.store(1, std::sync::atomic::Ordering::SeqCst);
+        test_seams::CLEANUP_FAILURES.set(1);
 
         assert!(temporary.commit_to(&target).is_ok());
         assert_eq!(fs::read(&target).unwrap(), bytes);
-        assert_eq!(
-            test_seams::CLEANUP_ATTEMPTS.load(std::sync::atomic::Ordering::SeqCst),
-            2
-        );
-        assert_eq!(
-            test_seams::CLEANUP_FAILURES.load(std::sync::atomic::Ordering::SeqCst),
-            0
-        );
+        assert_eq!(test_seams::CLEANUP_ATTEMPTS.get(), 2);
+        assert_eq!(test_seams::CLEANUP_FAILURES.get(), 0);
         fs::remove_dir_all(root).unwrap();
         test_seams::reset();
     }
