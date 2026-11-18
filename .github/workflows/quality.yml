@@ -54,7 +54,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Tauri Linux dependencies
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+        timeout-minutes: 15
+        working-directory: morphodita4
+        run: bash scripts/install-tauri-linux-deps.sh
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable installer
         with:
           toolchain: 1.97.1
