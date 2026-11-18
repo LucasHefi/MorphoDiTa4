@@ -54,7 +54,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Tauri Linux dependencies
-        timeout-minutes: 15
+        timeout-minutes: 25
         working-directory: morphodita4
         run: bash scripts/install-tauri-linux-deps.sh
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable installer

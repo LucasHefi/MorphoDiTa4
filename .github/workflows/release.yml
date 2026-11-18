@@ -61,7 +61,7 @@ jobs:
           persist-credentials: false
       - name: Install Linux build dependencies
         if: matrix.platform == 'linux'
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: bash scripts/install-tauri-linux-deps.sh
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
