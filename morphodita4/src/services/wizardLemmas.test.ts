@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolveWizardLemmas, wizardDictionaryModel } from './wizardLemmas';
 import type { AnalyzeResponse, TagResponse } from '../types/api';
 import { summaryRows, filterColumn, defaultSummarySettings, visibleDatabaseRows } from '../components/wizard/summaryFilters';
-const evidence = new URL('../../../docs/verification/2026-11-17-canonical-lemmas/', import.meta.url);
+const evidence = new URL('./__fixtures__/canonical-lemmas/', import.meta.url);
 const original = JSON.parse(readFileSync(new URL('before.json', evidence), 'utf8')) as { tag: TagResponse; expected: [string, string][] };
 const dictionary = JSON.parse(readFileSync(new URL('dictionary-analysis.json', evidence), 'utf8')) as AnalyzeResponse;
 describe('dictionary base forms', () => {

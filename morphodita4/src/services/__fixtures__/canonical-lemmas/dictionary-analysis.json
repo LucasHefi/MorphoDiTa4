@@ -1,0 +1,5844 @@
+{
+  "model": "czech-250909-no_dia",
+  "result": [
+    [
+      {
+        "token": "akcionar",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS1-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionare",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP4-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS2-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS4-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarem",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS7-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarema",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP7-----A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionari",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP1-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP5-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP7-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS3-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS5-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS6-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarich",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP6-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarove",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP1-----A---6"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP5-----A---6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUFS3M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUFS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUIS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUIS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUNS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUNS6M---------"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarovi",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS3-----A---1"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS6-----A---1"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMP1M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMP5M---------"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionaru",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP2-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarum",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionar",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS1-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionare",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP4-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS2-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS4-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarem",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS7-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarema",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP7-----A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionari",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP1-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP5-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP7-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS3-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS5-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS6-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarovi",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS3-----A---1"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMS6-----A---1"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMP1M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMP5M---------"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarove",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP1-----A---6"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP5-----A---6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUFS3M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUFS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUIS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUIS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUMS6M---------"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUNS3M--------6"
+          },
+          {
+            "lemma": "akcionářův_^(*2)",
+            "tag": "AUNS6M---------"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarum",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarich",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP6-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionaru",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP2-----A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarum",
+        "analyses": [
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A----"
+          },
+          {
+            "lemma": "akcionář",
+            "tag": "NNMP3-----A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarska",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarske",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskeho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskej",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejch",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejm",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskem",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskemu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskou",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarsky",
+        "analyses": [
+          {
+            "lemma": "akcionářsky_^(*1ý)",
+            "tag": "Dg-------1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskych",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskyho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskyma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A---7"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskymi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskymu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarsti",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskej",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejch",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejm",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskejma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskou",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarska",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarske",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskeho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskem",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskemu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarsky",
+        "analyses": [
+          {
+            "lemma": "akcionářsky_^(*1ý)",
+            "tag": "Dg-------1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskych",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskyho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskyma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A---7"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskymi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarskymu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarsti",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "akcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----2A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----2A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarska",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarske",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskeho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskej",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejch",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejm",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskem",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskemu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskou",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarsky",
+        "analyses": [
+          {
+            "lemma": "akcionářsky_^(*1ý)",
+            "tag": "Dg-------1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskych",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskyho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskyma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N---7"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskymi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskymu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarsti",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskej",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejch",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejm",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskejma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskou",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarska",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarske",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskeho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskem",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskemu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarsky",
+        "analyses": [
+          {
+            "lemma": "akcionářsky_^(*1ý)",
+            "tag": "Dg-------1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskych",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskyho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskym",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskyma",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N---7"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N---7"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskymi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarskymu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----1N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----1N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarsti",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----1N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----1N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----2N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "neakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----2N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----2N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3A---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3A---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----3A----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----3A----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP5----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS1----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS5----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsich",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP6----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsiho",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS2----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS4----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS2----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsim",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP3----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS6----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS7----3N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsima",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFD7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3N---6"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3N---6"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsimi",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAFP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMP7----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANP7----3N----"
+          }
+        ],
+        "space": "\n"
+      },
+      {
+        "token": "nejneakcionarstejsimu",
+        "analyses": [
+          {
+            "lemma": "akcionářský",
+            "tag": "AAIS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AAMS3----3N----"
+          },
+          {
+            "lemma": "akcionářský",
+            "tag": "AANS3----3N----"
+          }
+        ]
+      }
+    ]
+  ],
+  "acknowledgements": [
+    "http://ufal.mff.cuni.cz/morphodita#morphodita_acknowledgements",
+    "https://hdl.handle.net/11234/1-5985"
+  ]
+}
