@@ -14,5 +14,7 @@ Instalační balíčky pro Linux amd64 a Windows x64. Windows ZIP obsahuje insta
 
 Modely nejsou součástí balíčků; instalují se po přečtení licence v Nastavení. Program je MIT, přibalený upravený server MPL-2.0; licenční a zdrojové podklady jsou v instalaci.
 
+Sestavovací audit má časově omezenou výjimku pro dosud neopravené vývojové upozornění picomatch; podmínky a termín jsou v https://github.com/LucasHefi/MorphoDiTa4/blob/master/docs/releasing.md .
+
 Balíčky nejsou digitálně podepsané. Automatické sestavení a testy nenahrazují ruční akceptaci instalace a grafického rozhraní, zejména na Windows.
 ''')

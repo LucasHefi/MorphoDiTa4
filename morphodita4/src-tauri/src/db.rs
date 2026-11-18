@@ -1623,6 +1623,7 @@ mod tests {
         );
         assert!(target.is_file());
         assert!(!rollback.exists());
+        drop(conn);
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -1658,6 +1659,7 @@ mod tests {
             "live"
         );
         assert!(rollback.exists());
+        drop(conn);
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -1679,6 +1681,7 @@ mod tests {
                 .unwrap(),
             0
         );
+        drop(conn);
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -1701,6 +1704,7 @@ mod tests {
         );
         assert!(older.exists());
         assert!(!newer.exists());
+        drop(conn);
         std::fs::remove_dir_all(root).unwrap();
     }
 

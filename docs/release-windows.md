@@ -1,6 +1,6 @@
 # Windows x64 instalátor — 0.1.21
 
-Hotový instalační EXE a ZIP s českým návodem jsou v ignorované složce `artifacts/windows/0.1.21/`. Nejsou publikované na GitHubu ani digitálně podepsané. Obsah a SHA-256 shrnuje `manifest.json`; kontrolní součty balíčku jsou v `SHA256SUMS.txt`.
+Automaticky sestavované EXE a ZIP s českým návodem se vydávají přes [GitHub Releases](https://github.com/LucasHefi/MorphoDiTa4/releases). CI sestavuje klienta nativně na Windows/MSVC a spouští knihovní testy; viz [CI/CD](releasing.md). Lokální křížově sestavené kandidáty lze připravit níže uvedeným postupem do ignorované složky `artifacts/windows/0.1.21/`. Balíčky nejsou digitálně podepsané. Publikované manifesty a SHA256SUMS popisují přesné soubory jednotlivých sestavení.
 
 ## Instalace
 

@@ -1,5 +1,7 @@
 # Linux test release
 
+CI/CD builds and publishes version-tagged Linux DEB and Windows NSIS installers through GitHub Releases; see [the release workflow](releasing.md). Automated native builds and tests do not establish manual GUI/installer acceptance or a production support commitment.
+
 This document defines the current release boundary. The only locally supported and
 verified platform scope is a Linux x86_64 test `.deb`. That evidence does not
 create a public, production, or cross-platform support promise.
@@ -27,9 +29,7 @@ the current release decision for this document.
   integrity record, not a code-signing signature.
 - **Notarization:** **OPEN / unverified**. macOS notarization is not part of the
   current release scope, and no notarization evidence exists.
-- **Update channel:** **OPEN / unverified**. The repository documents a manually
-  built test `.deb`, but no application updater, update feed, or publication
-  channel is configured or verified here. The online LINDA API transport is not an
+- **Update channel:** **OPEN / unverified**. GitHub Releases is the installer publication channel. No application updater or in-app update feed is configured. The online LINDA API transport is not an
   application update channel.
 - **Support commitment:** limited to local verification of the Linux x86_64 test
   artifact. Windows has no support commitment until direct testing passes; macOS

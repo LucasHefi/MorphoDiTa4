@@ -228,8 +228,10 @@ fn sync_directory(path: &Path, phase: &str) -> std::io::Result<()> {
         use std::os::windows::fs::OpenOptionsExt;
         const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x02000000;
         let _ = phase;
+        // FlushFileBuffers requires GENERIC_WRITE even for a directory handle.
         return OpenOptions::new()
             .read(true)
+            .write(true)
             .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
             .open(path)?
             .sync_all();
@@ -531,7 +533,14 @@ pub fn sync_file(path: &Path) -> BackupResult<()> {
 }
 
 fn sync_file_for_phase(path: &Path, phase: &str) -> BackupResult<()> {
-    if let Err(error) = File::open(path).and_then(|file| file.sync_all()) {
+    // Windows FlushFileBuffers rejects read-only handles. Do not create or
+    // truncate the existing database; Unix can still sync a read-only handle.
+    if let Err(error) = File::options()
+        .read(true)
+        .write(cfg!(windows))
+        .open(path)
+        .and_then(|file| file.sync_all())
+    {
         return Err(BackupError::Invalid(format!(
             "durability sync failed during {phase} at {}: {error}",
             path.display()

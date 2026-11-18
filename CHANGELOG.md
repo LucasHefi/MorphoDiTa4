@@ -4,6 +4,10 @@ All notable changes to MorphoDiTa Client are recorded here.
 
 ## 0.1.21 — 2026-11-18
 
+- Windows zálohy a obnova otevírají soubory i adresáře pro zápis při synchronizaci, jak vyžaduje FlushFileBuffers. Nativní regresní testy zavírají databáze před odstraněním dočasných složek.
+
+- GitHub CI/CD kontroluje frontend, Rust i závislosti, sestavuje nativní Linux DEB a Windows NSIS a po úspěchu vydává balíčky z verzového tagu. Regresní jazykové vzorky jsou verzované odděleně od místních QA reportů.
+
 - Nasazena schválená ikona MorphoDiTa: otevřená kniha / M s tyrkysovým větvením. Nové PNG, ICO a ICNS pro okno aplikace, systémový spouštěč, instalační balíčky a ikonu webové záložky.
 
 ## 0.1.20 — 2026-11-18
