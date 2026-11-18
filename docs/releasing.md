@@ -20,6 +20,8 @@ Upstream [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf
 
 ## Vydání
 
+Před označením verze lze ručně spustit `gh workflow run release.yml --ref master`. Sestaví a otestuje balíčky, ale bez verzového tagu nic nepublikuje. To umožňuje ověřit obě platformy před vytvořením neměnného release tagu.
+
 1. Aktualizujte aplikaci, changelog a sjednoťte verzi v `package.json`, `package-lock.json`, `release-metadata.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, `src/App.tsx`, `src/pages/AboutPage.tsx` a očekávání testu `scripts/releaseMetadata.test.mjs` (cesty jsou relativní k `morphodita4`).
 2. Commitněte změny do `master`, pushněte je a ověřte Quality gates.
 3. Označte stejný commit verzí, například `git tag -a v0.1.21 -m "MorphoDiTa Client 0.1.21"`, a pushněte konkrétní tag `git push origin v0.1.21`. Již publikované tagy ani soubory nepřepisujte.
