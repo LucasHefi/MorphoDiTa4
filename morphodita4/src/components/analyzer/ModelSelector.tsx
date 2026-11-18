@@ -9,15 +9,15 @@ import { Link } from 'react-router';
 
 export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> = ({ compact = false, disabled = false }) => {
   const { t } = useTranslation();
-  const { models, selectedModel, isLoading, error, setSelectedModel, refreshModels } = useApiStore();
-  const automaticRequestStarted = useRef(false);
+  const { models, selectedModel, isLoading, error, catalogRevision, setSelectedModel, refreshModels } = useApiStore();
+  const automaticRequestRevision = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!automaticRequestStarted.current && Object.keys(models).length === 0) {
-      automaticRequestStarted.current = true;
+    if (automaticRequestRevision.current !== catalogRevision && Object.keys(models).length === 0) {
+      automaticRequestRevision.current = catalogRevision;
       void refreshModels();
     }
-  }, [models, refreshModels]);
+  }, [models, refreshModels, catalogRevision]);
 
   const options: SelectOption[] = Object.entries(models).map(([key, info]) => ({
     value: key,
@@ -44,7 +44,7 @@ export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> 
         </Link>
       )}
       <Button
-        variant="ghost"
+        variant={compact ? 'primary' : 'ghost'}
         size="md"
         onClick={() => void refreshModels()}
         disabled={isLoading || disabled}
@@ -53,6 +53,7 @@ export const ModelSelector: React.FC<{ compact?: boolean; disabled?: boolean }> 
         className="mb-[2px]"
       >
           <RefreshCw aria-hidden="true" className={`h-4 w-4 ${isLoading ? 'motion-safe:animate-spin' : ''}`} />
+          {compact && <span className="model-refresh-label">{t('design.refreshModels')}</span>}
       </Button>
     </div>
   );

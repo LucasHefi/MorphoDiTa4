@@ -1,0 +1,28 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "bundle": {
+    "targets": [
+      "nsis"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "displayLanguageSelector": true,
+        "languages": [
+          "Czech",
+          "English",
+          "Polish"
+        ],
+        "customLanguageFiles": {
+          "Czech": "installer/Czech.nsh",
+          "Polish": "installer/Polish.nsh"
+        }
+      }
+    }
+  }
+}

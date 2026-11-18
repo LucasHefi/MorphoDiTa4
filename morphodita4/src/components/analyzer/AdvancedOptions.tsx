@@ -36,10 +36,10 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   const guesserId = `${panelId}-guesser`;
   const convertTagsetId = `${panelId}-convert-tagset`;
 
-  const showGuesser = ['analyze', 'generate'].includes(operation);
-  const showInputFormat = operation === 'analyze';
-  const showDerivation = operation === 'analyze';
-  const showConvertTagset = ['analyze', 'generate'].includes(operation);
+  const showGuesser = ['tag', 'analyze', 'generate'].includes(operation);
+  const showInputFormat = ['tag', 'analyze'].includes(operation);
+  const showDerivation = ['tag', 'analyze'].includes(operation);
+  const showConvertTagset = ['tag', 'analyze', 'generate'].includes(operation);
 
   if (!showGuesser && !showInputFormat && !showDerivation && !showConvertTagset) {
     return null;
@@ -78,7 +78,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
                 disabled={disabled}
                 className="rounded border-input text-primary focus:ring-primary"
               />
-               <span className="text-sm text-foreground">{t('analyzer.guesser')}</span>
+               <span className="text-sm text-foreground">{t('design.guesser')}</span>
             </label>
           )}
 

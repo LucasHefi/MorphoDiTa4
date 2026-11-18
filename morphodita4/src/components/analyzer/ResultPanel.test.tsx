@@ -26,7 +26,7 @@ describe('ResultPanel copy feedback', () => {
   });
 
   it('prevents duplicate writes while copying and exposes actionable success feedback', async () => {
-    const button = [...container.querySelectorAll('button')].find((item) => item.textContent?.includes('analyzer.results.copy'));
+    const button = [...container.querySelectorAll('button')].find((item) => item.textContent?.includes('design.copyJson'));
     expect(button).toBeDefined();
     flushSync(() => button?.click());
     flushSync(() => button?.click());
@@ -43,7 +43,7 @@ describe('ResultPanel copy feedback', () => {
       .mockRejectedValueOnce(new Error('clipboard unavailable'))
       .mockResolvedValueOnce(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
-    const button = [...container.querySelectorAll('button')].find((item) => item.textContent?.includes('analyzer.results.copy'));
+    const button = [...container.querySelectorAll('button')].find((item) => item.textContent?.includes('design.copyJson'));
     expect(button).toBeDefined();
 
     flushSync(() => button?.click());

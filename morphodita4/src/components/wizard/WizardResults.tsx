@@ -3,12 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { useWizardStore } from '../../store/useWizardStore';
 import { Button, Tabs } from '../common';
 import { MorphologicalTag } from '../../types/api';
+import { ResultPager } from './ResultPagination';
+import { useResultPage } from './useResultPage';
 import { cleanLemma } from '../../services/filters';
 
 export const WizardResults: React.FC = () => {
   const { t } = useTranslation();
   const { processingResult, setStep } = useWizardStore();
 
+  const tokenPage = useResultPage(processingResult?.taggedTokens ?? []);
+  const formPage = useResultPage(processingResult?.forms ?? []);
   const [activeTab, setActiveTab] = useState('lemmas');
 
   if (!processingResult) {
@@ -20,10 +24,10 @@ export const WizardResults: React.FC = () => {
     );
   }
 
-  const { forms, uniqueLemmas, taggedTokens } = processingResult;
+  const { forms, uniqueLemmas } = processingResult;
 
   const renderLemmasTable = () => (
-    <div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
+    <><div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
        <table aria-label={t('wizard.results.lemmasTable')} className="min-w-[34rem] w-full text-sm text-left">
          <caption className="sr-only">{t('wizard.results.lemmasTable')}</caption>
         <thead className="text-xs uppercase bg-secondary text-muted-foreground sticky top-0">
@@ -35,9 +39,9 @@ export const WizardResults: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {taggedTokens?.map((token, idx) => (
+          {tokenPage.items.map((token, idx) => (
             <tr key={idx} className="bg-background border-b border-border hover:bg-secondary/50">
-              <td className="px-4 py-2 font-mono text-muted-foreground w-12">{idx + 1}</td>
+              <td className="px-4 py-2 font-mono text-muted-foreground w-12">{tokenPage.start + idx + 1}</td>
               <td className="px-4 py-2 font-medium">{token.token}</td>
               <td className="px-4 py-2">{cleanLemma(token.lemma)}</td>
               <td className="px-4 py-2 font-mono text-xs">{token.tag}</td>
@@ -45,11 +49,11 @@ export const WizardResults: React.FC = () => {
           ))}
         </tbody>
       </table>
-    </div>
+    </div><ResultPager {...tokenPage} /></>
   );
 
   const renderFormsTable = () => (
-    <div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
+    <><div className="overflow-auto border border-border rounded-md mt-4 max-h-[min(60vh,32rem)]">
        <table aria-label={t('wizard.results.formsTable')} className="min-w-[30rem] w-full text-sm text-left">
          <caption className="sr-only">{t('wizard.results.formsTable')}</caption>
         <thead className="text-xs uppercase bg-secondary text-muted-foreground sticky top-0">
@@ -60,7 +64,7 @@ export const WizardResults: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {forms?.map((item: MorphologicalTag, idx: number) => (
+          {formPage.items.map((item: MorphologicalTag, idx: number) => (
             <tr key={idx} className="bg-background border-b border-border hover:bg-secondary/50">
               <td className="px-4 py-2 text-muted-foreground">{cleanLemma(item.lemma)}</td>
               <td className="px-4 py-2 font-medium">{item.form || item.lemma}</td>
@@ -69,7 +73,7 @@ export const WizardResults: React.FC = () => {
           ))}
         </tbody>
       </table>
-    </div>
+    </div><ResultPager {...formPage} /></>
   );
 
   const tabsData = [
@@ -105,7 +109,7 @@ export const WizardResults: React.FC = () => {
         />
       </div>
 
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="wizard-actions flex justify-end gap-2 mt-4">
         <Button
           variant="secondary"
           onClick={() => setStep(2)}
@@ -116,7 +120,7 @@ export const WizardResults: React.FC = () => {
           onClick={() => setStep(4)}
           className="min-w-[120px]"
         >
-          {t('wizard.next')}
+          {t('design.continueSummary')}
         </Button>
       </div>
     </div>

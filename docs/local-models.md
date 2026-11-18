@@ -2,7 +2,7 @@
 
 The local model inventory is deliberately separate from bundled Tauri resources.
 
-- Bundled resources are resolved with `resolveResource('models')` and are used by the packaged offline sidecar.
+- Models are not bundled. Settings downloads a model after license acceptance and verifies its provenance before activation.
 - User-managed models are stored below Tauri `appDataDir()/models`.
 - Inventory scans only direct child directories of that app-data `models` directory. It does not recursively scan arbitrary user files.
 
@@ -21,10 +21,10 @@ An importable model directory contains:
 - `model.json` with `schemaVersion: 1`, `id`, `version`, `language`, and `artifact`;
 - `sourceUrl`, SPDX `license` metadata, a non-empty `notices` file list, and
   `serverCompatibility` with a minimum and optional maximum server version;
-- exactly one non-empty `.mor` artifact named by `artifact`;
+- exactly one non-empty `.mor` or `.tagger` artifact named by `artifact`;
 - declared root-level `README*`, `LICENSE*`, or `NOTICE*` files.
 
-The manifest `id` and artifact name must be safe single path components. Directory traversal, control characters, symlinks, nested directories, malformed JSON, an unsupported manifest schema, a missing artifact, multiple `.mor` artifacts, or an empty artifact are rejected.
+The manifest `id` and artifact name must be safe single path components. Directory traversal, control characters, symlinks, nested directories, malformed JSON, an unsupported manifest schema, a missing artifact, multiple `.mor` or `.tagger` artifacts, or an empty artifact are rejected.
 
 Inventory returns valid models with:
 

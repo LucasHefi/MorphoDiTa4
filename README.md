@@ -4,6 +4,14 @@ MorphoDiTa Client is a React/Tauri desktop application for morphological
 analysis, generation, tokenization, and local result storage. The application
 directory is [`morphodita4/`](morphodita4/).
 
+## Downloads and CI/CD
+
+[Latest release](https://github.com/LucasHefi/MorphoDiTa4/releases/latest) · [Quality gates](https://github.com/LucasHefi/MorphoDiTa4/actions/workflows/quality.yml) · [Release builds](https://github.com/LucasHefi/MorphoDiTa4/actions/workflows/release.yml)
+
+Linux amd64 DEB and Windows x64 EXE/ZIP are distributed through GitHub Releases, with SHA-256 manifests. Installers are unsigned; language models are downloaded separately after license consent. Native builds and automated tests do not replace manual GUI/installer acceptance.
+
+Version tags trigger checks, native Linux/Windows builds and publication of complete releases. See [the release workflow and audit policy](docs/releasing.md).
+
 ## Development
 
 Use Node/npm in `morphodita4/`:
@@ -27,7 +35,7 @@ cargo build --locked
 ```
 
 The manifests are authoritative for versions: React 19, TypeScript 5.7,
-Vite 6, Tauri 2.11.2, Rust 1.88 minimum supported, and `rusqlite` 0.31.0.
+Vite 8, Tauri 2.11.2, Rust 1.88 minimum supported, and `rusqlite` 0.43.0.
 The reproducible development and CI toolchain is pinned to Rust 1.97.1. The
 npm package manager is npm 10.9.8.
 
@@ -60,7 +68,10 @@ npm package manager is npm 10.9.8.
 - [Linux test-release boundary](docs/release-linux.md)
 - [Feature specification](docs/spec.md) and [UI guide](docs/ui_guide.md)
 
-Known blockers are the missing distributable model/license owner gate and
-RustSec's allowed upstream unmaintained/unsound warnings. After the lockfile
-update, the vulnerability count is zero; those warnings are not represented
-as zero risk.
+## Licenses
+
+The client is MIT licensed (owner decision, 2026-11-16). The bundled upstream
+server remains MPL-2.0; see NOTICE and licenses/MPL-2.0.txt. Models are not
+bundled. Settings requires explicit acceptance of the model terms before download;
+About shows model provenance and license links. MIT does not grant commercial
+use of the CC BY-NC-SA model. Windows verification remains open.

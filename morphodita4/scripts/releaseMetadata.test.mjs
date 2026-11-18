@@ -9,12 +9,12 @@ describe('release metadata', () => {
     expect(metadata.schemaVersion.source).toBe(4);
     expect(metadata.schemaVersion.docs).toHaveLength(4);
     expect(validateReleaseMetadata(metadata)).toEqual({
-      version: '0.1.0',
-      license: 'MPL-2.0',
-      modelLicenses: ['CC BY-NC-SA 4.0'],
+      version: '0.1.21',
+      license: 'MIT',
+      modelLicenses: ['CC BY-NC-SA 4.0', 'CC BY-NC-SA 4.0'],
       repository: 'https://github.com/LucasHefi/MorphoDiTa4',
       authors: ['MorphoDiTa Client contributors'],
-      openGates: ['model-commercial-distribution'],
+      openGates: [],
     });
   });
 

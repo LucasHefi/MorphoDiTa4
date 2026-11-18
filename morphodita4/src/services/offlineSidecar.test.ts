@@ -40,11 +40,11 @@ function getModelPathValidator(): RegExp {
     (permission): permission is { identifier: string; allow: Array<{ args?: Array<string | { validator?: string }> }> } =>
       typeof permission !== 'string' && permission.identifier === 'shell:allow-spawn',
   );
-  const validator = shellPermission?.allow[0]?.args?.[2];
+  const validator = shellPermission?.allow[0]?.args?.[3];
   if (typeof validator !== 'object' || !validator.validator) {
     throw new Error('Bundled model path validator is missing');
   }
-  return new RegExp(validator.validator);
+  return new RegExp(validator.validator, 'u');
 }
 
 describe('OfflineSidecar platform path handling', () => {
@@ -54,12 +54,10 @@ describe('OfflineSidecar platform path handling', () => {
     mocks.command.spawn.mockResolvedValue(mocks.child);
     mocks.sidecar.mockReturnValue(mocks.command);
     mocks.getLocalModelsDir.mockResolvedValue('/opt/morphodita/appdata/models');
-    mocks.validateLocalModelDirectory.mockResolvedValue({
-      manifest: { id: 'czech-250909', artifact: 'czech.tagger' },
-    });
+    mocks.validateLocalModelDirectory.mockImplementation(async (_directory: string, id: string) => ({ manifest: { id, artifact: 'czech.tagger' } }));
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'] } }),
+    json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'], 'czech-250909-no_dia': ['tag', 'analyze', 'generate', 'tokenize'] } }),
   }));
   });
 
@@ -72,9 +70,13 @@ describe('OfflineSidecar platform path handling', () => {
     await expect(OfflineSidecar.start()).resolves.toBe('http://127.0.0.1:8765');
 
     expect(mocks.sidecar).toHaveBeenCalledWith('binaries/morphodita-server', [
+      '--log_file=',
       '8765',
       'czech-250909',
       '/opt/morphodita/appdata/models/czech-250909/czech.tagger',
+      'https://hdl.handle.net/11234/1-5985',
+      'czech-250909-no_dia',
+      '/opt/morphodita/appdata/models/czech-250909-no_dia/czech.tagger',
       'https://hdl.handle.net/11234/1-5985',
     ]);
   });
@@ -84,9 +86,13 @@ describe('OfflineSidecar platform path handling', () => {
     await expect(OfflineSidecar.start('/tmp/attacker-models')).resolves.toBe('http://127.0.0.1:8765');
 
     expect(mocks.sidecar).toHaveBeenCalledWith('binaries/morphodita-server', [
+      '--log_file=',
       '8765',
       'czech-250909',
       '/opt/morphodita/appdata/models/czech-250909/czech.tagger',
+      'https://hdl.handle.net/11234/1-5985',
+      'czech-250909-no_dia',
+      '/opt/morphodita/appdata/models/czech-250909-no_dia/czech.tagger',
       'https://hdl.handle.net/11234/1-5985',
     ]);
     expect(mocks.getLocalModelsDir).toHaveBeenCalledTimes(1);
@@ -171,7 +177,7 @@ describe('OfflineSidecar platform path handling', () => {
     await expect(OfflineSidecar.start()).resolves.toBe('http://127.0.0.1:8766');
 
     expect(mocks.sidecar).toHaveBeenNthCalledWith(2, 'binaries/morphodita-server', expect.arrayContaining(['8766']));
-    expect(mocks.validateLocalModelDirectory).toHaveBeenCalledTimes(1);
+    expect(mocks.validateLocalModelDirectory).toHaveBeenCalledTimes(2);
   });
 
   it.each([
@@ -204,7 +210,7 @@ describe('OfflineSidecar platform path handling', () => {
     secondCommand.spawn.mockResolvedValueOnce(mocks.child);
     vi.mocked(fetch).mockImplementation(async (input) => {
       if (String(input).includes(':8765')) throw new Error('not ready');
-       return { ok: true, json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'] } }) } as Response;
+       return { ok: true, json: async () => ({ models: { 'czech-250909': ['tag', 'analyze', 'generate', 'tokenize'], 'czech-250909-no_dia': ['tag', 'analyze', 'generate', 'tokenize'] } }) } as Response;
     });
 
     const start = OfflineSidecar.start();
@@ -235,6 +241,10 @@ describe('OfflineSidecar platform path handling', () => {
   it('matches only canonical Linux and Windows model paths in the shell contract', () => {
     const validator = getModelPathValidator();
     expect(validator.test('/opt/morphodita/appdata/models/czech-250909/czech.tagger')).toBe(true);
+    expect(validator.test('C:\\Users\\Lukáš Novák\\AppData\\Roaming\\cz.ufal.morphodita\\models\\czech-250909\\czech.tagger')).toBe(true);
+    expect(validator.test('/home/žluťoučký/.local/share/cz.ufal.morphodita/models/czech-250909/czech.tagger')).toBe(true);
+    expect(validator.test('/home/jolanda/.local/share/cz.ufal.morphodita/models/czech-250909/czech.tagger')).toBe(true);
+    expect(validator.test('/tmp/.offline-test/models/czech-250909/czech.tagger')).toBe(true);
     expect(validator.test('C:\\Users\\test\\AppData\\models\\czech-250909\\czech.tagger')).toBe(true);
   });
 
@@ -247,6 +257,8 @@ describe('OfflineSidecar platform path handling', () => {
     '/opt/morphodita/appdata/models/czech-250909/czech.tagger\n',
     '/opt/morphodita/appdata/models/czech-250909/czech.tagger\0',
     '/tmp/arbitrary-model.tagger',
+    '/home/jolanda/../models/czech-250909/czech.tagger',
+    '/home/jolanda/./models/czech-250909/czech.tagger',
   ])('rejects unsafe or non-bundled model path: %s', (modelPath) => {
     expect(getModelPathValidator().test(modelPath)).toBe(false);
   });

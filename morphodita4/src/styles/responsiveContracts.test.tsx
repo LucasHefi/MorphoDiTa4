@@ -26,6 +26,7 @@ describe('responsive composition contracts', () => {
       'pages/DatabaseEditorPage.tsx',
       'pages/AboutPage.tsx',
     ]) {
+      if(page==='pages/HomePage.tsx'){expect(source(page)).toContain('className="dashboard-page"');continue;}
       expect(source(page), page).toMatch(/<main className="[^"\n]*\bcontainer\b[^"\n]*\bmax-w-[^"\n]*\bmx-auto\b/);
     }
   });

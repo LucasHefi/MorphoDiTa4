@@ -53,6 +53,7 @@ describe('model download contract', () => {
       sha256: '173ea80a38d4ebb53a3e85a74f91ad02827738472809f155d965ce225d27cc3e',
     });
     await expect(downloadModel('czech-250909', true)).resolves.toMatchObject({ id: 'czech-250909' });
-    expect(mocks.invoke).toHaveBeenCalledWith('download_model', { modelId: 'czech-250909', consent: true });
+    expect(mocks.invoke).toHaveBeenNthCalledWith(1, 'download_model', { modelId: 'czech-250909', consent: true });
+    expect(mocks.invoke).toHaveBeenNthCalledWith(2, 'download_model', { modelId: 'czech-250909-no_dia', consent: true });
   });
 });

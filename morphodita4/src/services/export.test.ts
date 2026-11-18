@@ -117,6 +117,17 @@ describe('CSV exports', () => {
     expect(JSON.parse(exportToJson(rows))).toEqual(rows);
   });
 
+  it('exports a lazy generator across block boundaries with one header and no lost records', () => {
+    function* rows() {
+      for (let i = 0; i < 2501; i++) yield { index: i, value: i === 999 ? 'žlutý, "kůň"\nřádek' : `value-${i}` };
+    }
+    const parsed = parseCsv(exportToCsv(rows(), ['index', 'value']));
+    expect(parsed).toHaveLength(2502);
+    expect(parsed[0]).toEqual(['index', 'value']);
+    expect(parsed[1000]).toEqual(['999', 'žlutý, "kůň"\nřádek']);
+    expect(parsed[2501]).toEqual(['2500', 'value-2500']);
+  });
+
   it('serializes a target-size dataset without losing rows', () => {
     const start = performance.now();
     const rows = Array.from({ length: 10000 }, (_, index) => ({
@@ -133,14 +144,17 @@ describe('CSV exports', () => {
     expect(performance.now() - start).toBeLessThan(5000);
   });
 
-  it('cleans up the download DOM and URL when clicking throws', () => {
+  it('cleans up the download DOM and URL when clicking throws', async () => {
+    vi.useFakeTimers();
     const createObjectURL = vi.fn(() => 'blob:test');
     const revokeObjectURL = vi.fn();
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => { throw new Error('blocked'); });
 
-    expect(() => downloadFile('data', 'result.txt', 'text/plain')).toThrow('blocked');
+    await expect(downloadFile('data', 'result.txt', 'text/plain')).rejects.toThrow('blocked');
+    vi.runAllTimers();
+    vi.useRealTimers();
     expect(document.querySelector('a[download="result.txt"]')).toBeNull();
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:test');
 

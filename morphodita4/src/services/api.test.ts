@@ -142,6 +142,30 @@ describe('MorphoDiTaAPI', () => {
     }));
   });
 
+  it('sends tagger advanced options without changing vertical sentence boundaries', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ model: 'model1', result: [] }) });
+    const input = 'Kočky\nspí\n.\n\nPes\nběží\n.';
+    await MorphoDiTaAPI.tagText(input, 'model1', 'json', {
+      inputFormat: 'vertical', guesser: false, derivation: 'path', convertTagset: 'pdt_to_conll2009',
+    });
+    const params = new URLSearchParams(mockFetch.mock.calls[0][1].body);
+    expect(Object.fromEntries(params)).toMatchObject({ data: input, input: 'vertical', guesser: 'no', derivation: 'path', convert_tagset: 'pdt_to_conll2009' });
+  });
+
+  it('rejects invalid tagger input and derivation options before fetching', async () => {
+    await expect(MorphoDiTaAPI.tagText('text', 'model1', 'json', { inputFormat: 'invalid' as 'vertical' })).rejects.toBeInstanceOf(APIInputError);
+    await expect(MorphoDiTaAPI.tagText('text', 'model1', 'json', { derivation: 'invalid' as 'root' })).rejects.toBeInstanceOf(APIInputError);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('uses vertical input for wizard words', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ model: 'model1', result: [[{ token: 'pes', lemma: 'pes', tag: 'N' }, { token: 'kočka', lemma: 'kočka', tag: 'N' }]] }) });
+    const result = await MorphoDiTaAPI.tagText('pes\nkočka', 'model1', 'json', { inputFormat: 'vertical' });
+    const init = mockFetch.mock.calls[0][1] as RequestInit;
+    expect(new URLSearchParams(init.body as string).get('input')).toBe('vertical');
+    expect(result.result[0].map((item) => item.token)).toEqual(['pes', 'kočka']);
+  });
+
   it('does not retry permanent client errors', async () => {
     mockFetch.mockResolvedValue({
       ok: false,

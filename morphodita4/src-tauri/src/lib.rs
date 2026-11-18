@@ -1,6 +1,8 @@
 pub mod backup;
 pub mod commands;
+pub mod dashboard;
 pub mod db;
+pub mod exports;
 
 #[cfg(test)]
 use std::alloc::{GlobalAlloc, Layout, System};
@@ -109,6 +111,9 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            dashboard::get_dashboard,
+            exports::export_file,
+            exports::export_csv_sections,
             commands::create_session,
             commands::save_wizard_results,
             commands::update_session_status,

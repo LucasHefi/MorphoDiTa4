@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { cn } from './utils';
 
 export interface TooltipProps {
@@ -8,12 +8,13 @@ export interface TooltipProps {
   className?: string;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ 
-  content, 
-  children, 
+export const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  children,
   position = 'top',
   className
 }) => {
+  const tooltipId = useId();
   const [isVisible, setIsVisible] = useState(false);
 
   const getPositionClasses = () => {
@@ -32,8 +33,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="relative inline-flex"
+      tabIndex={0}
+      aria-describedby={isVisible ? tooltipId : undefined}
+      onKeyDown={(event) => { if (event.key === 'Escape') setIsVisible(false); }}
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
       onFocus={() => setIsVisible(true)}
@@ -41,12 +45,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
     >
       {children}
       {isVisible && (
-        <div 
+        <div
           className={cn(
-            "absolute z-50 px-2 py-1 text-xs font-medium text-popover-foreground bg-popover rounded shadow-md border border-border whitespace-nowrap animate-in fade-in-0 zoom-in-95",
+            "absolute z-50 px-2 py-1 text-xs font-medium text-popover-foreground bg-popover rounded shadow-md border border-border whitespace-normal motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95",
             getPositionClasses(),
             className
           )}
+          id={tooltipId}
           role="tooltip"
         >
           {content}

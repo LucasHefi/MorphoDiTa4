@@ -4,7 +4,7 @@ import { DatabaseService } from '../services/database';
 import { DATABASE_PAGE_SIZE, hasExpectedAffectedRows } from '../components/database/databaseEditorContracts';
 import type { DatabaseId, DatabaseRow } from '../types/database';
 import { DatabaseTable } from '../components/database/DatabaseTable';
-import { Button, Input, Select } from '../components/common';
+import { Button, Input } from '../components/common';
 import { cn } from '../components/common/utils';
 import { RefreshCw, Search, Trash2, X } from 'lucide-react';
 
@@ -214,25 +214,27 @@ export const DatabaseEditorPage: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <main className="flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+      <main className="database-page flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
         <h1 className="text-3xl font-bold mb-6 text-foreground">{t('database.title')}</h1>
-        <div className="space-y-4">
+        <p className="page-subtitle">{t('design.databaseSubtitle')}</p>
+        <div className="database-workspace space-y-4">
+          <div className="database-tabs" role="group" aria-label={t('database.title')}>
+            {(['sessions', 'morphological_data'] as const).map((table) => <button type="button" key={table}
+              data-value={table} aria-pressed={tableType === table}
+              onClick={() => { setTableType(table); setActiveSearchTerm(''); setSearchTerm(''); setPage(0); }}>
+              {t(`database.table.${table}`)}
+            </button>)}
+          </div>
           <div className="glass-panel rounded-lg p-4">
             <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
               <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center min-w-0">
-                <Select aria-label={t('database.title')} value={tableType} onValueChange={(value) => {
-                  setTableType(value as TableType);
-                  setActiveSearchTerm('');
-                  setSearchTerm('');
-                  setPage(0);
-                }} options={[{ value: 'sessions', label: t('database.table.sessions') }, { value: 'morphological_data', label: t('database.table.morphological_data') }]} />
                 <div className="flex flex-wrap gap-2 items-center">
                   <div className="relative">
                     <Search aria-hidden="true" className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input ref={searchInputRef} aria-label={t('database.searchLabel')} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder={t('database.searchPlaceholder')} className="pl-8 w-full min-w-0 sm:w-64" onKeyDown={(event) => event.key === 'Enter' && handleSearch()} />
                   </div>
-                  <Button variant="secondary" size="sm" onClick={handleSearch} disabled={isLoading}>{t('database.search')}</Button>
-                  <Button variant="ghost" size="sm" aria-label={t('common.cancel')} onClick={handleClearSearch} disabled={isLoading || !searchTerm}><X aria-hidden="true" className="w-4 h-4" /></Button>
+                  <Button variant="primary" size="md" onClick={handleSearch} disabled={isLoading}><Search aria-hidden="true" size={17} className="mr-2" />{t('database.search')}</Button>
+                  <Button variant="ghost" size="sm" aria-label={t('common.cancel')} onClick={handleClearSearch} disabled={isLoading || !searchTerm}><X aria-hidden="true" className="w-4 h-4 mr-1" />{t('common.cancel')}</Button>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -243,17 +245,24 @@ export const DatabaseEditorPage: React.FC = () => {
           </div>
           <div className="glass-panel rounded-lg p-4">
             <DatabaseTable tableType={tableType} data={data} selectedIds={selectedIds} onSelectChange={setSelectedIds} onStatusChange={handleTableStatus} onRefresh={loadData} />
+            <p className="database-edit-help text-sm text-muted-foreground">{t('design.editHint')} {t('design.pageHint')}</p>
           </div>
-          <div className="flex items-center justify-center gap-3">
+          <div className="database-footer">
+            <div className="database-feedback">
+              {feedback?.kind === 'alert' && <div role="alert" aria-live="assertive">{feedback.message}</div>}
+              {feedback?.kind === 'status' && <div role="status" aria-live="polite">{feedback.message}</div>}
+            </div>
+            <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0 || isLoading}>{t('database.previous')}</Button>
             <span className="text-sm text-muted-foreground">{t('database.page')} {page + 1}</span>
             <Button variant="ghost" size="sm" onClick={() => setPage((current) => current + 1)} disabled={isLoading || data.length < DATABASE_PAGE_SIZE}>{t('database.next')}</Button>
           </div>
-          {feedback?.kind === 'alert' && <div role="alert" aria-live="assertive" className="text-sm text-muted-foreground px-2">{feedback.message}</div>}
-          {feedback?.kind === 'status' && <div role="status" aria-live="polite" className="text-sm text-muted-foreground px-2">{feedback.message}</div>}
+          </div>
+
         </div>
       </main>
       <dialog ref={dialogRef} open={!useNativeModal && deleteDialogOpen} aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" onCancel={(event) => { event.preventDefault(); closeDeleteDialog(); }} onKeyDown={handleDialogKeyDown} className="rounded-lg border border-border bg-background p-6 text-foreground shadow-xl backdrop:bg-black/50">
+        <div className="dialog-icon status-error"><Trash2 size={30} aria-hidden="true" /></div>
         <h2 id="delete-dialog-title" className="text-xl font-semibold">{t('database.delete')}</h2>
         <p id="delete-dialog-description" className="mt-3">{t('database.deletePrompt', { count: deleteSnapshot.length })}</p>
         {deleteError && <p role="alert" aria-live="assertive" className="mt-3 text-sm text-destructive">{deleteError}</p>}

@@ -1,41 +1,40 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { HomePage } from './pages/HomePage';
 import { AnalyzerPage } from './pages/AnalyzerPage';
-import { WizardPage } from './pages/WizardPage';
+import { RetainedWizard } from './components/wizard/RetainedWizard';
 import { SettingsPage } from './pages/SettingsPage';
 import { AboutPage } from './pages/AboutPage';
 import { DatabaseEditorPage } from './pages/DatabaseEditorPage';
 import { useAppStore } from './store/useAppStore';
 import { useApiStore } from './store/useApiStore';
-import { useDbStore } from './store/useDbStore';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Home, ScanText, Layers, Database, Settings, Info, Cloud, Laptop, Settings2 } from 'lucide-react';
 import { registerAppCloseHook } from './services/appLifecycle';
 
 // Simple Layout wrapper
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { t, i18n } = useTranslation();
-  const { theme, language, transportNotice } = useAppStore();
-  const { loadSessions } = useDbStore();
+  const { theme, language, transportNotice, useOfflineMode, transportStatus } = useAppStore();
   const location = useLocation();
-  const hasLoadedSessions = useRef(false);
 
-  // Apply theme
+  // Follow changes to the operating system when the system theme is selected.
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const apply = () => {
+      const resolved = theme === 'system' ? (media?.matches ? 'dark' : 'light') : theme;
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(resolved);
+    };
+    apply();
+    if (theme !== 'system') return;
+    media?.addEventListener?.('change', apply);
+    return () => media?.removeEventListener?.('change', apply);
   }, [theme]);
 
-  // Apply language
+  // Apply language to both translations and assistive technology.
   useEffect(() => {
+    document.documentElement.lang = language;
     if (i18n.language !== language) {
       i18n.changeLanguage(language);
     }
@@ -47,69 +46,48 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     if (Object.keys(models).length === 0) void refreshModels();
   }, []);
 
-  useEffect(() => {
-    if (!hasLoadedSessions.current || location.pathname === '/') {
-      hasLoadedSessions.current = true;
-      void loadSessions().catch(() => undefined);
-    }
-  }, [location.pathname, loadSessions]);
+
 
   const isActive = (path: string) => location.pathname === path;
 
+  const navigation = [
+    { path: '/', key: 'design.overview', icon: Home },
+    { path: '/analyzer', key: 'home.analyzer.title', icon: ScanText },
+    { path: '/wizard', key: 'design.wordWizard', icon: Layers },
+    { path: '/database', key: 'nav.database', icon: Database },
+  ];
+  const mode = transportNotice === 'offline-fallback' ? 'design.fallback'
+    : useOfflineMode || transportStatus === 'offline' ? 'design.localMode' : 'design.onlineMode';
+
+  const navItem = ({ path, key, icon: Icon }: typeof navigation[number]) => (
+    <Link key={path} to={path} aria-current={isActive(path) ? 'page' : undefined}
+      className={`sidebar-link ${isActive(path) ? 'is-active' : ''}`}>
+      <Icon aria-hidden="true" size={22} /><span>{t(key)}</span>
+    </Link>
+  );
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-300">
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-7xl items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-4 sm:gap-8">
-            <Link to="/" className="flex font-bold text-primary items-center gap-2 hover:opacity-80 transition-opacity">
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-              <span className="hidden xs:inline">MorphoDiTa4</span>
-            </Link>
-            <nav className="flex items-center gap-4 sm:gap-6 text-sm font-medium">
-              <Link 
-                to="/analyzer" 
-                className={`transition-colors hover:text-primary ${isActive('/analyzer') ? 'text-primary' : 'text-foreground/60'}`}
-              >
-                {t('nav.analyzer')}
-              </Link>
-              <Link 
-                to="/wizard" 
-                className={`transition-colors hover:text-primary ${isActive('/wizard') ? 'text-primary' : 'text-foreground/60'}`}
-              >
-                {t('nav.wizard')}
-              </Link>
-              <Link 
-                to="/database" 
-                className={`transition-colors hover:text-primary ${isActive('/database') ? 'text-primary' : 'text-foreground/60'}`}
-              >
-                {t('nav.database')}
-              </Link>
-              <Link 
-                to="/about" 
-                className={`transition-colors hover:text-primary ${isActive('/about') ? 'text-primary' : 'text-foreground/60'}`}
-              >
-                {t('nav.about')}
-              </Link>
-            </nav>
-          </div>
-          <Link 
-            to="/settings" 
-            className={`p-2 rounded-md transition-colors hover:bg-secondary ${isActive('/settings') ? 'text-primary bg-secondary' : 'text-foreground/60'}`}
-            title={t('nav.settings')}
-            aria-label={t('nav.settings')}
-          >
-            <SettingsIcon className="w-5 h-5" />
-          </Link>
+    <div className="app-shell min-h-screen bg-background text-foreground font-sans">
+      <a href="#workspace" className="skip-link">{t('design.skip')}</a>
+      <aside className="app-sidebar">
+        <Link to="/" className="sidebar-brand" aria-label="MorphoDiTa4">
+          <strong>MorphoDiTa<span>4</span></strong><span>{t('design.workshop')}</span>
+        </Link>
+        <nav aria-label={t('design.navigation')} className="sidebar-nav">{navigation.map(navItem)}</nav>
+        <div className="sidebar-bottom">
+          <nav aria-label={t('nav.settings')}>
+            {navItem({ path: '/settings', key: 'nav.settings', icon: Settings })}
+            {navItem({ path: '/about', key: 'nav.about', icon: Info })}
+          </nav>
+          <span className="sidebar-version">{t('about.version', { version: '0.1.21' })}</span>
         </div>
-      </header>
-      {transportNotice && (
-        <div role="status" className="border-b border-yellow-500/50 bg-yellow-500/10 px-4 py-2 text-center text-sm text-foreground">
-          {t(`transport.${transportNotice}`)}
-        </div>
-      )}
-      <div className="flex-1">
+      </aside>
+      <div id="workspace" className="app-workspace" tabIndex={-1}>
+        <div className="workspace-mode"><Link to="/settings" title={t('nav.settings')} className={`mode-badge ${transportNotice === 'offline-fallback' ? 'status-warning' : ''}`}>
+          {useOfflineMode || transportStatus === 'offline' ? <Laptop size={15} aria-hidden="true" /> : <Cloud size={15} aria-hidden="true" />}
+          {t(mode)} <Settings2 size={17} aria-hidden="true"/>
+        </Link></div>
+        {transportNotice && transportNotice !== 'offline-explicit' && <div role="status" className="transport-notice status-warning">{t(`transport.${transportNotice}`)}</div>}
         {children}
       </div>
     </div>
@@ -156,10 +134,11 @@ function App() {
             </button>
           </div>
         )}
+        <RetainedWizard />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/analyzer" element={<AnalyzerPage />} />
-          <Route path="/wizard" element={<WizardPage />} />
+          <Route path="/wizard" element={<></>} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/database" element={<DatabaseEditorPage />} />
           <Route path="/about" element={<AboutPage />} />

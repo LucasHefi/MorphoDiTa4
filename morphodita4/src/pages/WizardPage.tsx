@@ -2,11 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { WizardStepper, WizardInput, WizardProcessing, WizardResults, WizardSummary } from '../components/wizard';
 import { useWizardStore } from '../store/useWizardStore';
+import { ModelSelector } from '../components/analyzer/ModelSelector';
 import { Card } from '../components/common';
 
 export const WizardPage: React.FC = () => {
   const { t } = useTranslation();
-  const { currentStep } = useWizardStore();
+  const { currentStep, run } = useWizardStore();
 
   const renderStep = () => {
     switch (currentStep) {
@@ -25,8 +26,8 @@ export const WizardPage: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <main className="flex-1 container max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-8 flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
-        
+      <main className="wizard-page flex-1 container max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-8 flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300" data-step={currentStep}>
+
         <div className="flex flex-col space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">
             {t('home.wizard.title')}
@@ -36,9 +37,10 @@ export const WizardPage: React.FC = () => {
           </p>
         </div>
 
-        <Card className="p-4 sm:p-6 md:p-8">
+        <ModelSelector disabled={run.status === 'processing'} />
+        <Card className="wizard-surface p-4 sm:p-6 md:p-8">
           <WizardStepper />
-          <div className="mt-8">
+          <div className="wizard-step-content mt-8">
             {renderStep()}
           </div>
         </Card>

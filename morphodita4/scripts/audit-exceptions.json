@@ -1,0 +1,7 @@
+{
+  "GHSA-fc5q-39xc-vjpf": {
+    "package": "picomatch",
+    "expires": "2026-12-18",
+    "reason": "No patched npm version exists as of 2026-11-18. Build/test-only glob matcher, not shipped as a Node runtime or called on application input. Only trusted repository glob patterns are used. Exception applies exclusively to dev-only dependency nodes; production paths, critical severity, other advisories and expired exceptions fail CI."
+  }
+}

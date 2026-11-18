@@ -24,7 +24,7 @@ export const TextInput: React.FC<TextInputProps> = ({ value, onChange, disabled 
 
     // Check size (max 5MB for frontend parsing)
     if (file.size > 5 * 1024 * 1024) {
-      setError('File is too large (max 5MB).');
+      setError(t('wizard.input_file_too_large', { maxMiB: 5 }));
       return;
     }
 
@@ -35,7 +35,7 @@ export const TextInput: React.FC<TextInputProps> = ({ value, onChange, disabled 
       setError(null);
     };
     reader.onerror = () => {
-      setError('Error reading file.');
+      setError(t('wizard.input_file_read_failed'));
     };
     reader.readAsText(file);
 
@@ -53,43 +53,44 @@ export const TextInput: React.FC<TextInputProps> = ({ value, onChange, disabled 
   return (
     <div className="flex flex-col gap-2 w-full mt-4">
       <div className="flex justify-between items-end">
-        <label className="text-sm font-medium text-foreground">
-          {t('analyzer.input_placeholder').replace('...', '')}
+        <label htmlFor="analyzer-input-text" className="text-sm font-medium text-foreground">
+          {t('design.input')}
         </label>
         <div className="flex gap-2">
           {value && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleClear} 
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClear}
               disabled={disabled}
               className="h-7 text-xs text-muted-foreground"
             >
               <X className="w-3 h-3 mr-1" />
-              Clear
+              {t('design.clear')}
             </Button>
           )}
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={() => fileInputRef.current?.click()} 
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
             className="h-7 text-xs"
           >
             <Upload className="w-3 h-3 mr-1" />
-            Import TXT
+            {t('design.importTxt')}
           </Button>
-          <input 
-            type="file" 
-            accept=".txt" 
-            className="hidden" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
+          <input
+            type="file"
+            accept=".txt"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileChange}
           />
         </div>
       </div>
-      
+
       <TextArea
+        id="analyzer-input-text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('analyzer.input_placeholder')}
@@ -97,10 +98,10 @@ export const TextInput: React.FC<TextInputProps> = ({ value, onChange, disabled 
         error={error || undefined}
         className="min-h-[150px] resize-y font-mono"
       />
-      
+
       <div className="flex justify-end text-xs text-muted-foreground gap-4">
-        <span>Slov: {wordCount}</span>
-        <span>Řádků: {lineCount}</span>
+        <span>{t('design.words', { count: wordCount })}</span>
+        <span>{t('design.lines', { count: lineCount })}</span>
       </div>
     </div>
   );

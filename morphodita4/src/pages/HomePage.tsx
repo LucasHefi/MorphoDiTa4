@@ -1,117 +1,60 @@
-import React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Card, CardHeader, CardDescription, Button, Badge } from '../components/common';
-import { useDbStore } from '../store/useDbStore';
+import { ArrowRight, BookOpen, CalendarDays, Check, Database, Layers, RefreshCw } from 'lucide-react';
+import { Badge, Button, Select } from '../components/common';
 import { ModelSelector } from '../components/analyzer/ModelSelector';
+import { ActivityChart, HistoryChart, type HistoryMetric } from '../components/common/DashboardCharts';
+import { dayLabel } from '../services/dashboardFormat';
+import { DashboardService, type DashboardData } from '../services/dashboard';
 
-export const HomePage: React.FC = () => {
-  const { t } = useTranslation();
-  const { recentActivity, isLoading, error, loadSessions } = useDbStore();
-
-  return (
-    <div className="flex flex-col">
-      <main className="flex-1 container max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex flex-col gap-6 sm:gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
-        <div className="text-center space-y-3 sm:space-y-4 mb-4 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary">
-            {t('home.title')}
-          </h1>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            {t('home.subtitle')}
-          </p>
-        </div>
-
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground mb-2">{t('home.modelSelection')}</p>
-          <ModelSelector compact />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link to="/analyzer" className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-            <Card glass hoverEffect className="h-full border-primary/20 hover:border-primary/50">
-              <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                 <svg aria-hidden="true" className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold leading-none tracking-tight">{t('home.analyzer.title')}</h2>
-              <CardDescription className="text-base mt-2">
-                {t('home.analyzer.description')}
-              </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-
-          <Link to="/wizard" className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-            <Card glass hoverEffect className="h-full border-accent/20 hover:border-accent/50">
-              <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                 <svg aria-hidden="true" className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold leading-none tracking-tight">{t('home.wizard.title')}</h2>
-              <CardDescription className="text-base mt-2">
-                {t('home.wizard.description')}
-              </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        </div>
-
-        <section className="mt-8" aria-labelledby="recent-activity-title">
-          <h2 id="recent-activity-title" className="text-lg font-semibold mb-4 text-foreground">
-            {t('home.recent_activity')}
-           </h2>
-          {isLoading ? (
-            <p role="status" className="text-sm text-muted-foreground">{t('home.activity.loading')}</p>
-          ) : error ? (
-            <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-              <p className="text-sm text-muted-foreground">{t('home.activity.error')}</p>
-              <Button variant="secondary" size="sm" onClick={() => void loadSessions().catch(() => undefined)}>
-                {t('home.activity.retry')}
-              </Button>
-            </div>
-          ) : recentActivity.length === 0 ? (
-            <p role="status" className="text-sm text-muted-foreground">{t('home.activity.empty')}</p>
-          ) : (
-            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden overflow-x-auto">
-              <table className="w-full text-sm text-left min-w-[500px]">
-                <caption className="sr-only">{t('home.recent_activity')}</caption>
-                <thead className="bg-secondary text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">{t('home.table.operation')}</th>
-                    <th className="px-4 py-3 font-medium">{t('home.table.model')}</th>
-                    <th className="px-4 py-3 font-medium">{t('home.table.items')}</th>
-                    <th className="px-4 py-3 font-medium">{t('home.table.status')}</th>
-                    <th className="px-4 py-3 font-medium text-right">{t('home.table.date')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentActivity.map((session) => (
-                    <tr key={session.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
-                      <td className="px-4 py-3 font-medium text-foreground capitalize">
-                        {t(`analyzer.operations.${session.operation}`)}
-                      </td>
-                      <td className="px-4 py-3 text-xs">{session.model}</td>
-                      <td className="px-4 py-3">{session.result_count}</td>
-                      <td className="px-4 py-3">
-                         <Badge variant={session.status === 'completed' ? 'success' : session.status === 'failed' ? 'error' : 'info'}>
-                          {t(`home.status.${session.status}`)}
-                         </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right text-muted-foreground">
-                        {session.created_at ? new Date(session.created_at).toLocaleDateString() : '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+export const HomePage = () => {
+  const { t, i18n } = useTranslation(); const locale=i18n.language;
+  const [days,setDays]=useState(30),[metric,setMetric]=useState<HistoryMetric>('lemmas'),[termKind,setTermKind]=useState<'lemmas'|'forms'>('lemmas');
+  const [data,setData]=useState<DashboardData|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(false),[reload,setReload]=useState(0);
+  const request=useRef(0);
+  useEffect(()=>{const id=++request.current;let active=true;
+    const load=async()=>{setLoading(true);setError(false);try{const response=await DashboardService.get(days);if(active&&request.current===id)setData(response);}catch{if(active&&request.current===id){setData(null);setError(true);}}finally{if(active&&request.current===id)setLoading(false);}};
+    void load();const timer=setInterval(()=>void load(),60_000);return()=>{active=false;clearInterval(timer);};
+  },[days,reload]);
+  const number=(value:number|undefined)=>value===undefined?'—':value.toLocaleString(locale);
+  const terms=(termKind==='lemmas'?data?.frequent_lemmas:data?.frequent_forms)?.slice(0,5)??[];
+  const stats=[
+    {key:'words',value:number(data?.words),caption:data?t('dashboard.completedRuns',{count:data.runs,formatted:number(data.runs)}):'—',icon:Layers},
+    {key:'forms',value:number(data?.forms),caption:t('dashboard.uniqueForms'),icon:Database},
+    {key:'lemmas',value:number(data?.lemmas),caption:t('dashboard.currentDatabase'),icon:BookOpen},
+    {key:'bytes',value:data?`${new Intl.NumberFormat(locale,{maximumFractionDigits:1}).format(data.bytes/1_000_000)} MB`:'—',caption:t('dashboard.onDisk'),icon:Database},
+  ];
+  const periodLabel=data?`${dayLabel(data.start,locale)} – ${dayLabel(data.end,locale)}`:'';
+  return <main className="dashboard-page" aria-busy={loading}>
+    <header className="dashboard-heading"><div><h1>{t('design.overview')}</h1><p>{t('dashboard.subtitle')}</p></div>
+      <div className="dashboard-period"><CalendarDays size={22} aria-hidden="true"/><label className="sr-only" htmlFor="dashboard-period">{t('dashboard.period')}</label>
+        <div className="dashboard-period-picker"><Select id="dashboard-period" value={String(days)}
+          options={[7,30,90].map(value=>({value:String(value),label:t('dashboard.lastDays',{count:value})}))}
+          onValueChange={value=>{setData(null);setDays(Number(value));}} /></div>
+        {periodLabel&&<span>{periodLabel}</span>}<button aria-label={t('dashboard.refresh')} title={t('dashboard.refresh')} onClick={()=>setReload(x=>x+1)} disabled={loading}><RefreshCw size={18} aria-hidden="true"/></button>
+      </div>
+    </header>
+    <section className="dashboard-model" aria-label={t('home.modelSelection')}><strong>{t('dashboard.languageModel')}</strong><ModelSelector compact/></section>
+    {error&&<div role="alert" className="dashboard-error"><span>{t('dashboard.loadError')}</span><Button variant="secondary" onClick={()=>setReload(x=>x+1)}>{t('home.activity.retry')}</Button></div>}
+    <div className="dashboard-kpis">{stats.map(({key,value,caption,icon:Icon})=><section className="dashboard-kpi" key={key}><span className="dashboard-kpi-icon"><Icon size={32} strokeWidth={1.65} aria-hidden="true"/></span><div><h2>{t(`dashboard.${key==='forms'?'storedForms':key==='lemmas'?'uniqueLemmas':key}`)}</h2><strong>{value}</strong><p>{caption}</p></div></section>)}</div>
+    {loading&&!data&&<p role="status" className="dashboard-loading">{t('dashboard.loading')}</p>}
+    {data&&<>
+      <div className="dashboard-charts">
+        <section className="dashboard-panel"><header><div><h2>{t('dashboard.activityChart')}</h2><p>{t('dashboard.daily')}</p></div><div className="chart-legend"><span><i className="chart-analyzer"/>{t('home.analyzer.title')}</span><span><i className="chart-wizard"/>{t('dashboard.wizard')}</span>{data.daily.some(row=>row.legacy>0)&&<span><i className="chart-legacy"/>{t('dashboard.legacy')}</span>}</div></header>
+          {data.runs>0?<ActivityChart data={data}/>:<p className="dashboard-empty">{t('dashboard.noRuns')}</p>}
         </section>
-      </main>
-    </div>
-  );
+        <section className="dashboard-panel"><header><h2>{t('dashboard.historyChart')}</h2><div className="dashboard-segments" role="group" aria-label={t('dashboard.historyMetric')}>{(['lemmas','forms','bytes'] as const).map(key=><button key={key} aria-pressed={metric===key} onClick={()=>setMetric(key)}>{t(`dashboard.${key==='bytes'?'size':key}`)}</button>)}</div></header><HistoryChart history={data.history} metric={metric} start={data.start} end={data.end}/></section>
+      </div>
+      <div className="dashboard-bottom">
+        <section className="dashboard-panel dashboard-frequent"><header><h2>{t('dashboard.frequent')}</h2><div className="dashboard-segments" role="group" aria-label={t('dashboard.termKind')}>{(['lemmas','forms'] as const).map(key=><button key={key} aria-pressed={termKind===key} onClick={()=>setTermKind(key)}>{t(`dashboard.${key}`)}</button>)}</div></header>
+          {terms.length>0?<ol className="frequency-bars">{terms.map(term=><li key={term.term}><span title={term.term}>{term.term}</span><div className="frequency-track"><i style={{width:`${term.count/terms[0].count*100}%`}}/></div><strong>{number(term.count)}</strong></li>)}</ol>:<p className="dashboard-empty">{t('dashboard.noTerms')}</p>}
+        </section>
+        <section className="dashboard-panel dashboard-recent"><header><h2>{t('home.recent_activity')}</h2><Link to="/database">{t('dashboard.viewAll')} <ArrowRight size={18} aria-hidden="true"/></Link></header>
+          {data.recent.length?<div className="dashboard-table-scroll"><table><caption className="sr-only">{t('home.recent_activity')}</caption><thead><tr>{['operation','model','words','status','date'].map(key=><th scope="col" key={key}>{key==='words'?t('dashboard.wordColumn'):t(`home.table.${key}`)}</th>)}</tr></thead><tbody>{data.recent.map(row=><tr key={row.id}><td>{row.workflow==='wizard'?t('design.wordWizard'):t(`analyzer.operations.${row.operation}`)}</td><td><span title={row.model}>{row.model}</span></td><td>{number(row.words)}</td><td><Badge variant={row.status==='completed'?'success':row.status==='failed'?'error':'info'}>{row.status==='completed'&&<Check size={14} aria-hidden="true"/>}{t(`home.status.${row.status}`)}</Badge></td><td>{new Date(row.created_at.replace(' ','T')+(row.created_at.endsWith('Z')?'':'Z')).toLocaleString(locale,{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})}</td></tr>)}</tbody></table></div>:<p className="dashboard-empty">{t('home.activity.empty')}</p>}
+        </section>
+      </div>
+    </>}
+    <footer className="dashboard-footnote">{t('dashboard.coverage')}{loading&&data&&<span role="status"> · {t('dashboard.refreshing')}</span>}</footer>
+  </main>;
 };

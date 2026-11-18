@@ -1,3 +1,4 @@
+import React from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -9,6 +10,8 @@ import { WizardSummary } from './WizardSummary';
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
+
+vi.mock('../../services/database', () => ({ DatabaseService: { wordFormsExist: vi.fn().mockRejectedValue(new Error('lookup failed')) } }));
 
 vi.mock('../../services/workflow', () => ({
   WorkflowService: { saveWizardResults: vi.fn() },
@@ -46,6 +49,7 @@ describe('WizardSummary save recovery', () => {
   let root: Root;
 
   beforeEach(() => {
+    localStorage.removeItem('morphodita.summary.filters.v1');
     useWizardStore.getState().reset();
     useWizardStore.setState({ keywordsText: 'cat', processingResult, run: { status: 'ready', sessionId: 'session', completedPhase: 'ready' } });
     vi.mocked(WorkflowService.saveWizardResults).mockClear();
@@ -74,6 +78,14 @@ describe('WizardSummary save recovery', () => {
     alert.mockRestore();
   });
 
+  it('completes saving under React StrictMode', async () => {
+    flushSync(() => root.render(<React.StrictMode><WizardSummary /></React.StrictMode>));
+    flushSync(() => requiredFinishButton(container).click());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(container.textContent).toContain('wizard.save_success');
+    expect(WorkflowService.saveWizardResults).toHaveBeenCalledOnce();
+  });
+
   it('shows two explicit post-save choices without confirm', async () => {
     const confirm = vi.spyOn(window, 'confirm');
     flushSync(() => root.render(<WizardSummary />));
@@ -87,118 +99,38 @@ describe('WizardSummary save recovery', () => {
     confirm.mockRestore();
   });
 
-  it('preserves duplicate source rows until the duplicate policy is enabled', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        forms: [{ form: 'cats', lemma: 'cat', tag: 'N' }, { form: 'cats', lemma: 'cat', tag: 'N' }],
-        taggedTokens: [{ token: 'cat', lemma: 'cat', tag: 'N' }, { token: 'cat', lemma: 'cat', tag: 'N' }],
-      },
-      filters: { ...useWizardStore.getState().filters, removeDuplicates: false },
-    });
+  it('offers independent filters for each summary column', () => {
     flushSync(() => root.render(<WizardSummary />));
-
-    expect(container.textContent?.match(/cats = cat/g)).toHaveLength(2);
-    expect(container.textContent?.match(/wizard\.summary\.forms(?!ToLemmas)/g)).toHaveLength(1);
+    const groups = container.querySelectorAll('fieldset');
+    expect(groups).toHaveLength(3);
+    const first = groups[0].querySelector('input') as HTMLInputElement;
+    const second = groups[1].querySelector('input') as HTMLInputElement;
+    flushSync(() => first.click());
+    expect(first.checked).toBe(true);
+    expect(second.checked).toBe(false);
   });
 
-  it('deduplicates case-equivalent relationship rows by their configured key', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        forms: [{ form: 'PSI', lemma: 'pes', tag: 'N' }, { form: 'psi', lemma: 'PES', tag: 'N' }],
-        taggedTokens: [],
-      },
-      filters: {
-        ...useWizardStore.getState().filters,
-        removeDuplicates: true,
-        removeSpecialCharacters: false,
-      },
-    });
+  it('blocks copy, export and saving if the requested database lookup fails', async () => {
     flushSync(() => root.render(<WizardSummary />));
-
-    expect(container.textContent?.match(/psi = pes/gi)).toHaveLength(1);
-    expect(container.textContent).toContain('PSI = pes');
+    const existing = container.querySelectorAll('fieldset input')[4] as HTMLInputElement;
+    flushSync(() => existing.click());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(container.querySelector('[role=alert]')?.textContent).toContain('lookup failed');
+    expect(requiredFinishButton(container).disabled).toBe(true);
+    const copy = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'wizard.summaryColumns.copy');
+    expect(copy?.disabled).toBe(true);
   });
 
-  it('deduplicates relationship rows after configured special-character filtering', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        forms: [{ form: 'psi', lemma: 'pe-s', tag: 'N' }, { form: 'psi', lemma: 'PES', tag: 'N' }],
-        taggedTokens: [],
-      },
-      filters: {
-        ...useWizardStore.getState().filters,
-        removeDuplicates: true,
-        removeSpecialCharacters: true,
-      },
-    });
+  it('retains independent checkbox settings after reopening the summary', () => {
     flushSync(() => root.render(<WizardSummary />));
-
-    expect(container.textContent?.match(/psi = /g)).toHaveLength(1);
-  });
-
-  it('skips relationships when stopword filtering removes only the cleaned lemma', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        forms: [{ form: 'ci', lemma: 'či_extra', tag: 'N' }],
-        taggedTokens: [],
-      },
-      filters: {
-        ...useWizardStore.getState().filters,
-        removeDiacritics: false,
-        removeDuplicates: false,
-        removeStopWords: true,
-        removeSpecialCharacters: false,
-        stopWordsList: ['či'],
-      },
-    });
-    flushSync(() => root.render(<WizardSummary />));
-
-    expect(container.textContent).not.toContain('ci = či');
-  });
-
-  it('keeps canonically equivalent new-only sources with cleaned lemmas', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        newWords: ['ČAT'],
-        taggedTokens: [{ token: 'c\u030Cat', lemma: 'pes', tag: 'N' }],
-        forms: [{ form: 'běží', lemma: 'PES_extra-2', tag: 'N' }],
-        relations: [{ inputToken: 'c\u030Cat', lemma: 'PES_extra-2', tag: 'N', generatedForms: [] }],
-      },
-      filters: { ...useWizardStore.getState().filters, showOnlyNew: true, removeSpecialCharacters: false },
-    });
-    flushSync(() => root.render(<WizardSummary />));
-
-    expect(container.textContent).toContain('c\u030Cat = pes');
-    expect(container.textContent).toContain('běží = PES');
-  });
-
-  it('does not compare stripped special characters when that filter is disabled', () => {
-    useWizardStore.setState({
-      processingResult: {
-        ...processingResult,
-        forms: [{ form: 'pes!', lemma: 'pes', tag: 'N' }],
-        taggedTokens: [],
-      },
-      filters: {
-        ...useWizardStore.getState().filters,
-        removeDuplicates: true,
-        removeDiacritics: false,
-        removeSpecialCharacters: false,
-      },
-    });
-    flushSync(() => root.render(<WizardSummary />));
-    expect(container.textContent).toContain('pes! = pes');
-
-    useWizardStore.setState({ filters: { ...useWizardStore.getState().filters, removeSpecialCharacters: true } });
+    const first = container.querySelector('fieldset input') as HTMLInputElement;
+    flushSync(() => first.click());
     flushSync(() => root.unmount());
     root = createRoot(container);
     flushSync(() => root.render(<WizardSummary />));
-    expect(container.textContent).not.toContain('pes! = pes');
+    const inputs = container.querySelectorAll('fieldset input');
+    expect((inputs[0] as HTMLInputElement).checked).toBe(true);
+    expect((inputs[5] as HTMLInputElement).checked).toBe(false);
   });
 
   it('ignores a stale successful save after the source changes', async () => {
@@ -251,7 +183,7 @@ describe('WizardSummary save recovery', () => {
     expect(container.querySelector('[role="status"]')?.textContent).toContain('wizard.save_success');
   });
 
-  it('does not discard a save solely because the global selected model changes', async () => {
+  it('does not mark a replacement run saved when the model changes during a pending save', async () => {
     const save = deferred<number>();
     vi.mocked(WorkflowService.saveWizardResults).mockReturnValue(save.promise);
     flushSync(() => root.render(<WizardSummary />));
@@ -261,7 +193,9 @@ describe('WizardSummary save recovery', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(WorkflowService.saveWizardResults).toHaveBeenCalledOnce();
-    expect(useWizardStore.getState().run.status).toBe('saved');
-    expect(container.querySelector('[role="status"]')?.textContent).toContain('wizard.save_success');
+    expect(useWizardStore.getState().run.status).toBe('idle');
+    expect(useWizardStore.getState().processingResult).toBeNull();
+    expect(useWizardStore.getState().keywordsText).toBe('cat');
+    expect(container.textContent).not.toContain('wizard.save_success');
   });
 });

@@ -31,13 +31,14 @@ describe('WizardInput', () => {
 
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
     const oversizedFile = new File(['ignored'], 'oversized.txt', { type: 'text/plain' });
-    Object.defineProperty(oversizedFile, 'size', { value: 5 * 1024 * 1024 + 1 });
+    Object.defineProperty(oversizedFile, 'size', { value: MAX_WIZARD_INPUT_BYTES + 1 });
     Object.defineProperty(fileInput, 'files', { value: [oversizedFile] });
     flushSync(() => fileInput.dispatchEvent(new Event('change', { bubbles: true })));
 
     expect(container.textContent).toContain('wizard.input_file_too_large');
-    const nextButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('wizard.next'));
+    const nextButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('design.continueProcessing'));
     expect(nextButton).toBeDefined();
+    expect(nextButton?.disabled).toBe(true);
     flushSync(() => nextButton?.click());
     expect(useWizardStore.getState().currentStep).toBe(1);
   });
@@ -48,6 +49,37 @@ describe('WizardInput', () => {
     const textarea = container.querySelector('textarea');
     expect(textarea).not.toBeNull();
     expect(textarea?.maxLength).toBe(MAX_WIZARD_INPUT_BYTES);
+  });
+
+  it('prevents proceeding when the input contains only numbers', () => {
+    useWizardStore.setState({ keywordsText: '123 ٤٥ -42' });
+    flushSync(() => root.render(<WizardInput />));
+    const next = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('design.continueProcessing'));
+    expect(next?.disabled).toBe(true);
+    expect(container.textContent).toContain('wizard.input_digits_removed');
+  });
+
+  it('keeps a million-word paste and edits only the selected bounded page', () => {
+    flushSync(() => root.render(<WizardInput />));
+    const text = 'word '.repeat(1_000_000);
+    const field = container.querySelector('textarea')!;
+    const paste = new Event('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(paste, 'clipboardData', { value: { getData: () => text } });
+    flushSync(() => field.dispatchEvent(paste));
+    expect(paste.defaultPrevented).toBe(true);
+    expect(useWizardStore.getState().keywordsText).toBe(text);
+    expect(field.value).toHaveLength(50_000);
+    const page = container.querySelector('input[type="number"]')!;
+    flushSync(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(page, '100');
+      page.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    flushSync(() => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(field, 'tail');
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(useWizardStore.getState().keywordsText).toBe(text.slice(0, 4_950_000) + 'tail');
+    expect(field.value).toBe('tail');
   });
 
   it('renders the localized interpolated word count', () => {

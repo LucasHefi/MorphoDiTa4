@@ -79,6 +79,7 @@ export interface WizardCheckpoint {
 }
 
 export interface WizardProcessingResult {
+  lemmaModel?: string;
   inputWords: number;
   newWords: string[];
   uniqueLemmas: number;

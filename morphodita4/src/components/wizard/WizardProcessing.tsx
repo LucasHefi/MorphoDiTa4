@@ -4,8 +4,9 @@ import { useWizardStore } from '../../store/useWizardStore';
 import { useApiStore } from '../../store/useApiStore';
 import { MorphoDiTaAPI } from '../../services/api';
 import { DatabaseService } from '../../services/database';
-import { parseInputText, cleanLemma } from '../../services/filters';
-import { deduplicateWizardWords, getWizardInputError } from '../../services/wizardInput';
+import { wizardDictionaryModel, resolveWizardLemmas } from '../../services/wizardLemmas';
+import { cleanLemma, removeDiacritics } from '../../services/filters';
+import { deduplicateWizardWords, getWizardInputError, parseWizardWords, removeWizardDigits } from '../../services/wizardInput';
 import { buildWizardRelations, expandWizardTagGroups, WizardTaggingContractError } from '../../services/wizardPipeline';
 import { ProgressBar, Spinner, Button } from '../common';
 import { LogPanel, type LogEntry } from '../analyzer/LogPanel';
@@ -88,7 +89,7 @@ export const WizardProcessing: React.FC = () => {
         if (!isCurrent()) throw new DOMException('The operation was aborted', 'AbortError');
       };
       await Promise.resolve();
-      ensureCurrent();
+      if (!isCurrent()) return;
       const checkpointMatchesSource = !runCheckpoint || (
         runCheckpoint.source.input === keywordsText
         && runCheckpoint.source.model === selectedModel
@@ -124,7 +125,7 @@ export const WizardProcessing: React.FC = () => {
        addLog('INFO', t('wizard.processing.start'));
 
       try {
-        const wordsForTagging = parseInputText(keywordsText);
+        const wordsForTagging = parseWizardWords(keywordsText);
          addLog('DEBUG', t('wizard.processing.wordCount', { count: wordsForTagging.length }));
 
         const inputError = getWizardInputError(keywordsText);
@@ -161,21 +162,35 @@ export const WizardProcessing: React.FC = () => {
         const joinedWords = taggingWords.join('\n');
         const batchSize = getBatchSize();
         const wordChunks = splitText(joinedWords, batchSize);
+        const lemmaModel = wizardDictionaryModel(selectedModel, useApiStore.getState().models);
         let tagResult = checkpoint?.analysis?.taggedTokens ?? [];
         let uniqueLemmas = checkpoint?.analysis?.lemmas ?? [];
         if (!checkpoint || phaseNumber(runCompletedPhase) < phaseNumber('analysis') || !checkpoint.analysis) {
           const tagResponses = await processInBatches(
             wordChunks,
-            (chunk) => MorphoDiTaAPI.tagText(chunk, selectedModel, 'json', { signal }),
+            (chunk) => MorphoDiTaAPI.tagText(chunk, selectedModel, 'json', { signal, inputFormat: 'vertical' }),
             (completed) => {
               if (isCurrent()) setProgress(20 + (completed / Math.max(wordChunks.length, 1)) * 30);
             },
             { signal },
           );
           ensureCurrent();
-          const tagGroups = tagResponses.flatMap((response) => response.result);
-          tagResult = expandWizardTagGroups(taggingWords, wordsForTagging, tagGroups);
-          const rawLemmas = tagResult.map((item) => cleanLemma(item.lemma));
+          const tagGroups = tagResponses.flatMap((response) => response.result.flat().map((token) => [token]));
+          tagResult = expandWizardTagGroups(taggingWords, wordsForTagging, tagGroups).map((item) => {
+            const lemma = cleanLemma(item.lemma);
+            return /\p{N}/u.test(lemma) ? { ...item, lemma: removeWizardDigits(lemma) } : item;
+          });
+          if (lemmaModel) {
+            const dictionaryChunks = splitText(taggingWords.map(removeDiacritics).join('\n'), batchSize);
+            const dictionaryResponses = await processInBatches(dictionaryChunks,
+              chunk => MorphoDiTaAPI.analyzeText(chunk, lemmaModel, false, 'vertical', 'none', undefined, 'json', { signal }),
+              undefined, { signal });
+            ensureCurrent();
+            const resolved = resolveWizardLemmas(tagResult, taggingWords, dictionaryResponses.flatMap(r => r.result.flat()));
+            tagResult = resolved.tokens;
+            addLog('INFO', t('wizard.processing.dictionaryResolved', { corrected: resolved.corrected, ambiguous: resolved.ambiguous }));
+          }
+          const rawLemmas = tagResult.map((item) => removeWizardDigits(cleanLemma(item.lemma)));
           uniqueLemmas = Array.from(new Set(rawLemmas.filter((lemma) => lemma.length > 0)));
           ensureCurrent();
           setRunState({ completedPhase: 'analysis', checkpoint: { source: { input: keywordsText, model: selectedModel }, lookup: { newWords }, analysis: { taggedTokens: tagResult, lemmas: uniqueLemmas } } });
@@ -217,6 +232,7 @@ export const WizardProcessing: React.FC = () => {
           taggedTokens: tagResult,
           relations,
           model: selectedModel,
+          lemmaModel,
         });
         ensureCurrent();
         setProgress(100);
@@ -231,8 +247,9 @@ export const WizardProcessing: React.FC = () => {
           return;
         }
         if (!isCurrent()) return;
-        setRunState({ status: 'failed', error: error instanceof WizardTaggingContractError ? t('wizard.processing.taggingContractMismatch') : error instanceof Error ? error.message : String(error) });
-         addLog('ERROR', t('wizard.processing.error', { message: error instanceof Error ? error.message : String(error) }));
+        const message = error instanceof WizardTaggingContractError ? t('wizard.processing.taggingContractMismatch') : error instanceof Error ? error.message : String(error);
+        setRunState({ status: 'failed', error: message });
+         addLog('ERROR', t('wizard.processing.error', { message }));
       } finally {
         if (attemptRef.current === attemptId) abortController.current = null;
         if (mountedRef.current) setIsProcessing(false);
@@ -260,6 +277,9 @@ export const WizardProcessing: React.FC = () => {
     setIsFinished(false);
     resume();
   };
+
+  const completedPhaseIndex = ({ none: -1, lookup: 0, analysis: 1, generation: 2, ready: 3, saved: 3 })[run.completedPhase];
+  const phases = ['lookup', 'analysis', 'generation', 'ready'] as const;
 
   return (
     <div className="flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300">
@@ -294,16 +314,24 @@ export const WizardProcessing: React.FC = () => {
             )}
           </div>
           <div className="flex-1">
-             <ProgressBar progress={progress} label={t('wizard.processing.progress')} variant="gradient" />
+             <ProgressBar progress={progress} label={t('wizard.processing.progress')} variant="solid" />
           </div>
         </div>
       </div>
+
+      <ol className="processing-phases">
+        {phases.map((phase, index) => <li key={phase} className={index <= completedPhaseIndex ? 'is-completed' : index === completedPhaseIndex + 1 && isProcessing ? 'is-current' : ''}>
+          <span aria-hidden="true">{index <= completedPhaseIndex ? '✓' : index + 1}</span>
+          <strong>{t(`design.phases.${phase}`)}</strong>
+          <small>{index <= completedPhaseIndex ? t('home.status.completed') : index === completedPhaseIndex + 1 && isProcessing ? t('home.status.processing') : t('home.status.pending')}</small>
+        </li>)}
+      </ol>
 
       <div className="min-h-[clamp(10rem,25vh,18rem)] max-h-[50vh]">
         <AnalyzerLogPanel logs={logs} onClear={() => setLogs([])} />
       </div>
 
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="wizard-actions flex justify-end gap-2 mt-4">
         <Button variant="secondary" onClick={isProcessing ? handleCancel : run.status === 'cancelled' || run.status === 'failed' ? handleResume : () => setStep(1)}>
           {isProcessing ? t('wizard.cancel') : run.status === 'cancelled' || run.status === 'failed' ? t('wizard.resume') : t('wizard.back')}
         </Button>

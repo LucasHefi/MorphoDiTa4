@@ -1,0 +1,20 @@
+MorphoDiTa Client: MIT (see LICENSE).
+
+The separately packaged MorphoDiTa server v1.11.3 is by the Institute of
+Formal and Applied Linguistics, Charles University, and remains MPL-2.0.
+Source, including the server: https://github.com/ufal/morphodita/tree/v1.11.3
+License text: licenses/MPL-2.0.txt
+Upstream: https://ufal.mff.cuni.cz/morphodita
+
+Language models are separate works and are not included in the installer.
+Czech MorfFlex2.1 + PDT-C2.0 (250909): CC BY-NC-SA 4.0, not MIT.
+Source and attribution: https://hdl.handle.net/11234/1-5985
+License: https://creativecommons.org/licenses/by-nc-sa/4.0/
+The downloader retains upstream LICENSE and README alongside the model.
+No model modifications are made. Commercial model use is not granted by MIT.
+Other dependencies retain their own licenses.
+
+Desktop modification (2026-11-17): server binds IPv4 loopback 127.0.0.1 only.
+Full modified MPL-2.0 source and patch: third_party/morphodita/rest_server.cpp
+and third_party/morphodita/loopback.patch, included in the installed resources.
+Rebuild instructions: third_party/morphodita/README.md.

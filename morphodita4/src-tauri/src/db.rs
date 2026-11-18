@@ -47,15 +47,17 @@ pub const UNICODE_COLLATION: &str = "MORPHODITA_UNICODE";
 pub const CANONICAL_KEY_FUNCTION: &str = "MORPHODITA_KEY";
 pub const SQLITE_BUSY_TIMEOUT_MS: u64 = 5_000;
 pub const MAX_WORD_FORM_LOOKUP_WORDS: usize = 10_000;
-pub const MAX_INPUT_BYTES: usize = 5 * 1024 * 1024;
+pub const MAX_INPUT_BYTES: usize = 10_000_000;
 pub const MAX_MODEL_BYTES: usize = 256;
 pub const MAX_PARAMETER_BYTES: usize = 64 * 1024;
 pub const MAX_ERROR_MESSAGE_BYTES: usize = 64 * 1024;
 pub const MAX_FORM_BYTES: usize = 1024;
 pub const MAX_LEMMA_BYTES: usize = 1024;
 pub const MAX_TAG_BYTES: usize = 256;
+pub const MAX_WIZARD_INPUT_WORDS: usize = 1_000_000;
+pub const MAX_RESULT_BYTES: usize = 128 * 1024 * 1024;
 pub const MAX_GENERATED_FORMS_PER_INPUT: usize = 16;
-pub const MAX_OUTPUT_ROWS: usize = MAX_WORD_FORM_LOOKUP_WORDS * MAX_GENERATED_FORMS_PER_INPUT;
+pub const MAX_OUTPUT_ROWS: usize = MAX_WIZARD_INPUT_WORDS * MAX_GENERATED_FORMS_PER_INPUT;
 #[cfg(test)]
 const LOOKUP_TEST_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -667,6 +669,9 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
         tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
         validate_schema_contract(&tx).map_err(schema_contract_error)?;
     }
+    // Optional performance index; existing schema-v4 databases acquire it safely on startup.
+    tx.execute_batch("CREATE INDEX IF NOT EXISTS idx_morphological_data_lemma_unicode ON morphological_data(lemma COLLATE MORPHODITA_UNICODE)")?;
+    crate::dashboard::initialize(&tx)?;
     tx.commit()
 }
 
@@ -883,26 +888,6 @@ fn invalid_payload(field: &str) -> rusqlite::Error {
     rusqlite::Error::InvalidParameterName(field.to_string())
 }
 
-fn add_payload_bytes(total: &mut usize, value: &str, field: &str) -> Result<()> {
-    if value.trim().is_empty() || value.len() > MAX_INPUT_BYTES {
-        return Err(invalid_payload(field));
-    }
-    *total = total
-        .checked_add(value.len())
-        .ok_or_else(|| invalid_payload("payload_bytes"))?;
-    if *total > MAX_INPUT_BYTES {
-        return Err(invalid_payload("payload_bytes"));
-    }
-    Ok(())
-}
-
-fn add_optional_payload_bytes(total: &mut usize, value: Option<&str>, field: &str) -> Result<()> {
-    if let Some(value) = value {
-        add_payload_bytes(total, value, field)?;
-    }
-    Ok(())
-}
-
 fn validate_text(value: &Value, field: &str, max_bytes: usize, required: bool) -> Result<()> {
     let Some(value) = value.as_str() else {
         return Err(invalid_payload(field));
@@ -975,10 +960,33 @@ fn validate_session(session: &Session) -> Result<()> {
     Ok(())
 }
 
-fn validate_morphological_rows(rows: &[MorphologicalData]) -> Result<()> {
-    if rows.len() > MAX_OUTPUT_ROWS {
+fn validate_output_row_count(count: usize) -> Result<()> {
+    if count > MAX_OUTPUT_ROWS {
         return Err(invalid_payload("data"));
     }
+    Ok(())
+}
+
+fn add_result_bytes(total: &mut usize, value: &str, field: &str) -> Result<()> {
+    if value.trim().is_empty() || value.len() > MAX_INPUT_BYTES {
+        return Err(invalid_payload(field));
+    }
+    *total = total.saturating_add(value.len());
+    if *total > MAX_RESULT_BYTES {
+        return Err(invalid_payload(field));
+    }
+    Ok(())
+}
+
+fn add_optional_result_bytes(total: &mut usize, value: Option<&str>, field: &str) -> Result<()> {
+    if let Some(value) = value {
+        add_result_bytes(total, value, field)?;
+    }
+    Ok(())
+}
+
+fn validate_morphological_rows(rows: &[MorphologicalData]) -> Result<()> {
+    validate_output_row_count(rows.len())?;
     let mut bytes = 0;
     for row in rows {
         if !matches!(row.source_type.as_str(), "analysis" | "generation")
@@ -989,11 +997,11 @@ fn validate_morphological_rows(rows: &[MorphologicalData]) -> Result<()> {
         {
             return Err(invalid_payload("data"));
         }
-        add_payload_bytes(&mut bytes, &row.source_type, "source_type")?;
-        add_payload_bytes(&mut bytes, &row.lemma, "lemma")?;
-        add_payload_bytes(&mut bytes, &row.tag, "tag")?;
-        add_optional_payload_bytes(&mut bytes, row.original_form.as_deref(), "original_form")?;
-        add_optional_payload_bytes(&mut bytes, row.generated_form.as_deref(), "generated_form")?;
+        add_result_bytes(&mut bytes, &row.source_type, "source_type")?;
+        add_result_bytes(&mut bytes, &row.lemma, "lemma")?;
+        add_result_bytes(&mut bytes, &row.tag, "tag")?;
+        add_optional_result_bytes(&mut bytes, row.original_form.as_deref(), "original_form")?;
+        add_optional_result_bytes(&mut bytes, row.generated_form.as_deref(), "generated_form")?;
     }
     Ok(())
 }
@@ -1399,11 +1407,16 @@ pub fn search_morphological_data(
     rows.collect()
 }
 
-fn build_word_forms_exist_query(word_count: usize) -> String {
+fn build_word_forms_exist_query(word_count: usize, include_lemmas: bool) -> String {
     let values = (0..word_count)
         .map(|_| "(?, ?)".to_string())
         .collect::<Vec<_>>()
         .join(", ");
+    let lemma_join = if include_lemmas {
+        "UNION SELECT input.position, input.word FROM input JOIN morphological_data ON morphological_data.lemma = input.word COLLATE MORPHODITA_UNICODE"
+    } else {
+        ""
+    };
     format!(
         "WITH input(position, word) AS (VALUES {values})
          SELECT word FROM (
@@ -1412,6 +1425,7 @@ fn build_word_forms_exist_query(word_count: usize) -> String {
              UNION
              SELECT input.position, input.word FROM input
              JOIN morphological_data ON morphological_data.generated_form = input.word COLLATE MORPHODITA_UNICODE
+             {lemma_join}
          )
          GROUP BY word
          ORDER BY MIN(position)"
@@ -1419,6 +1433,14 @@ fn build_word_forms_exist_query(word_count: usize) -> String {
 }
 
 pub fn word_forms_exist(conn: &Connection, words: &[String]) -> Result<Vec<String>> {
+    word_values_exist(conn, words, false)
+}
+
+pub fn word_values_exist(
+    conn: &Connection,
+    words: &[String],
+    include_lemmas: bool,
+) -> Result<Vec<String>> {
     if words.len() > MAX_WORD_FORM_LOOKUP_WORDS {
         return Err(rusqlite::Error::InvalidParameterName("words".to_string()));
     }
@@ -1437,7 +1459,7 @@ pub fn word_forms_exist(conn: &Connection, words: &[String]) -> Result<Vec<Strin
         return Ok(Vec::new());
     }
 
-    let query = build_word_forms_exist_query(unique_words.len());
+    let query = build_word_forms_exist_query(unique_words.len(), include_lemmas);
     let query_params = unique_words
         .iter()
         .enumerate()
@@ -1537,7 +1559,8 @@ mod tests {
                  created_at TEXT
              );
              CREATE INDEX idx_morphological_data_original_form ON morphological_data(original_form COLLATE MORPHODITA_UNICODE);
-             CREATE INDEX idx_morphological_data_generated_form ON morphological_data(generated_form COLLATE MORPHODITA_UNICODE);",
+             CREATE INDEX idx_morphological_data_generated_form ON morphological_data(generated_form COLLATE MORPHODITA_UNICODE);
+             CREATE INDEX idx_morphological_data_lemma_unicode ON morphological_data(lemma COLLATE MORPHODITA_UNICODE);",
         )
         .unwrap();
         conn
@@ -1679,6 +1702,30 @@ mod tests {
         assert!(older.exists());
         assert!(!newer.exists());
         std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn lookup_can_include_lemmas_without_changing_existing_form_lookup() {
+        let conn = test_connection();
+        conn.execute("INSERT INTO morphological_data (source_type, original_form, lemma, tag) VALUES ('analysis', 'psa', 'pes', 'N')", []).unwrap();
+        let words = vec!["PES".to_string()];
+        assert!(word_forms_exist(&conn, &words).unwrap().is_empty());
+        assert_eq!(word_values_exist(&conn, &words, true).unwrap(), words);
+        let plan: Vec<String> = conn
+            .prepare(&format!(
+                "EXPLAIN QUERY PLAN {}",
+                build_word_forms_exist_query(1, true)
+            ))
+            .unwrap()
+            .query_map(params![0, "pes"], |row| row.get(3))
+            .unwrap()
+            .collect::<Result<_>>()
+            .unwrap();
+        assert!(
+            plan.iter()
+                .any(|step| step.contains("idx_morphological_data_lemma_unicode")),
+            "{plan:?}"
+        );
     }
 
     #[test]
@@ -1836,7 +1883,7 @@ mod tests {
         let plan = conn
             .prepare(&format!(
                 "EXPLAIN QUERY PLAN {query}",
-                query = build_word_forms_exist_query(1)
+                query = build_word_forms_exist_query(1, false)
             ))
             .unwrap()
             .query_map(params![0i64, "word"], |row| row.get::<_, String>(3))
@@ -1973,7 +2020,7 @@ mod tests {
                 |row| row.get::<_, i64>(0)
             )
             .unwrap(),
-            6
+            7
         );
         validate_schema_contract(&conn).unwrap();
         conn.execute("DELETE FROM sessions WHERE id = 12", [])
@@ -2169,10 +2216,10 @@ mod tests {
             conn.query_row(
                 "SELECT length(model), length(input_text) FROM sessions",
                 [],
-                |row| { Ok((row.get::<_, usize>(0)?, row.get::<_, usize>(1)?)) }
+                |row| { Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?)) }
             )
             .unwrap(),
-            (MAX_MODEL_BYTES, MAX_INPUT_BYTES)
+            (MAX_MODEL_BYTES as i64, MAX_INPUT_BYTES as i64)
         );
     }
 
@@ -2870,9 +2917,7 @@ mod tests {
             0
         );
 
-        let mut rows = vec![valid_morphological_data(); MAX_OUTPUT_ROWS + 1];
-        rows[0].lemma = "valid".to_string();
-        assert!(insert_morphological_data(&mut conn, rows).is_err());
+        assert!(validate_output_row_count(MAX_OUTPUT_ROWS + 1).is_err());
         assert_eq!(
             conn.query_row("SELECT COUNT(*) FROM morphological_data", [], |row| row
                 .get::<_, i64>(0))
@@ -2882,16 +2927,14 @@ mod tests {
     }
 
     #[test]
-    fn accepts_output_row_limit_and_rejects_boundary_plus_one() {
+    fn accepts_large_wizard_output_above_previous_limits() {
+        assert!(validate_output_row_count(16_000_000).is_ok());
+        assert!(validate_output_row_count(16_000_001).is_err());
+        let mut bytes = MAX_RESULT_BYTES;
+        assert!(add_result_bytes(&mut bytes, "x", "data").is_err());
         let mut conn = test_connection();
-        let rows = vec![valid_morphological_data(); MAX_OUTPUT_ROWS];
-        assert_eq!(
-            insert_morphological_data(&mut conn, rows).unwrap(),
-            MAX_OUTPUT_ROWS
-        );
-        let mut second = test_connection();
-        let rows = vec![valid_morphological_data(); MAX_OUTPUT_ROWS + 1];
-        assert!(insert_morphological_data(&mut second, rows).is_err());
+        let rows = vec![valid_morphological_data(); 100_000];
+        assert_eq!(insert_morphological_data(&mut conn, rows).unwrap(), 100_000);
     }
 
     #[test]

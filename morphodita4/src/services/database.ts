@@ -6,6 +6,7 @@ import type {
   MorphologicalData,
   Session,
 } from '../types/database';
+import { canonicalKey } from './filters';
 import { MAX_WIZARD_INPUT_BYTES, MAX_WIZARD_INPUT_WORDS } from './wizardInput';
 
 type PaginationArgs = { limit?: number; offset?: number };
@@ -53,7 +54,7 @@ export type DatabaseCommandContract = {
   insert_morphological_data: { args: { data: DatabasePayload[] }; result: number };
   get_morphological_data: { args: { sessionId: number }; result: MorphologicalData[] };
   search_lemmas: { args: { query: string }; result: MorphologicalData[] };
-  word_forms_exist: { args: { words: string[] }; result: string[] };
+  word_forms_exist: { args: { words: string[]; includeLemmas?: boolean }; result: string[] };
   get_all_morphological_data: { args: PaginationArgs; result: MorphologicalData[] };
   delete_sessions: { args: { ids: number[] }; result: number };
   delete_morphological_data: { args: { ids: number[] }; result: number };
@@ -269,19 +270,30 @@ export const DatabaseService = {
     return safeInvoke('search_lemmas', { query });
   },
 
-  async wordFormsExist(words: string[]): Promise<string[]> {
+  async wordFormsExist(words: string[], includeLemmas = false): Promise<string[]> {
     if (words.length === 0) return [];
     if (words.length > MAX_WIZARD_INPUT_WORDS) {
       throw new ValidationError('word_forms_exist', `word lookup is limited to ${MAX_WIZARD_INPUT_WORDS} words`);
     }
-    const inputBytes = words.reduce((total, word) => total + new TextEncoder().encode(word).byteLength, 0);
+    const encoder = new TextEncoder();
+    const inputBytes = words.reduce((total, word) => total + encoder.encode(word).byteLength, 0);
     if (inputBytes > MAX_DATABASE_INPUT_BYTES) {
       throw new ValidationError('word_forms_exist', `word lookup input is limited to ${MAX_DATABASE_INPUT_BYTES} bytes`);
     }
 
-    const matched = await safeInvoke('word_forms_exist', { words });
-    if (!Array.isArray(matched) || matched.some((word) => typeof word !== 'string')) {
-      throw new ValidationError('word_forms_exist', 'Tauri returned an invalid word lookup result');
+    // Keep native lookups bounded at 10,000 words while accepting a whole wizard input.
+    const matched: string[] = [];
+    const seen = new Set<string>();
+    for (let offset = 0; offset < words.length; offset += 10_000) {
+      const batch = words.slice(offset, offset + 10_000);
+      const result = await safeInvoke('word_forms_exist', includeLemmas ? { words: batch, includeLemmas } : { words: batch });
+      if (!Array.isArray(result) || result.some((word) => typeof word !== 'string')) {
+        throw new ValidationError('word_forms_exist', 'Tauri returned an invalid word lookup result');
+      }
+      for (const word of result) {
+        const key = canonicalKey(word);
+        if (!seen.has(key)) { seen.add(key); matched.push(word); }
+      }
     }
     return matched;
   },

@@ -1,7 +1,7 @@
 import { parseInputText, removeDuplicates } from './filters';
 
-export const MAX_WIZARD_INPUT_WORDS = 10_000;
-export const MAX_WIZARD_INPUT_BYTES = 5 * 1024 * 1024;
+export const MAX_WIZARD_INPUT_WORDS = 1_000_000;
+export const MAX_WIZARD_INPUT_BYTES = 10_000_000;
 export const MAX_WIZARD_INPUT_FILE_BYTES = MAX_WIZARD_INPUT_BYTES;
 
 export type WizardInputError =
@@ -10,8 +10,17 @@ export type WizardInputError =
   | { code: 'file-too-large'; maxBytes: number }
   | { code: 'file-read-failed' };
 
+/** Digits are never sent to linguistic processing. Keep the original text for review. */
+export function removeWizardDigits(text: string): string {
+  return text.replace(/\p{N}/gu, '');
+}
+
+export function parseWizardWords(text: string): string[] {
+  return parseInputText(removeWizardDigits(text)).filter((word) => /\p{L}/u.test(word));
+}
+
 export function getWizardInputWordCount(text: string): number {
-  return parseInputText(text).length;
+  return parseWizardWords(text).length;
 }
 
 export function getWizardInputError(text: string): WizardInputError | null {

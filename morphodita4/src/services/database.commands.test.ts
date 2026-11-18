@@ -36,7 +36,9 @@ describe('database command inventory', () => {
   });
 
   it('allows opened model files only under the existing app-data model scope', () => {
-    expect(defaultCapability.permissions).toContain('fs:allow-open');
+    for (const command of ['open', 'read', 'fstat']) {
+      expect(defaultCapability.permissions).toContain(`fs:allow-${command}`);
+    }
     expect(defaultCapability.permissions).toContainEqual({
       identifier: 'fs:scope',
       allow: [{ path: '$APPDATA/models' }, { path: '$APPDATA/models/**/*' }],

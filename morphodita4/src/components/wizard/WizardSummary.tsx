@@ -1,118 +1,80 @@
+import { PagedValues } from './ResultPagination';
+import { Copy, Download, Pencil } from 'lucide-react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWizardStore } from '../../store/useWizardStore';
-import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '../common';
-import { applyFiltersToArray, canonicalKey, cleanLemma } from '../../services/filters';
-import { selectWizardSources } from './wizardSummarySelectors';
+import { Button, Card, CardHeader, CardTitle, CardContent } from '../common';
+import { DatabaseService } from '../../services/database';
+import { canonicalKey, removeDiacritics } from '../../services/filters';
+import { readSummarySettings, writeSummarySettings, summaryRows, filterColumn, visibleDatabaseRows, type ColumnId, type ColumnFilters } from './summaryFilters';
 import { WorkflowService } from '../../services/workflow';
 import {
   downloadFile,
   exportToJson,
-  exportToCsv,
+  downloadWizardCsv,
 } from '../../services/export';
 
 export const WizardSummary: React.FC = () => {
   const { t } = useTranslation();
-  const { processingResult, filters, setStep, setFilters, reset, setRunState } = useWizardStore();
+  const { processingResult, setStep, reset, setRunState } = useWizardStore();
 
-  const [localFilters, setLocalFilters] = useState(filters);
-  const [stopWordsInput, setStopWordsInput] = useState(filters.stopWordsList?.join(', ') || '');
+  const [settings, setSettings] = useState(readSummarySettings);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [forbiddenInput, setForbiddenInput] = useState(settings.forbiddenWords.join('\n'));
+  const [existing, setExisting] = useState<Set<string>>(new Set());
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [lookupPending, setLookupPending] = useState(false);
+  const [lookupReady, setLookupReady] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('');
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => { writeSummarySettings(settings); }, [settings]);
+  useEffect(() => { if (dialogOpen) dialogRef.current?.showModal(); }, [dialogOpen]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSucceeded, setSaveSucceeded] = useState(false);
   const [exportStatus, setExportStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const [exportPath, setExportPath] = useState<string | undefined>();
   const [exportError, setExportError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
-  useEffect(() => () => {
-    mountedRef.current = false;
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
   }, []);
 
   const forms = useMemo(() => processingResult?.forms ?? [], [processingResult]);
   const taggedTokens = useMemo(() => processingResult?.taggedTokens ?? [], [processingResult]);
-  const relations = useMemo(() => processingResult?.relations ?? [], [processingResult]);
   const model = processingResult?.model ?? '';
-  const newWords = useMemo(() => processingResult?.newWords ?? [], [processingResult]);
-
-  const newWordsSet = useMemo(
-    () => new Set(newWords.map(canonicalKey)),
-    [newWords],
-  );
-
-  const newLemmasSet = useMemo(
-    () => new Set(
-      relations
-        .filter((relation) => newWordsSet.has(canonicalKey(relation.inputToken)))
-        .map((relation) => canonicalKey(cleanLemma(relation.lemma)))
-    ),
-    [newWordsSet, relations],
-  );
-
-  const selectedSources = useMemo(
-    () => selectWizardSources(taggedTokens, forms, Boolean(localFilters.showOnlyNew), newWordsSet, newLemmasSet),
-    [forms, taggedTokens, localFilters.showOnlyNew, newWordsSet, newLemmasSet],
-  );
-
-  const formsToLemmas = useMemo(() => {
-    const { taggedTokens: sourceTaggedTokens, forms: sourceForms } = selectedSources;
-    const result: string[] = [];
-    const seenRelationshipKeys = new Set<string>();
-    [...sourceTaggedTokens.map((token) => ({ form: token.token, lemma: token.lemma })), ...sourceForms.map((item) => ({ form: item.form, lemma: item.lemma }))].forEach(({ form, lemma: rawLemma }) => {
-      const lemma = cleanLemma(rawLemma);
-      let displayLemma = lemma;
-      const ignoreDiacritics = localFilters.removeDiacritics;
-      if (ignoreDiacritics) {
-        const filteredLemma = applyFiltersToArray([lemma], {
-          ...localFilters,
-          removeDuplicates: false,
-          removeStopWords: false,
-          removeSpecialCharacters: false,
-        });
-        if (filteredLemma.length > 0) displayLemma = filteredLemma[0];
-      }
-
-      const comparisonOptions = { ...localFilters, removeDuplicates: false };
-      const filteredFormForCompare = applyFiltersToArray([form], comparisonOptions)[0];
-      const filteredLemmaForCompare = applyFiltersToArray([displayLemma], comparisonOptions)[0];
-      if (filteredFormForCompare === undefined || filteredLemmaForCompare === undefined) return;
-      const formCompare = filteredFormForCompare === undefined ? undefined : canonicalKey(filteredFormForCompare);
-      const lemmaCompare = filteredLemmaForCompare === undefined ? undefined : canonicalKey(filteredLemmaForCompare);
-
-      if (localFilters.removeDuplicates && formCompare !== undefined && formCompare === lemmaCompare) return;
-
-      const filteredForm = applyFiltersToArray([form], localFilters);
-      if (filteredForm.length > 0) {
-        const relationship = `${filteredForm[0]} = ${displayLemma}`;
-        if (localFilters.removeDuplicates && formCompare !== undefined) {
-          const relationshipKey = `${formCompare} = ${lemmaCompare ?? canonicalKey(displayLemma)}`;
-          if (seenRelationshipKeys.has(relationshipKey)) return;
-          seenRelationshipKeys.add(relationshipKey);
-        }
-        result.push(relationship);
-      }
-    });
-    return result.sort();
-  }, [selectedSources, localFilters]);
-
-  const filteredLemmas = useMemo(() => {
-    const allLemmas = [
-      ...selectedSources.taggedTokens.map((token) => cleanLemma(token.lemma)),
-      ...selectedSources.forms.map((form) => cleanLemma(form.lemma)),
-    ].filter((lemma) => lemma.length > 0);
-
-    return applyFiltersToArray(allLemmas, localFilters).sort();
-  }, [selectedSources, localFilters]);
-
-  const filteredForms = useMemo(() => {
-    const { taggedTokens: sourceTaggedTokens, forms: sourceForms } = selectedSources;
-
-    const allForms = [
-      ...sourceTaggedTokens.map((token) => token.token),
-      ...sourceForms.map((form) => form.form),
-    ].filter((form) => form.length > 0);
-
-    return applyFiltersToArray(allForms, localFilters).sort();
-  }, [selectedSources, localFilters]);
+  const rows = useMemo(() => summaryRows(taggedTokens, forms), [taggedTokens, forms]);
+  const lookupNeeded = Object.values(settings.columns).some((column) => column.existing);
+  useEffect(() => {
+    if (!lookupNeeded) return;
+    let active = true;
+    const words = [...new Set(rows.flatMap((row) => [row.value, row.lemma ?? '', removeDiacritics(row.value), removeDiacritics(row.lemma ?? '')]).filter(Boolean))];
+    setLookupPending(true); setLookupReady(false); setLookupError(null);
+    void (async () => {
+      const matches: string[] = [];
+      for (let i = 0; i < words.length; i += 5000) matches.push(...await DatabaseService.wordFormsExist(words.slice(i, i + 5000), true));
+      if (active) { setExisting(new Set(matches.map(canonicalKey))); setLookupReady(true); }
+    })().catch((error) => { if (active) setLookupError(error instanceof Error ? error.message : String(error)); })
+      .finally(() => { if (active) setLookupPending(false); });
+    return () => { active = false; };
+  }, [rows, lookupNeeded]);
+  const results = useMemo(() => Object.fromEntries((['relations', 'lemmas', 'forms'] as const).map((id) => [id,
+    settings.columns[id].existing && (lookupPending || !lookupReady || lookupError) ? [] : filterColumn(rows, id, settings.columns[id], settings.forbiddenWords, existing),
+  ])) as Record<ColumnId, string[]>, [rows, settings, existing, lookupPending, lookupReady, lookupError]);
+  const formsToLemmas = results.relations, filteredLemmas = results.lemmas, filteredForms = results.forms;
+  const localFilters = settings;
+  const setColumnFilter = (id: ColumnId, key: keyof ColumnFilters, value: boolean) => {
+    if (key === 'existing' && value && !lookupNeeded) setLookupReady(false);
+    setSettings((previous) => ({
+      ...previous, columns: { ...previous.columns, [id]: { ...previous.columns[id], [key]: value } },
+    }));
+  };
+  const copyColumn = async (id: ColumnId) => {
+    try { await navigator.clipboard.writeText(results[id].join('\n')); setCopyStatus(t('wizard.summaryColumns.copied')); }
+    catch { setCopyStatus(t('wizard.summaryColumns.copyError')); }
+  };
 
   if (!processingResult) {
     return (
@@ -123,34 +85,24 @@ export const WizardSummary: React.FC = () => {
     );
   }
 
-  const handleApplyFilters = () => {
-    setFilters({
-      ...localFilters,
-      stopWordsList: stopWordsInput
-        .split(/[,\s;]+/)
-        .map((word) => word.trim())
-        .filter((word) => word.length > 0),
-    });
-  };
-
   const handleExport = async (format: 'csv' | 'json' | 'txt') => {
     if (exportStatus === 'pending') return;
     setExportStatus('pending');
     setExportError(null);
+    setExportPath(undefined);
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
     const timestamp = new Date().toISOString().slice(0, 10);
     const schemaVersion = 1;
-    const exportData = { schemaVersion, model, filters: localFilters, formsToLemmas, filteredLemmas, filteredForms };
+    const exportData = { schemaVersion, model, lemmaModel: processingResult.lemmaModel, filters: localFilters, formsToLemmas, filteredLemmas, filteredForms };
     try {
       if (format === 'json') {
-        downloadFile(exportToJson(exportData), `wizard-results-${timestamp}.json`, 'application/json');
+        setExportPath(await downloadFile(exportToJson(exportData), `wizard-results-${timestamp}.json`, 'application/json'));
       } else if (format === 'csv') {
-        const rows = [
-          ...formsToLemmas.map((value) => ({ schemaVersion, model, section: 'formsToLemmas', value })),
-          ...filteredLemmas.map((value) => ({ schemaVersion, model, section: 'filteredLemmas', value })),
-          ...filteredForms.map((value) => ({ schemaVersion, model, section: 'filteredForms', value })),
-        ];
-        downloadFile(exportToCsv(rows, ['schemaVersion', 'model', 'section', 'value']), `wizard-results-${timestamp}.csv`, 'text/csv');
+        setExportPath(await downloadWizardCsv([
+          { section: 'formsToLemmas', values: formsToLemmas },
+          { section: 'filteredLemmas', values: filteredLemmas },
+          { section: 'filteredForms', values: filteredForms },
+        ], model, schemaVersion, `wizard-results-${timestamp}.csv`));
       } else {
         const combinedTxt = [
           `# schemaVersion: ${schemaVersion}`,
@@ -161,7 +113,7 @@ export const WizardSummary: React.FC = () => {
            `# ${t('wizard.summary.exportFilteredLemmas')}`, ...filteredLemmas, '',
            `# ${t('wizard.summary.exportFilteredForms')}`, ...filteredForms,
         ].join('\n');
-        downloadFile(combinedTxt, `wizard-results-${timestamp}.txt`, 'text/plain');
+        setExportPath(await downloadFile(combinedTxt, `wizard-results-${timestamp}.txt`, 'text/plain'));
       }
       setExportStatus('success');
     } catch (error) {
@@ -193,7 +145,7 @@ export const WizardSummary: React.FC = () => {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await WorkflowService.saveWizardResults(taggedTokens, forms, saveModel, saveInput);
+      await WorkflowService.saveWizardResults(taggedTokens, forms, saveModel, saveInput, visibleDatabaseRows(results, rows, settings));
       if (!isCurrentSave()) return;
       setRunState({ status: 'saved', completedPhase: 'saved' });
       setSaveSucceeded(true);
@@ -216,91 +168,55 @@ export const WizardSummary: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[clamp(14rem,30vh,22rem)] max-h-[60vh]">
-        <Card glass className="flex flex-col overflow-hidden">
-          <CardHeader className="py-2">
-             <CardTitle className="text-sm">{t('wizard.summary.formsToLemmas', { count: formsToLemmas.length })}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto text-xs font-mono">
-            {formsToLemmas.map((item, index) => <div key={index}>{item}</div>)}
-          </CardContent>
-        </Card>
-        <Card glass className="flex flex-col overflow-hidden">
-          <CardHeader className="py-2">
-             <CardTitle className="text-sm">{t('wizard.summary.lemmas', { count: filteredLemmas.length })}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto text-xs">
-            {filteredLemmas.join(', ')}
-          </CardContent>
-        </Card>
-        <Card glass className="flex flex-col overflow-hidden">
-          <CardHeader className="py-2">
-             <CardTitle className="text-sm">{t('wizard.summary.forms', { count: filteredForms.length })}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto text-xs">
-            {filteredForms.join(', ')}
-          </CardContent>
-        </Card>
+      <p className="text-sm text-muted-foreground">{t('wizard.result_model')}: <span className="font-mono break-all">{model}</span></p>
+
+      <div className="summary-columns grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
+        {(['relations', 'lemmas', 'forms'] as const).map((id) => (
+          <Card glass key={id} className="flex flex-col min-w-0 overflow-hidden">
+            <CardHeader className="py-3"><CardTitle className="text-sm break-words">{t(`wizard.summaryColumns.${id}`)} ({results[id].length})</CardTitle></CardHeader>
+            <CardContent className="flex flex-col gap-3 min-w-0">
+              <fieldset className="grid gap-1 text-sm"><legend className="sr-only">{t('wizard.summary.filters')}: {t(`wizard.summaryColumns.${id}`)}</legend>
+                {(['duplicates', 'diacritics', 'forbidden', 'functionWords', 'existing'] as const).map((key) => (
+                  <label key={key} className="flex items-start gap-2"><input type="checkbox" disabled={isSaving} checked={settings.columns[id][key]} onChange={(event) => setColumnFilter(id, key, event.target.checked)} /> <span>{t(`wizard.summaryColumns.${key}`)}</span></label>
+                ))}
+              </fieldset>
+              <Button variant="secondary" size="sm" onClick={() => void copyColumn(id)} disabled={settings.columns[id].existing && (lookupPending || !lookupReady || Boolean(lookupError))}><Copy size={16} aria-hidden="true" className="mr-2" />{t('wizard.summaryColumns.copy')}</Button>
+              <PagedValues values={results[id]} label={t(`wizard.summaryColumns.${id}`)} />
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-         <h3 className="text-md font-semibold mb-4">{t('wizard.summary.filters')}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={localFilters.removeDuplicates} onChange={(event) => setLocalFilters({ ...localFilters, removeDuplicates: event.target.checked })} className="rounded text-primary focus:ring-primary" />
-             <span className="text-sm">{t('wizard.summary.removeDuplicates')}</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={localFilters.removeDiacritics} onChange={(event) => setLocalFilters({ ...localFilters, removeDiacritics: event.target.checked })} className="rounded text-primary focus:ring-primary" />
-             <span className="text-sm">{t('wizard.summary.removeDiacritics')}</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={localFilters.removeSpecialCharacters} onChange={(event) => setLocalFilters({ ...localFilters, removeSpecialCharacters: event.target.checked })} className="rounded text-primary focus:ring-primary" />
-             <span className="text-sm">{t('wizard.summary.removeSpecialCharacters')}</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={localFilters.removeStopWords} onChange={(event) => setLocalFilters({ ...localFilters, removeStopWords: event.target.checked })} className="rounded text-primary focus:ring-primary" />
-             <span className="text-sm">{t('wizard.summary.removeStopWords')}</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={localFilters.showOnlyNew} onChange={(event) => setLocalFilters({ ...localFilters, showOnlyNew: event.target.checked })} className="rounded text-primary focus:ring-primary" />
-             <span className="text-sm">{t('wizard.summary.showOnlyNew')}</span>
-          </label>
-        </div>
-
-        {localFilters.removeStopWords && (
-          <div className="mt-4">
-            <Input
-               label={t('wizard.summary.customStopWords')}
-              value={stopWordsInput}
-              onChange={(event) => setStopWordsInput(event.target.value)}
-               placeholder={t('wizard.summary.stopWordsPlaceholder')}
-            />
-          </div>
-        )}
-
-        <div className="mt-4 flex justify-end">
-           <Button variant="secondary" size="sm" onClick={handleApplyFilters} disabled={isSaving}>
-             {t('wizard.summary.applyFilters')}
-          </Button>
-        </div>
+      <div className="summary-notes"><p className="text-sm text-muted-foreground">{t('wizard.summaryColumns.functionNote')}</p>
+      <div className="flex flex-wrap gap-3 items-center"><Button variant="secondary" disabled={isSaving} onClick={() => setDialogOpen(true)}>{t('wizard.summaryColumns.editForbidden')}</Button>
+        {lookupPending && <span role="status">{t('wizard.summaryColumns.checking')}</span>}
+        {lookupError && <span role="alert">{t('wizard.summaryColumns.databaseError')}: {lookupError}</span>}
+        {copyStatus && <span role="status">{copyStatus}</span>}
       </div>
+      </div>
+      <dialog ref={dialogRef} aria-labelledby="forbidden-dialog-title" onClose={() => setDialogOpen(false)} className="max-w-xl w-[90vw] rounded-xl bg-card text-foreground p-6 backdrop:bg-black/60">
+        <div className="dialog-icon status-info"><Pencil size={30} aria-hidden="true" /></div>
+        <h3 id="forbidden-dialog-title" className="text-lg font-semibold">{t('wizard.summaryColumns.editForbidden')}</h3>
+        <label className="block mt-3" htmlFor="forbidden-words">{t('wizard.summaryColumns.forbiddenHelp')}</label>
+        <textarea id="forbidden-words" className="w-full h-48 mt-2 rounded border border-input bg-background p-2" value={forbiddenInput} onChange={(event) => setForbiddenInput(event.target.value)} />
+        <div className="flex justify-end gap-2 mt-4"><Button variant="secondary" onClick={() => { setForbiddenInput(settings.forbiddenWords.join('\n')); dialogRef.current?.close(); }}>{t('wizard.summaryColumns.cancel')}</Button>
+          <Button onClick={() => { setSettings((prev) => ({ ...prev, forbiddenWords: forbiddenInput.split(/[,;\s]+/u).filter(Boolean) })); dialogRef.current?.close(); }}>{t('wizard.summaryColumns.save')}</Button></div>
+      </dialog>
 
-      <div className="flex flex-wrap justify-between gap-3 mt-4">
+      <div className="wizard-actions flex flex-wrap justify-between gap-3 mt-4">
          <Button variant="secondary" onClick={() => setStep(3)} disabled={isSaving}>
           {t('wizard.back')}
         </Button>
         <div className="flex flex-wrap gap-2">
-           <Button variant="ghost" onClick={() => void handleExport('csv')} disabled={isSaving || exportStatus === 'pending'}>{t('wizard.summary.exportCsv')}</Button>
-           <Button variant="ghost" onClick={() => void handleExport('json')} disabled={isSaving || exportStatus === 'pending'}>{t('wizard.summary.exportJson')}</Button>
-           <Button variant="ghost" onClick={() => void handleExport('txt')} disabled={isSaving || exportStatus === 'pending'}>{t('wizard.summary.exportTxt')}</Button>
-          <Button variant="primary" onClick={handleFinish} disabled={isSaving || saveSucceeded}>
+           <Button variant="ghost" onClick={() => void handleExport('csv')} disabled={isSaving || exportStatus === 'pending' || (lookupNeeded && (lookupPending || !lookupReady || Boolean(lookupError)))}><Download size={16} aria-hidden="true" className="mr-2" />{t('wizard.summary.exportCsv')}</Button>
+           <Button variant="ghost" onClick={() => void handleExport('json')} disabled={isSaving || exportStatus === 'pending' || (lookupNeeded && (lookupPending || !lookupReady || Boolean(lookupError)))}><Download size={16} aria-hidden="true" className="mr-2" />{t('wizard.summary.exportJson')}</Button>
+           <Button variant="ghost" onClick={() => void handleExport('txt')} disabled={isSaving || exportStatus === 'pending' || (lookupNeeded && (lookupPending || !lookupReady || Boolean(lookupError)))}><Download size={16} aria-hidden="true" className="mr-2" />{t('wizard.summary.exportTxt')}</Button>
+          <Button variant="primary" onClick={handleFinish} disabled={isSaving || saveSucceeded || (lookupNeeded && (lookupPending || !lookupReady || Boolean(lookupError)))}>
              {isSaving ? t('wizard.summary.saving') : t('wizard.summary.finishSave')}
           </Button>
         </div>
       </div>
       {exportStatus === 'pending' && <div role="status" aria-live="polite">{t('wizard.export_pending')}</div>}
-      {exportStatus === 'success' && <div role="status" aria-live="polite">{t('wizard.export_success')}</div>}
+      {exportStatus === 'success' && <div role="status" aria-live="polite">{t('wizard.export_success')}{exportPath && <div className="break-all">{exportPath}</div>}</div>}
       {exportStatus === 'error' && <div role="alert">{t('wizard.export_error')}: {exportError}</div>}
       {saveError && (
         <div role="alert" className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">

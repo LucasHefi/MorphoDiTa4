@@ -1,6 +1,6 @@
 use crate::db::{register_unicode_collation, validate_schema_contract, SCHEMA_VERSION};
 use chrono::Utc;
-use rusqlite::{backup::Backup, params, Connection, DatabaseName, OpenFlags};
+use rusqlite::{backup::Backup, params, Connection, OpenFlags};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[cfg(test)]
-mod test_seams {
+pub(crate) mod test_seams {
     use std::cell::RefCell;
     use std::path::PathBuf;
     use std::sync::atomic::{AtomicUsize, Ordering};
@@ -411,7 +411,11 @@ pub fn backup_database(source: &Connection, target_path: &Path) -> BackupResult<
         ));
     }
     let temporary = TemporaryPath::create(target_path, "backup")?;
-    source.backup(DatabaseName::Main, &temporary.path, None)?;
+    source.backup(
+        rusqlite::MAIN_DB,
+        &temporary.path,
+        None::<fn(rusqlite::backup::Progress)>,
+    )?;
     let backup_connection = Connection::open(&temporary.path)?;
     register_unicode_collation(&backup_connection)?;
     backup_connection.execute_batch("PRAGMA foreign_keys = ON;")?;
@@ -772,7 +776,11 @@ mod tests {
         )
         .unwrap();
         source
-            .backup(DatabaseName::Main, &backup_path, None)
+            .backup(
+                rusqlite::MAIN_DB,
+                &backup_path,
+                None::<fn(rusqlite::backup::Progress)>,
+            )
             .unwrap();
         let backup_connection = Connection::open(&backup_path).unwrap();
         backup_connection
@@ -785,7 +793,11 @@ mod tests {
         let target = populated_connection();
         let target_file = root.join("target-source.sqlite");
         target
-            .backup(DatabaseName::Main, &target_file, None)
+            .backup(
+                rusqlite::MAIN_DB,
+                &target_file,
+                None::<fn(rusqlite::backup::Progress)>,
+            )
             .unwrap();
         drop(target);
         fs::rename(target_file, &target_path).unwrap();
@@ -814,7 +826,11 @@ mod tests {
         let target = populated_connection();
         let target_file = root.join("target-source.sqlite");
         target
-            .backup(DatabaseName::Main, &target_file, None)
+            .backup(
+                rusqlite::MAIN_DB,
+                &target_file,
+                None::<fn(rusqlite::backup::Progress)>,
+            )
             .unwrap();
         drop(target);
         fs::rename(target_file, &target_path).unwrap();
@@ -842,7 +858,11 @@ mod tests {
         backup_database(&source, &backup_path).unwrap();
         let target = populated_connection();
         target
-            .backup(DatabaseName::Main, &target_path, None)
+            .backup(
+                rusqlite::MAIN_DB,
+                &target_path,
+                None::<fn(rusqlite::backup::Progress)>,
+            )
             .unwrap();
         drop(target);
 
@@ -932,7 +952,11 @@ mod tests {
         backup_database(&source, &backup_path).unwrap();
         let target = populated_connection();
         target
-            .backup(DatabaseName::Main, &target_path, None)
+            .backup(
+                rusqlite::MAIN_DB,
+                &target_path,
+                None::<fn(rusqlite::backup::Progress)>,
+            )
             .unwrap();
         drop(target);
         test_seams::set_sync_failure_phase(Some("restore publication".to_string()));

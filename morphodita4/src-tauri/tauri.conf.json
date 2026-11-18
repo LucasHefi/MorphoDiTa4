@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MorphoDiTa Client",
-  "version": "0.1.0",
+  "version": "0.1.21",
   "identifier": "cz.ufal.morphodita",
   "build": {
     "frontendDist": "../dist",
@@ -33,16 +33,26 @@
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
+      "icons/icon.png",
       "icons/icon.icns",
       "icons/icon.ico"
     ],
     "resources": {
-      "../../LICENSE": "LICENSE"
+      "../../LICENSE": "LICENSE",
+      "../../NOTICE": "NOTICE",
+      "../../licenses/MPL-2.0.txt": "licenses/MPL-2.0.txt",
+      "../../third_party/morphodita/rest_server.cpp": "third_party/morphodita/rest_server.cpp",
+      "../../third_party/morphodita/loopback.patch": "third_party/morphodita/loopback.patch",
+      "../../third_party/morphodita/README.md": "third_party/morphodita/README.md"
     },
     "windows": {
       "nsis": {
         "template": null,
-        "languages": ["English", "Czech", "Polish"]
+        "languages": [
+          "English",
+          "Czech",
+          "Polish"
+        ]
       }
     },
     "android": {

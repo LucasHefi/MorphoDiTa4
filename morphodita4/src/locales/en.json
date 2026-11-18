@@ -82,8 +82,8 @@
     "save": "Save result",
     "saveSuccess": "Saved {{count}} result records to the database.",
     "results_title": "Result",
-    "no_result_placeholder": "Enter text and run analysis to see results."
-    ,"results": {
+    "no_result_placeholder": "Enter text and run analysis to see results.",
+    "results": {
       "title": "Results",
       "table": "Table",
       "json": "JSON",
@@ -96,13 +96,13 @@
       "space": "Space",
       "copy": "Copy",
       "copied": "Copied to clipboard.",
-       "copyError": "Copying failed. Please try again.",
-       "tabsLabel": "Result views"
-       ,"morphologicalTable": "Morphological results"
-       ,"tokenTable": "Token results"
+      "copyError": "Copying failed. Please try again.",
+      "tabsLabel": "Result views",
+      "morphologicalTable": "Morphological results",
+      "tokenTable": "Token results"
     },
     "logs": {
-      "title": "Logs",
+      "title": "Progress and messages",
       "filter": "Log filter",
       "all": "All",
       "info": "Info",
@@ -115,9 +115,36 @@
       "label": "Export",
       "format": "Export format"
     },
-    "modelRequired": "Select a model for {{operation}}.", "inputRequired": "Enter text for {{operation}}.", "operationUnavailable": "Model {{model}} does not support the {{operation}} operation.", "operationStarted": "Starting operation: {{operation}}.", "operationSuccess": "Operation completed successfully.", "operationError": "Operation failed: {{message}}", "exportSuccess": "{{format}} export completed: {{filename}}"
+    "modelRequired": "Select a model for {{operation}}.",
+    "inputRequired": "Enter text for {{operation}}.",
+    "operationUnavailable": "Model {{model}} does not support the {{operation}} operation.",
+    "operationStarted": "Starting operation: {{operation}}.",
+    "operationSuccess": "Operation completed successfully.",
+    "operationError": "Operation failed: {{message}}",
+    "exportSuccess": "{{format}} export completed: {{filename}}"
   },
   "wizard": {
+    "input_digits_removed": "Numeric characters are removed before processing; for example, “model123” is processed as “model”.",
+    "summaryColumns": {
+      "functionNote": "The fixed Czech list is approximate: a word can belong to more than one word class.",
+      "relations": "Forms and lemmas",
+      "lemmas": "Lemmas",
+      "forms": "Forms",
+      "duplicates": "Remove duplicates",
+      "diacritics": "Remove diacritics",
+      "forbidden": "Remove forbidden words",
+      "functionWords": "Remove prepositions, conjunctions, pronouns and interjections",
+      "existing": "Remove values already in database",
+      "copy": "Copy column",
+      "copied": "Column copied.",
+      "copyError": "Copy failed.",
+      "editForbidden": "Edit forbidden words",
+      "forbiddenHelp": "One word per line or separated by commas. Shared across columns.",
+      "checking": "Checking database…",
+      "databaseError": "Database lookup failed",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
     "steps": {
       "input": "Input",
       "processing": "Processing",
@@ -143,10 +170,10 @@
     "input_label": "Keywords",
     "wordCount": "Words: {{count}}",
     "input_too_many_words": "The input may contain at most {{maxWords}} words.",
-    "input_too_large": "The input may be at most {{maxMiB}} MiB.",
-    "input_file_too_large": "The TXT file may be at most {{maxMiB}} MiB.",
-    "input_file_read_failed": "The TXT file could not be read."
-    ,"processing": {
+    "input_too_large": "The input may be at most {{maxMB}} MB.",
+    "input_file_too_large": "The TXT file may be at most {{maxMB}} MB.",
+    "input_file_read_failed": "The TXT file could not be read.",
+    "processing": {
       "title": "Processing",
       "working": "Your data is being processed. Please wait...",
       "complete": "Processing completed.",
@@ -165,7 +192,8 @@
       "error": "Processing error: {{message}}",
       "taggingContractMismatch": "The morphological tagging response did not match the unique input words.",
       "tooManyWords": "The input contains more than {{maxWords}} words.",
-      "inputReadFailed": "The input file could not be read."
+      "inputReadFailed": "The input file could not be read.",
+      "dictionaryResolved": "Dictionary base forms: corrected {{corrected}}, unresolved ambiguous forms {{ambiguous}}."
     },
     "summary": {
       "title": "Summary and export",
@@ -201,7 +229,11 @@
       "lemmasPreview": "Preview of found lemmas",
       "formsPreview": "Preview of generated forms",
       "tabsLabel": "Wizard result views"
-    }
+    },
+    "editor_page_hint": "Editing part {{page}} of {{pages}}. The entire input will be processed.",
+    "clear_input": "Clear entire input",
+    "model_changed_rerun": "The model or connection mode changed. Your input is retained; run processing again with the new model.",
+    "result_model": "Model used for these results"
   },
   "settings": {
     "title": "Application Settings",
@@ -262,16 +294,39 @@
     "deleteDeleting": "Deleting {{count}} records...",
     "deleteSuccess": "Successfully deleted {{count}} records.",
     "deleteError": "Deletion failed: {{message}} Please retry or cancel.",
-    "deleteCancelled": "Deletion cancelled."
-    ,"columns": {
-      "id": "ID", "operation": "Operation", "model": "Model", "input": "Input", "parameters": "Parameters", "results": "Results", "time": "Time (s)", "status": "Status", "error": "Error", "created": "Created", "completed": "Completed", "type": "Type", "originalForm": "Original form", "lemma": "Lemma", "tag": "Tag", "generatedForm": "Generated form", "probability": "Probability", "relationId": "Relation ID"
+    "deleteCancelled": "Deletion cancelled.",
+    "columns": {
+      "id": "ID",
+      "operation": "Operation",
+      "model": "Model",
+      "input": "Input",
+      "parameters": "Parameters",
+      "results": "Results",
+      "time": "Time (s)",
+      "status": "Status",
+      "error": "Error",
+      "created": "Created",
+      "completed": "Completed",
+      "type": "Type",
+      "originalForm": "Original form",
+      "lemma": "Lemma",
+      "tag": "Tag",
+      "generatedForm": "Generated form",
+      "probability": "Probability",
+      "relationId": "Relation ID"
     },
-    "caption": { "sessions": "Database sessions", "morphological_data": "Morphological data" },
+    "caption": {
+      "sessions": "Database sessions",
+      "morphological_data": "Morphological data"
+    },
     "editInvalid": "Enter a valid value.",
     "notChanged": "The record was not changed",
     "saved": "Saved",
     "saveFailed": "Save failed: {{message}}",
-    "errorStatus": "Error: {{message}}", "saveRefreshFailed": "The record was saved, but refreshing the data failed. Refresh manually: {{message}}", "deleteReloadFailed": "{{count}} records were deleted, but reloading failed. Refresh manually: {{message}}", "deletePartial": "{{actual}} of {{expected}} records were deleted. Check the data and refresh manually."
+    "errorStatus": "Error: {{message}}",
+    "saveRefreshFailed": "The record was saved, but refreshing the data failed. Refresh manually: {{message}}",
+    "deleteReloadFailed": "{{count}} records were deleted, but reloading failed. Refresh manually: {{message}}",
+    "deletePartial": "{{actual}} of {{expected}} records were deleted. Check the data and refresh manually."
   },
   "tagset": {
     "unknown": "Unknown '{{val}}'",
@@ -287,55 +342,66 @@
       "J": "Conjunction",
       "T": "Particle",
       "I": "Interjection",
-      "Z": "Abbreviation",
-      "X": "Foreign word"
+      "Z": "Punctuation",
+      "X": "Undetermined part of speech"
     },
     "subtype": {
       "noun": {
-        "N": "Common",
-        "H": "Proper"
+        "N": "Noun form"
       },
       "verb": {
-        "B": "To be",
-        "c": "Modal",
-        "e": "Phase",
-        "f": "Frequentative",
-        "i": "Iterative",
-        "p": "Perfective",
-        "q": "Frequentative (impf)",
-        "t": "Factitive",
-        "w": "Reflexive",
-        "I": "Imperfective",
-        "F": "Future",
-        "R": "Preterite"
+        "B": "Present or future form",
+        "c": "Conditional form of být",
+        "e": "Present transgressive",
+        "f": "Infinitive",
+        "i": "Imperative",
+        "m": "Past transgressive",
+        "p": "Active past participle",
+        "q": "Active past participle with -ť",
+        "s": "Passive participle",
+        "t": "Present or future form with -ť"
       },
       "adj": {
-        "2": "Gradable",
-        "N": "Non-gradable",
-        "W": "Possessive"
+        "A": "General adjective",
+        "C": "Short nominal form",
+        "G": "From present transgressive",
+        "M": "From past transgressive",
+        "U": "Possessive"
       },
       "pron": {
-        "1": "Personal",
-        "2": "Relative",
-        "3": "Interrogative",
-        "4": "Relative/Interrogative",
-        "5": "Indefinite",
-        "6": "Negative",
-        "7": "Reciprocal",
-        "8": "General indefinite",
-        "9": "Relative/Interrogative"
+        "4": "Interrogative or relative (jaký, který, čí)",
+        "5": "Personal after preposition (něj, něho)",
+        "6": "Long reflexive (sebe, sobě)",
+        "7": "Short reflexive (se, si)",
+        "8": "Reflexive possessive (svůj)",
+        "9": "Relative after preposition (něhož)",
+        "D": "Demonstrative",
+        "E": "Relative (což)",
+        "H": "Clitic personal",
+        "J": "Relative (jenž)",
+        "K": "Interrogative or relative (kdo)",
+        "L": "Indefinite (všechen, sám)",
+        "O": "Standalone (svůj, nesvůj, tentam)",
+        "P": "Personal",
+        "Q": "Interrogative or relative (co)",
+        "S": "Possessive",
+        "W": "Negative",
+        "Y": "Clitic interrogative or relative (oč, nač)",
+        "Z": "Indefinite"
       }
     },
     "gender": {
       "M": "Masculine animate",
+      "I": "Masculine inanimate",
       "F": "Feminine",
-      "N": "Masculine inanimate",
-      "I": "Neuter",
-      "Y": "Ambigeneric",
-      "T": "Gender unmarked",
-      "H": "Animate",
-      "Q": "Animate/Inanimate",
-      "U": "Undefined"
+      "N": "Neuter",
+      "Y": "Masculine animate or inanimate",
+      "H": "Feminine or neuter",
+      "Q": "Feminine singular or neuter plural",
+      "T": "Masculine inanimate or feminine",
+      "W": "Masculine inanimate or neuter",
+      "Z": "Masculine or neuter",
+      "X": "Any gender"
     },
     "case": {
       "1": "1st case (Nominative)",
@@ -345,7 +411,7 @@
       "5": "5th case (Vocative)",
       "6": "6th case (Locative)",
       "7": "7th case (Instrumental)",
-      "X": "Unmarked",
+      "X": "Any case",
       "Y": "Residual",
       "Z": "Homonymy"
     },
@@ -353,8 +419,8 @@
       "S": "Singular",
       "P": "Plural",
       "D": "Dual",
-      "W": "Singulare tantum",
-      "X": "Unmarked"
+      "W": "Singular feminine or plural neuter",
+      "X": "Any number"
     },
     "possessivity": {
       "none": "None",
@@ -367,13 +433,14 @@
       "number": {
         "S": "singular",
         "P": "plural",
-        "D": "dual"
+        "D": "dual",
+        "X": "Any number"
       },
       "gender": {
-        "M": "masc. anim.",
-        "F": "feminine",
-        "N": "masc. inan.",
-        "I": "neuter"
+        "M": "Masculine animate",
+        "F": "Feminine",
+        "X": "Any gender",
+        "Z": "Masculine or neuter"
       },
       "case": {
         "1": "1st case",
@@ -390,10 +457,115 @@
     "title": "About",
     "name": "MorphoDiTa Client",
     "author": "Author: Lukáš Hefner (mediamaker.cz)",
-    "license": "License: Mozilla Public License 2.0",
+    "license": "License: MIT",
+    "modelTitle": "Language models and licenses",
+    "modelTerms": "The application MIT license does not cover language models. The CC BY-NC-SA 4.0 model requires attribution, non-commercial use and sharing adaptations under the same license. The model is not bundled; accept its terms before downloading it in Settings.",
+    "sidecarLicense": "MorphoDiTa server by ÚFAL, Charles University: MPL 2.0. Source code and license:",
     "version": "Version: {{version}}",
     "description": "Desktop application for morphological analysis of the Czech language using the MorphoDiTa tool.",
     "tech": "Built with React + Tauri + TypeScript.",
     "links": "Official site: https://ufal.mff.cuni.cz/morphodita"
+  },
+  "design": {
+    "overview": "Overview",
+    "wordWizard": "Word wizard",
+    "workshop": "Language workshop",
+    "navigation": "Main navigation",
+    "skip": "Skip to content",
+    "onlineMode": "Mode: online",
+    "localMode": "Mode: local",
+    "fallback": "Local fallback",
+    "homeTitle": "Your workspace",
+    "homeSubtitle": "From text to words, forms and clear results.",
+    "openAnalyzer": "Open analyzer",
+    "openWizard": "Start wizard",
+    "gettingStarted": "Getting started? The wizard guides you through each step.",
+    "input": "Input text",
+    "importTxt": "Import TXT",
+    "clear": "Clear",
+    "words": "Words: {{count}}",
+    "lines": "Lines: {{count}}",
+    "process": {
+      "tag": "Tag text",
+      "analyze": "Analyze text",
+      "generate": "Generate forms",
+      "tokenize": "Tokenize text"
+    },
+    "operationHelp": {
+      "tag": "Assign word tags in context.",
+      "analyze": "Find possible morphological analyses.",
+      "generate": "Create word forms from lemmas.",
+      "tokenize": "Split text into tokens and spaces."
+    },
+    "analyzerSubtitle": "Enter text and choose what to do with it.",
+    "guesser": "Guess unknown words (guesser)",
+    "copyJson": "Copy JSON",
+    "continueProcessing": "Continue to processing",
+    "continueSummary": "Continue to summary",
+    "viewResults": "View results",
+    "howTo": "How it works",
+    "guideInput": "Enter words or import a TXT file.",
+    "guideResults": "Review lemmas and generated word forms.",
+    "guideSave": "Set filters in the summary, export and save results.",
+    "modelContext": "Model from Overview",
+    "limits": "Up to 1,000,000 words and 10 MB.",
+    "settingsSubtitle": "Appearance, language and processing mode.",
+    "appearance": "Appearance and language",
+    "processing": "Processing",
+    "localModel": "Local model",
+    "editHint": "Double-click or Enter: edit. Enter or leaving the field: save. Esc: cancel.",
+    "pageHint": "50 records per page · sorting applies to this page",
+    "databaseSubtitle": "Browse records and edit permitted fields.",
+    "refreshModels": "Refresh models",
+    "phases": {
+      "lookup": "Database check",
+      "analysis": "Morphological tagging",
+      "generation": "Generating forms",
+      "ready": "Preparing results"
+    },
+    "modelWarning": "Application and language model licenses differ. This model does not permit commercial use.",
+    "authorLabel": "Author",
+    "technologyLabel": "Technology",
+    "appLicenseLabel": "Application license",
+    "sourceCode": "Source code",
+    "officialSite": "Official MorphoDiTa website",
+    "serverTitle": "MorphoDiTa server · ÚFAL UK",
+    "modelDetails": "Model and license details"
+  },
+  "dashboard": {
+    "subtitle": "Your work with words, in numbers.",
+    "period": "Statistics period",
+    "lastDays": "Last {{count}} days",
+    "refresh": "Refresh statistics",
+    "completedRuns": "{{formatted}} completed runs",
+    "words": "Processed words",
+    "forms": "Forms",
+    "lemmas": "Lemmas",
+    "bytes": "Database size",
+    "uniqueForms": "unique forms in the database",
+    "currentDatabase": "currently in the database",
+    "onDisk": "on disk",
+    "activityChart": "Words processed over time",
+    "daily": "Daily totals",
+    "wizard": "Wizard",
+    "legacy": "Earlier runs",
+    "historyChart": "Database history",
+    "historyMetric": "History metric",
+    "size": "Size",
+    "frequent": "Most frequently analyzed words",
+    "termKind": "Frequency grouping",
+    "viewAll": "View all",
+    "wordColumn": "Words",
+    "coverage": "From saved completed runs. Earlier runs with no workflow type are shown separately.",
+    "noRuns": "No saved completed runs in this period.",
+    "noTerms": "No saved word analyses yet.",
+    "historyStart": "History shows actual snapshots starting with your first Overview visit.",
+    "showChartData": "Show chart data",
+    "loadError": "Statistics could not be loaded. Please try again.",
+    "loading": "Loading statistics…",
+    "refreshing": "Refreshing…",
+    "storedForms": "Stored forms",
+    "uniqueLemmas": "Unique lemmas",
+    "languageModel": "Language model"
   }
 }

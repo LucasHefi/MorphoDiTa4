@@ -64,8 +64,8 @@ The package must contain:
 
 - the Tauri application executable;
 - `usr/bin/morphodita-server` as the Linux sidecar;
-- the bundled Czech model under the application `models/` directory;
-- `model.json`, `README.txt`, and `LICENSE.txt` for model provenance.
+- MIT `LICENSE`, third-party `NOTICE`, and `licenses/MPL-2.0.txt`;
+- no language model. Models are downloaded separately after consent in Settings.
 
 ## Package verification
 

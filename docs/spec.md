@@ -1155,6 +1155,6 @@ Offline mode (toggle in Settings) uses the official pre-compiled \morphodita-ser
 - Future: support for multiple sidecar versions, custom ports.
 
 ## Batching & About (Phase 4/6)
-- New /about route + nav + Settings link. Static info (author, MPL 2.0, version, tech, UFAL link).
+- New /about route + nav + Settings link. Static info (author, MIT, version, tech, UFAL link).
 - Home always shows compact ModelSelector + 'Výběr modelu' text above cards; cards never disabled.
 

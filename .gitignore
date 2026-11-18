@@ -43,3 +43,19 @@ USER.md
 .agents/
 .hermes/
 .kilo/
+
+# Local visual iteration evidence
+.dream-loop/
+
+# Generated installer handoff artifacts
+artifacts/
+
+# Private/local QA evidence and generated build state
+docs/verification/
+*.tsbuildinfo
+morphodita4/release-dist/
+morphodita4/src-tauri/rust-logs/
+morphodita4/src-tauri/binaries/*-pc-windows-msvc.exe
+.codex/
+.aws/
+morphodita4/ci.build.conf.json

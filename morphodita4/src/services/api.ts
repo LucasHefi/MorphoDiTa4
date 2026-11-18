@@ -470,14 +470,20 @@ export const MorphoDiTaAPI = {
       : { models: transformedModels };
   },
 
-  async tagText(data: string, model: string, output: 'json' | 'xml' | 'vertical' = 'json', options: ApiRequestOptions = {}): Promise<TagResponse> {
+  async tagText(data: string, model: string, output: 'json' | 'xml' | 'vertical' = 'json', options: ApiRequestOptions & { inputFormat?: 'untokenized' | 'vertical'; guesser?: boolean; derivation?: 'none' | 'root' | 'path' | 'tree'; convertTagset?: string } = {}): Promise<TagResponse> {
     requireOperationInput('tag', data, model);
+    if (options.inputFormat !== undefined) requireOption('tag', 'input', options.inputFormat, ['untokenized', 'vertical']);
+    if (options.derivation !== undefined) requireOption('tag', 'derivation', options.derivation, ['none', 'root', 'path', 'tree']);
     requireJsonOutput('tag', output);
     const base = await getBaseUrl()
     const params = new URLSearchParams()
     params.append('data', data)
     params.append('model', model)
     params.append('output', output)
+    if (options.inputFormat) params.append('input', options.inputFormat)
+    if (options.guesser !== undefined) params.append('guesser', options.guesser ? 'yes' : 'no')
+    if (options.derivation && options.derivation !== 'none') params.append('derivation', options.derivation)
+    if (options.convertTagset) params.append('convert_tagset', options.convertTagset)
 
     return parseTagResponse(await fetchWithRetry<unknown>(`${base}/tag`, {
       method: 'POST',

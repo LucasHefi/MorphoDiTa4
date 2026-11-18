@@ -127,13 +127,12 @@ function hasRequiredBundledCapabilities(payload: unknown): boolean {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) return false;
   const models = (payload as { models?: unknown }).models;
   if (typeof models !== 'object' || models === null || Array.isArray(models)) return false;
-  const capabilities = (models as Record<string, unknown>)[BUNDLED_MODEL_ID];
-  if (!Array.isArray(capabilities) || capabilities.length === 0 || new Set(capabilities).size !== capabilities.length) {
-    return false;
+  for (const id of [BUNDLED_MODEL_ID, 'czech-250909-no_dia']) {
+    const capabilities = (models as Record<string, unknown>)[id];
+    if (!Array.isArray(capabilities) || capabilities.length !== 4 || new Set(capabilities).size !== 4) return false;
+    if (!capabilities.every(c => ['tag', 'analyze', 'generate', 'tokenize'].includes(c))) return false;
   }
-  const allowed = new Set(['tag', 'analyze', 'generate', 'tokenize']);
-  return capabilities.every((capability) => typeof capability === 'string' && allowed.has(capability)) &&
-    allowed.size === capabilities.length && capabilities.every((capability) => allowed.has(capability));
+  return true;
 }
 
 async function killCurrentChild(): Promise<void> {
@@ -171,12 +170,27 @@ async function startInternal(): Promise<string> {
       );
     }
 
+    const helperId = 'czech-250909-no_dia';
+    const helperDirectory = joinModelPath(modelsPath, helperId);
+    let helperPath: string;
+    try {
+      const helper = await validateLocalModelDirectory(helperDirectory, helperId);
+      if (helper.manifest.id !== helperId || helper.manifest.artifact !== BUNDLED_MODEL_FILE) throw new Error('unexpected helper id or artifact');
+      helperPath = joinModelPath(helperDirectory, helper.manifest.artifact);
+    } catch (error) {
+      throw new OfflineSidecarError(`local companion model ${helperId} is missing or invalid; reinstall the Czech model in Settings (${error instanceof Error ? error.message : String(error)})`, error);
+    }
+
     for (let attempt = 0; attempt < MAX_PORT_ATTEMPTS && !stopRequested; attempt += 1) {
       const port = DEFAULT_PORT + attempt;
       const command = Command.sidecar('binaries/morphodita-server', [
+        '--log_file=',
         String(port),
         BUNDLED_MODEL_ID,
         modelPath,
+        MODEL_ACKNOWLEDGEMENT,
+        helperId,
+        helperPath,
         MODEL_ACKNOWLEDGEMENT,
       ]);
       attachDiagnostics(command);

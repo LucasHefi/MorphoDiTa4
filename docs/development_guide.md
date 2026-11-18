@@ -3,10 +3,10 @@
 ## Scope
 
 The application is a React/Tauri desktop client in `morphodita4/`. The
-frontend uses React 19, TypeScript 5.7, Vite 6, Tailwind CSS 4, Zustand 5,
-and Vitest 3. The backend uses Tauri 2.11.2 and Rust 1.88 minimum supported;
+frontend uses React 19, TypeScript 5.7, Vite 8, Tailwind CSS 4, Zustand 5,
+and Vitest 5. The backend uses Tauri 2.11.2 and Rust 1.88 minimum supported;
 the reproducible development and CI toolchain is pinned to Rust 1.97.1.
-SQLite access is Rust `rusqlite` 0.31.0 with bundled SQLite and the backup API. These versions
+SQLite access is Rust `rusqlite` 0.43.0 with bundled SQLite and the backup API. These versions
 come from `morphodita4/package.json` and `morphodita4/src-tauri/Cargo.toml`;
 do not infer versions from old examples in this documentation tree.
 

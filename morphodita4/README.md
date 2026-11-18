@@ -37,7 +37,7 @@ eligible network/server failure can activate the configured local sidecar
 fallback. Offline startup errors are fail-closed and never silently switch to
 the online service.
 
-The backend uses Rust `rusqlite` 0.31.0 with bundled SQLite and backup support.
+The backend uses Rust `rusqlite` 0.43.0 with bundled SQLite and backup support.
 Database initialization enforces schema version 4. Versions 0 through 2 create
 or rebuild the canonical schema; version-3 databases transactionally replace
 their two ASCII `NOCASE` lookup indexes with Unicode-aware indexed collation.

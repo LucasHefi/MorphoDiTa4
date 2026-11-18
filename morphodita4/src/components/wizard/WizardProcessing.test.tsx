@@ -190,7 +190,7 @@ describe('WizardProcessing recovery', () => {
     useApiStore.setState({ selectedModel: 'model' });
     useWizardStore.setState({ keywordsText: 'Cat cat DOG dog' });
     vi.mocked(MorphoDiTaAPI.tagText).mockImplementation(async (chunk) => ({
-      result: chunk.split('\n').map((word) => [token(word.toLowerCase(), word.toLowerCase())]),
+      result: [chunk.split('\n').map((word) => token(word.toLowerCase(), word.toLowerCase()))],
     } as never));
     vi.mocked(MorphoDiTaAPI.generateForms).mockImplementation(async (chunk) => ({
       result: chunk.split('\n').map((lemma) => [{ form: `${lemma}s`, lemma, tag: 'N' }]),
@@ -200,7 +200,7 @@ describe('WizardProcessing recovery', () => {
     await new Promise((resolve) => setTimeout(resolve, 120));
 
     expect(MorphoDiTaAPI.tagText).toHaveBeenCalledTimes(1);
-    expect(MorphoDiTaAPI.tagText).toHaveBeenCalledWith('Cat\nDOG', 'model', 'json', expect.anything());
+    expect(MorphoDiTaAPI.tagText).toHaveBeenCalledWith('Cat\nDOG', 'model', 'json', expect.objectContaining({ inputFormat: 'vertical' }));
     expect(MorphoDiTaAPI.generateForms).toHaveBeenCalledTimes(1);
     const result = useWizardStore.getState().processingResult!;
     expect(result.inputWords).toBe(4);
@@ -246,11 +246,35 @@ describe('WizardProcessing recovery', () => {
     expect(container.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('100');
   });
 
-  it('processes 10000 words in bounded batches exactly once', async () => {
-    vi.useFakeTimers();
+  it('removes digits before database lookup and linguistic requests', async () => {
+    useApiStore.setState({ selectedModel: 'model' });
+    useWizardStore.setState({ keywordsText: '123 pes12 45kočka pes99' });
+    vi.mocked(MorphoDiTaAPI.tagText).mockResolvedValue({ result: [[token('pes', 'pes'), token('kočka', 'kočka')]] } as never);
+    vi.mocked(MorphoDiTaAPI.generateForms).mockResolvedValue({ result: [] } as never);
+    flushSync(() => root.render(<WizardProcessing />));
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(DatabaseService.wordFormsExist).toHaveBeenCalledWith(['pes', 'kočka']);
+    expect(MorphoDiTaAPI.tagText).toHaveBeenCalledWith('pes\nkočka', 'model', 'json', expect.anything());
+    expect(MorphoDiTaAPI.generateForms).toHaveBeenCalledWith('pes\nkočka', 'model', true, undefined, 'json', expect.anything());
+    expect(useWizardStore.getState().run.status).toBe('ready');
+  });
+
+  it('does not send digits from a returned lemma to generation and retains the relationship', async () => {
+    useApiStore.setState({ selectedModel: 'model' });
+    useWizardStore.setState({ keywordsText: 'slovo' });
+    vi.mocked(MorphoDiTaAPI.tagText).mockResolvedValue({ result: [[token('slovo', 'lemma9')]] } as never);
+    vi.mocked(MorphoDiTaAPI.generateForms).mockResolvedValue({ result: [[{ form: 'slova', lemma: 'lemma', tag: 'N' }]] } as never);
+    flushSync(() => root.render(<WizardProcessing />));
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(MorphoDiTaAPI.generateForms).toHaveBeenCalledWith('lemma', 'model', true, undefined, 'json', expect.anything());
+    expect(useWizardStore.getState().processingResult?.relations[0].generatedForms).toHaveLength(1);
+  });
+
+  it('processes 1000000 words in bounded batches exactly once', async () => {
+    vi.useFakeTimers({ loopLimit: 100_000 });
     useApiStore.setState({ selectedModel: 'model' });
     useAppStore.setState({ apiBatchSize: 50 });
-    const words = Array.from({ length: 10000 }, (_, index) => `word${index}`);
+    const words = Array.from({ length: 1000000 }, (_, index) => `word${Array.from({ length: 5 }, (_, digit) => String.fromCharCode(97 + Math.floor(index / (26 ** digit)) % 26)).join('')}`);
     useWizardStore.setState({ keywordsText: words.join(' ') });
     vi.mocked(MorphoDiTaAPI.tagText).mockImplementation(async (chunk) => ({
       result: chunk.split('\n').map((word) => [token(word, word)]),
@@ -262,11 +286,11 @@ describe('WizardProcessing recovery', () => {
     flushSync(() => root.render(<WizardProcessing />));
     await vi.runAllTimersAsync();
 
-    expect(MorphoDiTaAPI.tagText).toHaveBeenCalledTimes(200);
-    expect(MorphoDiTaAPI.generateForms).toHaveBeenCalledTimes(200);
+    expect(MorphoDiTaAPI.tagText).toHaveBeenCalledTimes(20000);
+    expect(MorphoDiTaAPI.generateForms).toHaveBeenCalledTimes(20000);
     expect(useWizardStore.getState().run.status).toBe('ready');
-    expect(useWizardStore.getState().processingResult?.inputWords).toBe(10000);
-  });
+    expect(useWizardStore.getState().processingResult?.inputWords).toBe(1000000);
+  }, 120_000);
 
   it('fails with the tagging contract error on an unmappable response', async () => {
     useApiStore.setState({ selectedModel: 'model' });

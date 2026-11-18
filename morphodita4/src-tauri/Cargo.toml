@@ -1,9 +1,9 @@
 [package]
 name = "morphodita-client"
-version = "0.1.0"
+version = "0.1.21"
 description = "MorphoDiTa desktop client"
 authors = ["MorphoDiTa Client contributors"]
-license = "MPL-2.0"
+license = "MIT"
 repository = "https://github.com/LucasHefi/MorphoDiTa4"
 edition = "2021"
 rust-version = "1.88"
@@ -25,7 +25,7 @@ tauri = { version = "2.11.2", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
-rusqlite = { version = "0.31.0", features = ["backup", "bundled", "collation", "functions"] }
+rusqlite = { version = "0.43.0", features = ["backup", "bundled", "collation", "functions"] }
 unicode-normalization = "0.1"
 chrono = { version = "0.4.38", features = ["serde"] }
 uuid = { version = "1.8.0", features = ["v4", "serde"] }
@@ -35,4 +35,4 @@ md-5 = "0.10"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 sha2 = "0.10"
 tokio = { version = "1", features = ["fs", "io-util"] }
-zip = { version = "2.2", default-features = false, features = ["deflate"] }
+zip = { version = "9.0", default-features = false, features = ["deflate"] }

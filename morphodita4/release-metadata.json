@@ -1,8 +1,10 @@
 {
   "application": "MorphoDiTa Client",
-  "version": "0.1.0",
-  "license": "MPL-2.0",
-  "authors": ["MorphoDiTa Client contributors"],
+  "version": "0.1.21",
+  "license": "MIT",
+  "authors": [
+    "MorphoDiTa Client contributors"
+  ],
   "repository": "https://github.com/LucasHefi/MorphoDiTa4",
   "models": [
     {
@@ -23,9 +25,26 @@
         "runtime:LICENSE.txt",
         "runtime:README.txt"
       ]
+    },
+    {
+      "id": "czech-250909-no_dia",
+      "version": "2.1.0",
+      "license": "CC BY-NC-SA 4.0",
+      "commercialUse": false,
+      "sourceUrl": "https://hdl.handle.net/11234/1-5985",
+      "downloadUrl": "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams/a5d20e52-fc3d-4bc4-9df9-5b4c36839dcc/content",
+      "archiveName": "czech-morfflex2.1-pdtc2.0-250909.zip",
+      "archiveSizeBytes": 102852507,
+      "archiveMd5": "6d4a664404947ef33083076845db7655",
+      "archiveSha256": "4dcc33862cd4a2919c1079cd843d0e68b8ebbe01ea8895bb02179805e03774e7",
+      "artifactName": "czech.tagger",
+      "artifactSizeBytes": 33263873,
+      "artifactSha256": "ccf306d08c965aa0764f273f9ece82ee6c5fa5f30daab6480fe5299dfe9a9d5f",
+      "noticeFiles": [
+        "runtime:LICENSE.txt",
+        "runtime:README.txt"
+      ]
     }
   ],
-  "openGates": [
-    "model-commercial-distribution"
-  ]
+  "openGates": []
 }

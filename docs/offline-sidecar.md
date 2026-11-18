@@ -2,12 +2,15 @@
 
 ## Contract
 
-The Linux bundle ships the upstream MorphoDiTa REST server built from the
-UFAL MorphoDiTa `v1.11.3` source release. Tauri invokes the platform-named
+The Linux bundle ships the MorphoDiTa REST server built from the
+UFAL MorphoDiTa `v1.11.3` source release with the desktop loopback patch.
+The full modified MPL-2.0 source and patch are in `third_party/morphodita/`
+and in the installed resources. Rebuild with
+`sh morphodita4/scripts/build-sidecar-linux.sh`. Tauri invokes the platform-named
 external binary as:
 
 ```text
-morphodita-server <port> czech-250909 <models>/czech.tagger https://hdl.handle.net/11234/1-5985
+morphodita-server --log_file= <port> czech-250909 <models>/czech.tagger https://hdl.handle.net/11234/1-5985
 ```
 
 The server listens on loopback and exposes the upstream REST paths directly:
@@ -31,27 +34,16 @@ shutdown. Offline startup errors remain fail-closed and expose explicit
 recovery actions; `api.ts` never silently switches to LINDA while offline mode
 is enabled.
 
-## Bundled files
+## Packaged server and downloaded models
 
-The Tauri resource mapping currently flattens files from `morphodita4/models`
-into the packaged `models/` directory. The runtime intentionally addresses the
-resulting path `models/czech.tagger`.
-
-- `morphodita4/src-tauri/binaries/morphodita-server-x86_64-unknown-linux-gnu`
-  - target: Linux x86_64
-  - SHA-256: `99ac5a75fc931b2820321219a45e223f6771c44309439ae0e86af7fe1be44579`
-  - source: UFAL MorphoDiTa `v1.11.3`, built with `make -C src server PLATFORM=linux MODE=release BITS=64`
-- `morphodita4/models/czech-250909/czech.tagger`
-  - packaged as `models/czech.tagger`
-  - SHA-256: `173ea80a38d4ebb53a3e85a74f91ad02827738472809f155d965ce225d27cc3e`
-  - source: `https://hdl.handle.net/11234/1-5985`
-  - release: `czech-morfflex2.1-pdtc2.0-250909`
-  - license: CC BY-NC-SA 4.0; see the bundled `LICENSE.txt`
-- `model.json`, `README.txt`, and `LICENSE.txt` are bundled provenance/notices.
-
-The `.mor` files handled by `localModels.ts` are a separate user-local model
-inventory contract. They are not silently treated as REST tagger files and are
-not substituted for the bundled `.tagger` artifact.
+The installer contains the Linux server, MIT client LICENSE, NOTICE and the
+upstream MPL-2.0 text. The server source is linked in NOTICE and About.
+It contains no model. Settings downloads the official Czech model only after
+explicit CC BY-NC-SA 4.0 acceptance, verifies hashes and retains LICENSE/README.
+The active model lives under Tauri appDataDir()/models, with model.json and
+provenance notices. Runtime activation validates the model before sidecar startup.
+User import accepts .mor and .tagger artifacts; the inventory and compatibility
+checks decide whether an artifact can be activated.
 
 ## Verification
 
@@ -67,8 +59,20 @@ cargo test
 npm run tauri -- build --bundles deb
 ```
 
-For a packaged sidecar smoke, extract the Debian package and run the bundled
-binary with the bundled model. Verify that `/models` lists `czech-250909`,
+For a packaged sidecar smoke, use the installed server and the separately
+downloaded model (models are not bundled):
+
+```sh
+node morphodita4/scripts/verify-offline-no-network.mjs \
+  --sidecar /usr/bin/morphodita-server \
+  --model "$HOME/.local/share/cz.ufal.morphodita/models/czech-250909/czech.tagger"
+```
+
+This checks the Linux socket binds only to `127.0.0.1`, performs real tagging,
+and starts/stops the server twice. For native frontend coverage and the external
+connection audit, see `docs/verification/2026-11-17-offline-regression/`.
+
+Alternatively extract the Debian package and run its bundled binary with the downloaded model. Verify that `/models` lists `czech-250909`,
 `/tag?data=Kočka%20běží.&output=json` returns lemma `kočka`, then terminate
 the process and verify the loopback port is closed and no sidecar process
 remains.
@@ -80,3 +84,7 @@ this checkout. Windows and macOS sidecar binaries, installers, and runtime
 smoke remain OPEN until direct target-platform artifacts and hosts are
 available. Linux evidence must not be reported as Windows or production
 acceptance.
+
+### Oprava systémové instalace 0.1.14
+
+Spouštění používá pevný argument `--log_file=` (bez souborového logu požadavků), aby server nezapisoval vedle binárního souboru v `/usr/bin`. Shell capability povoluje tento jediný pevný argument. Diagnostika procesu zůstává v aplikaci. Změna online/offline režimu nebo modelu zneplatní rozpracované výsledky průvodce; původní vstup zůstává zachován pro nové zpracování.

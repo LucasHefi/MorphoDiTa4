@@ -38,7 +38,14 @@ export const AnalyzerPage: React.FC = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [result, setResult] = useState<AnalyzerResult | null>(null);
+  const [completed, setCompleted] = useState<{
+    result: AnalyzerResult;
+    operation: OperationType;
+    model: string;
+    input: string;
+    options: { guesser: boolean; inputFormat: 'untokenized' | 'vertical'; derivation: 'none' | 'root' | 'path' | 'tree'; convertTagset: string };
+  } | null>(null);
+  const result = completed?.result ?? null;
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const requestController = useRef<AbortController | null>(null);
 
@@ -76,12 +83,13 @@ export const AnalyzerPage: React.FC = () => {
     const controller = new AbortController();
     requestController.current = controller;
     setIsProcessing(true);
-    setResult(null);
+    setCompleted(null);
     addLog('INFO', t('analyzer.operationStarted', { operation: operationLabel }));
 
     try {
       const batchSize = getBatchSize();
-      const chunks = splitText(inputText, batchSize);
+      // Tagging needs the full sentence context and vertical sentence separators.
+      const chunks = operation === 'tag' ? [inputText] : splitText(inputText, batchSize);
       if (chunks.length > 1) {
         addLog('INFO', t('analyzer.batchingNote'));
       }
@@ -90,7 +98,9 @@ export const AnalyzerPage: React.FC = () => {
       switch (operation) {
         case 'tag': {
           const tagResponses = await processInBatches(chunks, (chunk) =>
-            MorphoDiTaAPI.tagText(chunk, selectedModel, 'json', { signal: controller.signal }),
+            MorphoDiTaAPI.tagText(chunk, selectedModel, 'json', {
+              signal: controller.signal, inputFormat, guesser, derivation, convertTagset,
+            }),
             undefined,
             { signal: controller.signal },
           );
@@ -135,7 +145,7 @@ export const AnalyzerPage: React.FC = () => {
         }
       }
 
-      setResult(processedResult);
+      setCompleted({ result: processedResult, operation, model: selectedModel, input: inputText, options: { guesser, inputFormat, derivation, convertTagset } });
       addLog('INFO', t('analyzer.operationSuccess'));
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
@@ -155,41 +165,32 @@ export const AnalyzerPage: React.FC = () => {
     requestController.current?.abort();
   };
 
-  const handleExport = (format: 'csv' | 'json' | 'txt') => {
-    if (!result) return;
-
+  const handleExport = async (format: 'csv' | 'json' | 'txt') => {
+    if (!completed) return;
+    const { result, operation } = completed;
     const timestamp = new Date().toISOString().slice(0, 10);
     const filename = `morphodita-result-${operation}-${timestamp}.${format}`;
-
-    switch (format) {
-      case 'csv':
-        downloadFile(exportMorphologicalTagsToCsv(result), filename, 'text/csv');
-        break;
-      case 'json':
-        downloadFile(exportToJson({
-          operation,
-          model: selectedModel,
-          input: inputText,
-          options: { guesser, inputFormat, derivation, convertTagset },
-          result,
-        }), filename, 'application/json');
-        break;
-      case 'txt':
-        downloadFile(exportMorphologicalTagsToTxt(result), filename, 'text/plain');
-        break;
+    try {
+      const content = format === 'json' ? exportToJson(completed)
+        : format === 'csv' ? exportMorphologicalTagsToCsv(result)
+        : exportMorphologicalTagsToTxt(result);
+      const destination = await downloadFile(content, filename,
+        format === 'json' ? 'application/json' : format === 'csv' ? 'text/csv' : 'text/plain');
+      addLog('INFO', t('analyzer.exportSuccess', { format: format.toUpperCase(), filename: destination ?? filename }));
+    } catch (error) {
+      addLog('ERROR', `${t('common.error')}: ${error instanceof Error ? error.message : String(error)}`);
     }
-    addLog('INFO', t('analyzer.exportSuccess', { format: format.toUpperCase(), filename }));
   };
 
   const handleSave = async () => {
-    if (!result || !selectedModel || isSaving) return;
+    if (!completed || isSaving) return;
     setIsSaving(true);
     try {
       const savedCount = await WorkflowService.saveAnalyzerResult(
-        operation,
-        result,
-        selectedModel,
-        inputText,
+        completed.operation,
+        completed.result,
+        completed.model,
+        completed.input,
       );
       addLog('INFO', t('analyzer.saveSuccess', { count: savedCount }));
     } catch (error) {
@@ -201,13 +202,16 @@ export const AnalyzerPage: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <main className="flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
-        <div className="min-w-0 flex flex-col gap-4">
-          <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-             <h1 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h1>
+      <main className="analyzer-page flex-1 container max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+        <header className="analyzer-heading">             <h1 className="text-xl font-semibold mb-4 text-foreground">{t('home.analyzer.title')}</h1>
 
-            <ModelSelector disabled={isProcessing} />
+            <p className="text-muted-foreground mb-5">{t('design.analyzerSubtitle')}</p>
+</header>
+        <div className="analyzer-toolbar">            <ModelSelector disabled={isProcessing} />
             <OperationSelector selectedOperation={operation} onOperationChange={setOperation} disabled={isProcessing} />
+</div>
+        <div className="analyzer-left min-w-0 flex flex-col gap-4">
+          <div className="analyzer-input bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
             <TextInput value={inputText} onChange={setInputText} disabled={isProcessing} />
             <p className="text-xs text-muted-foreground mt-1">{t('analyzer.batchingNote')}</p>
 
@@ -237,18 +241,18 @@ export const AnalyzerPage: React.FC = () => {
                   disabled={!inputText.trim() || !selectedModel}
                   className="w-full sm:w-auto"
                 >
-                  {t('analyzer.process')}
+                  {t(`design.process.${operation}`)}
                 </Button>
               )}
             </div>
           </div>
 
-          <div className="min-h-[clamp(10rem,25vh,18rem)] max-h-[50vh] min-w-0">
+          <div className="analyzer-log min-h-[clamp(10rem,25vh,18rem)] max-h-[50vh] min-w-0">
             <LogPanel logs={logs} onClear={() => setLogs([])} />
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-col w-full min-h-[clamp(18rem,60vh,42rem)]">
+        <div className="analyzer-results flex min-w-0 flex-col w-full min-h-[clamp(18rem,60vh,42rem)]">
           {result ? (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col h-full">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
@@ -257,11 +261,11 @@ export const AnalyzerPage: React.FC = () => {
                   <Button variant="secondary" size="sm" onClick={() => void handleSave()} disabled={isSaving}>
                     {isSaving ? t('common.loading') : t('analyzer.save')}
                   </Button>
-                  <ExportMenu onExport={handleExport} />
+                  <ExportMenu onExport={(format) => void handleExport(format)} />
                 </div>
               </div>
               <div className="flex-1 overflow-auto">
-                <ResultPanel result={result} operation={operation} />
+                <ResultPanel result={result} operation={completed!.operation} />
               </div>
             </div>
           ) : (

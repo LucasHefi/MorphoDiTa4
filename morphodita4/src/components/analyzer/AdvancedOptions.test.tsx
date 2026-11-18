@@ -57,4 +57,18 @@ describe('AdvancedOptions disclosure', () => {
     flushSync(() => disabledButton.click());
     expect(disabledButton.getAttribute('aria-expanded')).toBe('true');
   });
+  it('exposes all four advanced controls for tagging and hides them for tokenization', () => {
+    flushSync(() => root.render(<AdvancedOptions {...props} operation="tag" />));
+    flushSync(() => container.querySelector('button')!.click());
+    expect(container.querySelector('input[type="checkbox"]')).not.toBeNull();
+    expect(container.textContent).toContain('analyzer.input_format');
+    expect(container.textContent).toContain('analyzer.derivation');
+    expect(container.querySelector('input[type="text"]')).not.toBeNull();
+    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    flushSync(() => checkbox.click());
+    expect(props.onGuesserChange).toHaveBeenCalledWith(true);
+    flushSync(() => root.render(<AdvancedOptions {...props} operation="tokenize" />));
+    expect(container.textContent).toBe('');
+  });
+
 });

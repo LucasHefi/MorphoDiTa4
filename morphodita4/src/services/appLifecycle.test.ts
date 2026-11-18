@@ -46,6 +46,25 @@ describe('app close lifecycle', () => {
     expect(unlisten).toHaveBeenCalledOnce();
   });
 
+  it('closes even when sidecar shutdown never resolves', async () => {
+    vi.useFakeTimers();
+    try {
+      Object.defineProperty(window, '__TAURI_INTERNALS__', { configurable: true, value: {} });
+      let handler: ((event: { preventDefault: () => void }) => Promise<void>) | undefined;
+      mocks.onCloseRequested.mockImplementation((listener: typeof handler) => { handler = listener; return Promise.resolve(vi.fn()); });
+      mocks.getCurrentWindow.mockReturnValue({ onCloseRequested: mocks.onCloseRequested, destroy: mocks.destroy });
+      mocks.stop.mockReturnValue(new Promise(() => {}));
+      mocks.destroy.mockResolvedValue(undefined);
+      await registerAppCloseHook();
+      const closing = handler?.({ preventDefault: vi.fn() });
+      await vi.advanceTimersByTimeAsync(3000);
+      await closing;
+      expect(mocks.destroy).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('returns no cleanup handle when the browser preview has no Tauri window', async () => {
     mocks.getCurrentWindow.mockImplementation(() => { throw new Error('window.__TAURI_INTERNALS__ is unavailable'); });
 

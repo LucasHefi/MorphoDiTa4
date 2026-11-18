@@ -104,7 +104,7 @@ function parseModelCatalogEntry(value: unknown): ModelCatalogEntry {
   };
 }
 
-export const MODEL_CATALOG = parseModelCatalog({
+const PRIMARY_MODEL_CATALOG = parseModelCatalog({
   schemaVersion: 1,
   models: [{
     id: 'czech-250909',
@@ -150,6 +150,14 @@ export const MODEL_CATALOG = parseModelCatalog({
   }],
 });
 
+export const MODEL_CATALOG = parseModelCatalog({ schemaVersion: 1, models: [
+  ...PRIMARY_MODEL_CATALOG.models,
+  { ...PRIMARY_MODEL_CATALOG.models[0], id: 'czech-250909-no_dia',
+    artifactPath: 'czech-morfflex2.1-pdtc2.0-250909/czech-morfflex2.1-pdtc2.0-250909-no_dia.tagger',
+    artifactSizeBytes: 33263873,
+    artifactSha256: 'ccf306d08c965aa0764f273f9ece82ee6c5fa5f30daab6480fe5299dfe9a9d5f' },
+] });
+
 export function getModelCatalog(): ModelCatalog {
   return MODEL_CATALOG;
 }
@@ -158,7 +166,9 @@ export async function downloadModel(modelId: string, consent: boolean): Promise<
   if (!consent) throw new ModelDownloadError('model download requires explicit license consent');
   const model = MODEL_CATALOG.models.find((candidate) => candidate.id === modelId);
   if (!model) throw new ModelDownloadError(`model is not available in the catalog: ${modelId}`);
-  return invoke<DownloadedModel>('download_model', { modelId: model.id, consent: true });
+  const installed = await invoke<DownloadedModel>('download_model', { modelId: model.id, consent: true });
+  if (model.id === 'czech-250909') await invoke<DownloadedModel>('download_model', { modelId: 'czech-250909-no_dia', consent: true });
+  return installed;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

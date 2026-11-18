@@ -101,7 +101,28 @@ describe('DatabaseService', () => {
     expect(tauriApi.invoke).toHaveBeenCalledWith('word_forms_exist', { words });
   });
 
-  it('rejects direct IPC lookup input above the shared 5 MiB budget', async () => {
+  it('checks 1,000,000 words in one hundred bounded native calls and retains first-seen matches', async () => {
+    const words = Array.from({ length: 1_000_000 }, (_, index) => `w${index}`);
+    vi.mocked(tauriApi.invoke).mockImplementation(async (_command, args) => {
+      const batch = (args as { words: string[] }).words;
+      return [batch[0], 'shared'];
+    });
+    const matched = await DatabaseService.wordFormsExist(words, true);
+    expect(tauriApi.invoke).toHaveBeenCalledTimes(100);
+    for (const [command, args] of vi.mocked(tauriApi.invoke).mock.calls) {
+      expect(command).toBe('word_forms_exist');
+      expect((args as { words: string[] }).words).toHaveLength(10_000);
+      expect(args).toMatchObject({ includeLemmas: true });
+    }
+    expect(matched).toEqual(['w0', 'shared', ...Array.from({ length: 99 }, (_, index) => `w${(index + 1) * 10_000}`)]);
+  });
+
+  it('rejects a lookup above 1,000,000 words before invoking native commands', async () => {
+    await expect(DatabaseService.wordFormsExist(Array(1_000_001).fill('word'))).rejects.toMatchObject({ code: 'VALIDATION' });
+    expect(tauriApi.invoke).not.toHaveBeenCalled();
+  });
+
+  it('rejects direct IPC lookup input above the shared 10 MB budget', async () => {
     const words = ['a'.repeat(MAX_DATABASE_INPUT_BYTES + 1)];
 
     await expect(DatabaseService.wordFormsExist(words)).rejects.toMatchObject({

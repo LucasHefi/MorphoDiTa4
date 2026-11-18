@@ -58,6 +58,8 @@ describe('locale contracts', () => {
     const locales = { cs: flatten(cs), en: flatten(en), pl: flatten(pl) };
     for (const [language, values] of Object.entries(locales)) {
       expect(values['wizard.processing.taggingContractMismatch'], `${language} tagging contract error`).toBeTruthy();
+      expect(values['wizard.summaryColumns.relations'], `${language} summary column labels`).toBeTruthy();
+      expect(values['wizard.summaryColumns.forbiddenHelp'], `${language} forbidden word editor`).toBeTruthy();
     }
   });
 

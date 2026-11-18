@@ -19,7 +19,6 @@ export class TagParser {
 
   static NOUN_SUBTYPES: Record<string, string> = {
     'N': 'tagset.subtype.noun.N',
-    'H': 'tagset.subtype.noun.H'
   };
 
   static VERB_SUBTYPES: Record<string, string> = {
@@ -28,43 +27,55 @@ export class TagParser {
     'e': 'tagset.subtype.verb.e',
     'f': 'tagset.subtype.verb.f',
     'i': 'tagset.subtype.verb.i',
+    'm': 'tagset.subtype.verb.m',
     'p': 'tagset.subtype.verb.p',
     'q': 'tagset.subtype.verb.q',
+    's': 'tagset.subtype.verb.s',
     't': 'tagset.subtype.verb.t',
-    'w': 'tagset.subtype.verb.w',
-    'I': 'tagset.subtype.verb.I',
-    'F': 'tagset.subtype.verb.F',
-    'R': 'tagset.subtype.verb.R'
   };
 
   static ADJECTIVE_SUBTYPES: Record<string, string> = {
-    '2': 'tagset.subtype.adj.2',
-    'N': 'tagset.subtype.adj.N',
-    'W': 'tagset.subtype.adj.W'
+    'A': 'tagset.subtype.adj.A',
+    'C': 'tagset.subtype.adj.C',
+    'G': 'tagset.subtype.adj.G',
+    'M': 'tagset.subtype.adj.M',
+    'U': 'tagset.subtype.adj.U',
   };
 
   static PRONOUN_SUBTYPES: Record<string, string> = {
-    '1': 'tagset.subtype.pron.1',
-    '2': 'tagset.subtype.pron.2',
-    '3': 'tagset.subtype.pron.3',
     '4': 'tagset.subtype.pron.4',
     '5': 'tagset.subtype.pron.5',
     '6': 'tagset.subtype.pron.6',
     '7': 'tagset.subtype.pron.7',
     '8': 'tagset.subtype.pron.8',
-    '9': 'tagset.subtype.pron.9'
+    '9': 'tagset.subtype.pron.9',
+    'D': 'tagset.subtype.pron.D',
+    'E': 'tagset.subtype.pron.E',
+    'H': 'tagset.subtype.pron.H',
+    'J': 'tagset.subtype.pron.J',
+    'K': 'tagset.subtype.pron.K',
+    'L': 'tagset.subtype.pron.L',
+    'O': 'tagset.subtype.pron.O',
+    'P': 'tagset.subtype.pron.P',
+    'Q': 'tagset.subtype.pron.Q',
+    'S': 'tagset.subtype.pron.S',
+    'W': 'tagset.subtype.pron.W',
+    'Y': 'tagset.subtype.pron.Y',
+    'Z': 'tagset.subtype.pron.Z',
   };
 
   static GENDERS: Record<string, string> = {
     'M': 'tagset.gender.M',
+    'I': 'tagset.gender.I',
     'F': 'tagset.gender.F',
     'N': 'tagset.gender.N',
-    'I': 'tagset.gender.I',
     'Y': 'tagset.gender.Y',
-    'T': 'tagset.gender.T',
     'H': 'tagset.gender.H',
     'Q': 'tagset.gender.Q',
-    'U': 'tagset.gender.U'
+    'T': 'tagset.gender.T',
+    'W': 'tagset.gender.W',
+    'Z': 'tagset.gender.Z',
+    'X': 'tagset.gender.X',
   };
 
   static CASES: Record<string, string> = {
@@ -76,8 +87,7 @@ export class TagParser {
     '6': 'tagset.case.6',
     '7': 'tagset.case.7',
     'X': 'tagset.case.X',
-    'Y': 'tagset.case.Y',
-    'Z': 'tagset.case.Z'
+
   };
 
   static NUMBERS: Record<string, string> = {
@@ -106,7 +116,7 @@ export class TagParser {
     const pos3 = tag[2]; // Gender in Python was tag[2]
     const pos4 = tag[3]; // Number in Python was tag[3]
     const pos5 = tag[4]; // Case in Python was tag[4]
-    
+
     // Note: Python code used:
     // word_class = cls._parse_word_class(tag[0])
     // subtype = cls._parse_subtype(tag[0], tag[1])
@@ -128,42 +138,24 @@ export class TagParser {
 
   private static getSubtype(pos1: string, pos2: string): string {
     if (pos2 === '-') return "";
-    
+
     let key = "";
     if (pos1 === 'N') key = this.NOUN_SUBTYPES[pos2];
     else if (pos1 === 'V') key = this.VERB_SUBTYPES[pos2];
     else if (pos1 === 'A') key = this.ADJECTIVE_SUBTYPES[pos2];
     else if (pos1 === 'P') key = this.PRONOUN_SUBTYPES[pos2];
-    
+
     return key ? i18n.t(key) : (pos1 === 'N' || pos1 === 'V' || pos1 === 'A' || pos1 === 'P' ? i18n.t('tagset.unknown', { val: pos2 }) : "");
   }
 
   private static parsePossessivity(pos6_15: string): string {
-    if (pos6_15 === '----------') return i18n.t('tagset.possessivity.none');
-    
-    const person = pos6_15[0];
-    const number = pos6_15[1];
-    const gender = pos6_15[2];
-    const caseVal = pos6_15[5];
-
-    if (caseVal !== '-' && caseVal !== 'A') {
-      const details: string[] = [];
-      if (person !== '-') {
-        details.push(i18n.t(`tagset.possessivity.person.${person}`, { defaultValue: `osoba ${person}` }));
-      }
-      if (number !== '-') {
-        details.push(i18n.t(`tagset.possessivity.number.${number}`, { defaultValue: `číslo ${number}` }));
-      }
-      if (gender !== '-') {
-        details.push(i18n.t(`tagset.possessivity.gender.${gender}`, { defaultValue: `rod ${gender}` }));
-      }
-      if (caseVal !== '-') {
-        details.push(i18n.t(`tagset.possessivity.case.${caseVal}`, { defaultValue: `pád ${caseVal}` }));
-      }
-      return `${i18n.t('tagset.possessivity.title')} (${details.join(', ')})`;
-    }
-
-    return i18n.t('tagset.possessivity.none');
+    // PDT positions 6 and 7 describe the possessor; person is position 8.
+    // Negation (position 11) must never determine whether a word is possessive.
+    const [gender, number] = pos6_15;
+    const details: string[] = [];
+    if (gender && gender !== '-') details.push(i18n.t(`tagset.possessivity.gender.${gender}`, { defaultValue: i18n.t('tagset.unknown', { val: gender }) }));
+    if (number && number !== '-') details.push(i18n.t(`tagset.possessivity.number.${number}`, { defaultValue: i18n.t('tagset.unknown', { val: number }) }));
+    return details.length ? `${i18n.t('tagset.possessivity.title')} (${details.join(', ')})` : i18n.t('tagset.possessivity.none');
   }
 
   static formatTagCompact(tag: string): string {

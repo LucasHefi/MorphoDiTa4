@@ -10,7 +10,15 @@ export async function registerAppCloseHook(): Promise<(() => void) | null> {
   return appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
     try {
-      await OfflineSidecar.stop();
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          OfflineSidecar.stop(),
+          new Promise<void>((resolve) => { timeout = setTimeout(resolve, 3000); }),
+        ]);
+      } finally {
+        if (timeout !== undefined) clearTimeout(timeout);
+      }
     } finally {
       await appWindow.destroy();
     }

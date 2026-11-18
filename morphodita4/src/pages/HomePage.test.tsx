@@ -1,184 +1,50 @@
-import { flushSync } from 'react-dom';
-import { createRoot } from 'react-dom/client';
-import type { Root } from 'react-dom/client';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter, useLocation } from 'react-router';
-import type { Session } from '../types/database';
-
-const databaseMock = vi.hoisted(() => ({
-  getSessions: vi.fn(),
-}));
-
-vi.mock('../services/database', () => ({ DatabaseService: databaseMock }));
-vi.mock('../components/analyzer/ModelSelector', () => ({ ModelSelector: () => null }));
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
+import { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
+import { DashboardService, type DashboardData } from '../services/dashboard';
 import { HomePage } from './HomePage';
-import { useDbStore } from '../store/useDbStore';
-
-const reactTestEnvironment = globalThis as typeof globalThis & {
-  IS_REACT_ACT_ENVIRONMENT?: boolean;
-};
-
-async function flushReactUpdates(callback: () => void | Promise<void>): Promise<void> {
-  let pending: void | Promise<void> = undefined;
-  flushSync(() => {
-    pending = callback();
-  });
-  await pending;
-  await Promise.resolve();
-}
-
-function createSession(id: string): Session {
-  return {
-    id,
-    operation: 'analyze',
-    model: `model-${id}`,
-    input_text: `input-${id}`,
-    parameters: {},
-    result_count: Number(id),
-    status: 'completed',
-    created_at: '2026-08-09T10:00:00.000Z',
-  };
-}
-
-describe('HomePage activity states', () => {
-  let container: HTMLDivElement;
-  let root: Root;
-  let previousActEnvironment: boolean | undefined;
-
-  beforeAll(() => {
-    previousActEnvironment = reactTestEnvironment.IS_REACT_ACT_ENVIRONMENT;
-    reactTestEnvironment.IS_REACT_ACT_ENVIRONMENT = true;
-  });
-
-  afterAll(() => {
-    reactTestEnvironment.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
-  });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    useDbStore.setState({
-      sessions: [],
-      recentActivity: [],
-      isLoading: false,
-      error: null,
-    });
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-  });
-
-  afterEach(async () => {
-    await flushReactUpdates(() => root.unmount());
-    container.remove();
-  });
-
-  it('renders the loading state while activity is being fetched', async () => {
-    useDbStore.setState({ isLoading: true });
-
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-        </MemoryRouter>,
-      );
-    });
-
-    expect(container.querySelector('[role="status"]')?.textContent).toBe('home.activity.loading');
-  });
-
-  it('renders a retryable error state when activity loading fails', async () => {
-    useDbStore.setState({ error: 'database unavailable' });
-
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-        </MemoryRouter>,
-      );
-    });
-
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain('home.activity.error');
-    expect(container.querySelector('button')?.textContent).toContain('home.activity.retry');
-  });
-
-  it('renders the empty state when no activity exists', async () => {
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-        </MemoryRouter>,
-      );
-    });
-
-    expect(container.querySelector('[role="status"]')?.textContent).toBe('home.activity.empty');
-  });
-
-  it('retries activity loading through the store contract', async () => {
-    databaseMock.getSessions.mockResolvedValue([]);
-    useDbStore.setState({ error: 'database unavailable' });
-
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-        </MemoryRouter>,
-      );
-    });
-
-    const retryButton = container.querySelector('button');
-    expect(retryButton).not.toBeNull();
-
-    await flushReactUpdates(async () => {
-      retryButton?.click();
-      await Promise.resolve();
-    });
-
-    expect(databaseMock.getSessions).toHaveBeenCalledWith(5);
-    expect(container.querySelector('[role="status"]')?.textContent).toBe('home.activity.empty');
-  });
-
-  it('renders a table for populated activity', async () => {
-    const sessions = [createSession('2'), createSession('1')];
-    useDbStore.setState({ sessions, recentActivity: sessions });
-
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-        </MemoryRouter>,
-      );
-    });
-
-    expect(container.querySelector('table')).not.toBeNull();
-    expect(container.querySelectorAll('tbody tr')).toHaveLength(2);
-    expect(container.textContent).toContain('model-2');
-    expect(container.textContent).toContain('home.table.operation');
-  });
-
-  it('navigates the analyzer link and preserves the heading hierarchy', async () => {
-    const LocationProbe = () => <output data-testid="location">{useLocation().pathname}</output>;
-
-    await flushReactUpdates(() => {
-      root.render(
-        <MemoryRouter>
-          <HomePage />
-          <LocationProbe />
-        </MemoryRouter>,
-      );
-    });
-
-    const headings = [...container.querySelectorAll('h1, h2, h3')];
-    expect(headings.map((heading) => heading.tagName)).toEqual(['H1', 'H2', 'H2', 'H2']);
-    const analyzerLink = [...container.querySelectorAll('a')].find((link) => link.textContent?.includes('home.analyzer.title'));
-    expect(analyzerLink?.getAttribute('href')).toBe('/analyzer');
-    analyzerLink?.focus();
-    expect(document.activeElement).toBe(analyzerLink);
-    analyzerLink?.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(container.querySelector('[data-testid="location"]')?.textContent).toBe('/analyzer');
-  });
+vi.mock('../services/dashboard',()=>({DashboardService:{get:vi.fn()}}));
+vi.mock('../components/analyzer/ModelSelector',()=>({ModelSelector:()=>null}));
+vi.mock('react-i18next',()=>({useTranslation:()=>({t:(key:string)=>key,i18n:{language:'cs'}})}));
+const fixture:DashboardData={start:'2026-11-01',end:'2026-11-30',words:12,runs:2,forms:3,lemmas:2,bytes:12000,daily:[{day:'2026-11-18',analyzer:8,wizard:4,legacy:0,runs:2}],history:[{day:'2026-11-18',forms:3,lemmas:2,bytes:12000}],frequent_forms:[{term:'kočky',count:3}],frequent_lemmas:[{term:'kočka',count:3}],recent:[{id:1,operation:'analyze',model:'czech-250909',words:12,status:'completed',created_at:'2026-11-18 12:00:00'}]};
+describe('statistics overview',()=>{
+ let container:HTMLDivElement,root:Root;
+ beforeEach(()=>{vi.clearAllMocks();container=document.createElement('div');document.body.appendChild(container);root=createRoot(container);});
+ afterEach(async()=>{await act(()=>root.unmount());container.remove();});
+ const render=()=>act(async()=>{root.render(<MemoryRouter><HomePage/></MemoryRouter>);await new Promise(r=>setTimeout(r,0));});
+ it('shows loading placeholders rather than fake zero statistics',async()=>{
+  vi.mocked(DashboardService.get).mockReturnValue(new Promise(()=>{}));await render();
+  expect(container.querySelector('[role=status]')?.textContent).toBe('dashboard.loading');expect(container.querySelector('.dashboard-kpi strong')?.textContent).toBe('—');
+ });
+ it('shows real statistics and accessible charts, retains database navigation and removes the two launchers',async()=>{
+  vi.mocked(DashboardService.get).mockResolvedValue(fixture);await render();
+  expect(container.querySelector('.dashboard-kpi strong')?.textContent).toBe('12');
+  expect(container.querySelectorAll('svg[role=img]')).toHaveLength(2);
+  expect(container.querySelector('a[href="/database"]')).not.toBeNull();
+  expect(container.querySelector('a[href="/analyzer"],a[href="/wizard"]')).toBeNull();
+  const history=container.querySelector('[aria-label="dashboard.historyMetric"]')!;
+  await act(()=>[...history.querySelectorAll('button')].find(e=>e.textContent==='dashboard.forms')!.click());
+  expect(history.querySelector('[aria-pressed=true]')?.textContent).toBe('dashboard.forms');
+  const terms=container.querySelector('[aria-label="dashboard.termKind"]')!;
+  await act(()=>[...terms.querySelectorAll('button')].find(e=>e.textContent==='dashboard.forms')!.click());
+  expect(container.querySelector('.frequency-bars')?.textContent).toContain('kočky');
+ });
+ it('offers a real retry after a failed load',async()=>{
+  vi.mocked(DashboardService.get).mockRejectedValueOnce(Error('private detail')).mockResolvedValue(fixture);await render();
+  expect(container.querySelector('[role=alert]')?.textContent).toContain('dashboard.loadError');expect(container.textContent).not.toContain('private detail');
+  await act(async()=>{container.querySelector<HTMLButtonElement>('[role=alert] button')!.click();await new Promise(r=>setTimeout(r,0));});
+  expect(container.querySelector('[role=alert]')).toBeNull();expect(container.querySelector('.dashboard-kpi strong')?.textContent).toBe('12');
+ });
+ it('ignores an old response after switching the period',async()=>{
+  let finish!:(data:DashboardData)=>void;
+  vi.mocked(DashboardService.get).mockReturnValueOnce(new Promise(r=>finish=r)).mockResolvedValue({...fixture,words:7});await render();
+  await act(()=>container.querySelector<HTMLButtonElement>('#dashboard-period')!.click());
+  await act(async()=>{document.querySelector<HTMLElement>('[role=option][id$="-7"]')!.click();await new Promise(r=>setTimeout(r,0));});
+  await act(()=>finish(fixture));expect(container.querySelector('.dashboard-kpi strong')?.textContent).toBe('7');expect(DashboardService.get).toHaveBeenLastCalledWith(7);
+ });
+ it('renders empty histories and rankings without fabricated bars',async()=>{
+  vi.mocked(DashboardService.get).mockResolvedValue({...fixture,words:0,runs:0,forms:0,lemmas:0,daily:[],history:[],frequent_forms:[],frequent_lemmas:[],recent:[]});await render();
+  expect(container.querySelector('.dashboard-kpi strong')?.textContent).toBe('0');expect(container.textContent).toContain('dashboard.noRuns');expect(container.textContent).toContain('dashboard.noTerms');expect(container.querySelector('.chart-line')).toBeNull();
+ });
 });

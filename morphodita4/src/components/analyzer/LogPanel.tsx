@@ -41,11 +41,11 @@ export const LogPanel: React.FC<LogPanelProps> = ({ logs, onClear }) => {
   };
 
   return (
-    <details open className="flex flex-col h-full bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+    <details open className="log-panel flex flex-col h-full bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       <summary className="cursor-pointer list-none p-2 bg-secondary/50 border-b border-border">
          <span>{t('analyzer.logs.title')}</span>
       </summary>
-      <div className="flex justify-between items-center gap-2 p-2 bg-secondary/50 border-b border-border">
+      <div className="log-controls flex justify-between items-center gap-2 p-2 bg-secondary/50 border-b border-border">
         <div className="flex gap-2">
           {filters.map((level) => (
             <button
@@ -68,12 +68,12 @@ export const LogPanel: React.FC<LogPanelProps> = ({ logs, onClear }) => {
            {t('analyzer.logs.clear')}
         </Button>
       </div>
-      <div role="log" aria-live="polite" className="min-h-0 flex-1 p-2 overflow-y-auto font-mono text-xs max-h-[min(50vh,28rem)]">
+      <div role="log" aria-live="polite" className="log-content min-h-0 flex-1 p-2 overflow-y-auto text-sm max-h-[min(50vh,28rem)]">
         {filteredLogs.length === 0 ? (
            <div role="status" className="text-muted-foreground text-center py-4">{t('analyzer.logs.empty')}</div>
         ) : (
           filteredLogs.map((log) => (
-            <div key={log.id} className="mb-1 flex gap-2">
+            <div key={log.id} className="log-row mb-1 flex gap-2">
               <span className="text-muted-foreground whitespace-nowrap">
                  [{new Date(log.timestamp).toLocaleTimeString(locale)}]
               </span>

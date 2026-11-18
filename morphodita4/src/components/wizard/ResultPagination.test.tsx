@@ -1,0 +1,31 @@
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, expect, it, vi } from 'vitest';
+import { PagedValues } from './ResultPagination';
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+const env = globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean };
+env.IS_REACT_ACT_ENVIRONMENT = true;
+let root: ReturnType<typeof createRoot>;
+let container: HTMLDivElement;
+afterEach(async () => { if (root) await act(() => root.unmount()); container?.remove(); });
+it('bounds a 1,000,000-value preview, visits the last page and resets for a filtered dataset', async () => {
+  container = document.createElement('div'); document.body.appendChild(container); root = createRoot(container);
+  const values = Array.from({ length: 1_000_000 }, (_, i) => `value-${i}`);
+  await act(() => root.render(<PagedValues values={values} label="values" />));
+  expect(container.querySelectorAll('.summary-value')).toHaveLength(200);
+  expect(container.querySelector('.summary-value')?.textContent).toBe('value-0');
+  await act(() => {
+    const input = container.querySelector('input')!;
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '5000');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  expect(container.querySelector('.summary-value')?.textContent).toBe('value-999800');
+  expect(container.querySelectorAll('.summary-value')).toHaveLength(200);
+  expect([...container.querySelectorAll('button')].find(b => b.textContent === 'database.next')?.disabled).toBe(true);
+  expect(values).toHaveLength(1_000_000);
+  const filtered = values.slice(250, 260);
+  await act(() => root.render(<PagedValues values={filtered} label="values" />));
+  expect(container.querySelector('.summary-value')?.textContent).toBe('value-250');
+  expect(container.querySelectorAll('.summary-value')).toHaveLength(10);
+  expect(container.querySelector('input')).toBeNull();
+});

@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
+import { InputHTMLAttributes, forwardRef, useId, ReactNode } from 'react';
 import { cn } from './utils';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
@@ -8,11 +8,13 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, prefixNode, type, ...props }, ref) => {
+  ({ className, label, error, prefixNode, type, id, ...props }, ref) => {
+    const generatedId = useId();
+    const fieldId = id ?? generatedId;
     return (
       <div className="w-full space-y-1">
         {label && (
-          <label className="text-sm font-medium text-foreground">
+          <label htmlFor={fieldId} className="text-sm font-medium text-foreground">
             {label}
           </label>
         )}
@@ -23,6 +25,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
           <input
+            id={fieldId}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
             type={type}
             ref={ref}
             className={cn(
@@ -35,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p className="text-xs text-destructive">{error}</p>
+          <p id={`${fieldId}-error`} role="alert" className="text-xs text-destructive">{error}</p>
         )}
       </div>
     );

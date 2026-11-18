@@ -213,10 +213,12 @@ pub fn get_morphological_data(
 pub fn word_forms_exist(
     state: State<'_, DbState>,
     words: Vec<String>,
+    include_lemmas: Option<bool>,
 ) -> std::result::Result<Vec<String>, String> {
     let conn_guard = state.conn.lock().unwrap();
     if let Some(conn) = conn_guard.as_ref() {
-        db::word_forms_exist(conn, &words).map_err(|e| e.to_string())
+        db::word_values_exist(conn, &words, include_lemmas.unwrap_or(false))
+            .map_err(|e| e.to_string())
     } else {
         Err("Database not initialized".to_string())
     }
@@ -694,7 +696,10 @@ fn install_model_archive_with_cleanup_failure(
             let entry = archive
                 .by_index(index)
                 .map_err(|error| format!("model install: cannot inspect ZIP entry: {error}"))?;
-            let name = entry.name().to_string();
+            let name = entry
+                .name()
+                .map_err(|error| format!("model install: invalid ZIP entry name: {error}"))?
+                .into_owned();
             if !is_safe_archive_path(&name)
                 || !expected.contains(name.as_str())
                 || !seen.insert(name.clone())

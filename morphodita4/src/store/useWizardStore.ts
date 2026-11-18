@@ -3,6 +3,8 @@ import type { FilterOptions, WizardProcessingResult, WizardRunState } from '../t
 
 interface WizardStore {
   currentStep: number;
+  resultsInvalidated: boolean;
+  invalidateProcessing: () => void;
   keywordsText: string;
   filters: FilterOptions;
   processingResult: WizardProcessingResult | null;
@@ -27,6 +29,8 @@ const defaultFilters: FilterOptions = {
 
 export const useWizardStore = create<WizardStore>((set) => ({
   currentStep: 1,
+  resultsInvalidated: false,
+  invalidateProcessing: () => set((state) => !state.processingResult && !state.run.checkpoint && state.run.status === 'idle' ? {} : ({ currentStep: 1, processingResult: null, resultsInvalidated: true, run: { status: 'idle', sessionId: '', completedPhase: 'none', checkpoint: undefined } })),
   keywordsText: '',
   filters: defaultFilters,
   processingResult: null,
@@ -36,16 +40,17 @@ export const useWizardStore = create<WizardStore>((set) => ({
     if (state.keywordsText === keywordsText) return { keywordsText };
     return {
       keywordsText,
+      resultsInvalidated: false,
       processingResult: null,
       run: { status: 'idle', sessionId: '', completedPhase: 'none', checkpoint: undefined },
     };
   }),
-  setFilters: (newFilters) => set((state) => ({ 
-    filters: { ...state.filters, ...newFilters } 
+  setFilters: (newFilters) => set((state) => ({
+    filters: { ...state.filters, ...newFilters }
   })),
-  setProcessingResult: (processingResult) => set({ processingResult }),
+  setProcessingResult: (processingResult) => set({ processingResult, resultsInvalidated: false }),
   setRunState: (run) => set((state) => ({ run: { ...state.run, ...run } })),
   cancel: () => set((state) => ({ run: { ...state.run, status: 'cancelled' } })),
   resume: () => set((state) => ({ run: { ...state.run, status: 'processing', error: undefined } })),
-  reset: () => set({ currentStep: 1, keywordsText: '', filters: { ...defaultFilters }, processingResult: null, run: { status: 'idle', sessionId: '', completedPhase: 'none', checkpoint: undefined } })
+  reset: () => set({ currentStep: 1, resultsInvalidated: false, keywordsText: '', filters: { ...defaultFilters }, processingResult: null, run: { status: 'idle', sessionId: '', completedPhase: 'none', checkpoint: undefined } })
 }));

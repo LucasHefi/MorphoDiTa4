@@ -85,13 +85,13 @@ describe('ModelSelector', () => {
     expect(MorphoDiTaAPI.getModels).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores a model response from the previous API mode', async () => {
+  it('refreshes without remounting after a mode change and ignores the previous response', async () => {
     let resolveRequest: (response: Awaited<ReturnType<typeof MorphoDiTaAPI.getModels>>) => void;
     vi.mocked(MorphoDiTaAPI.getModels).mockImplementationOnce(
       () => new Promise((resolve) => {
         resolveRequest = resolve;
       }),
-    );
+    ).mockResolvedValueOnce({ models: { 'current-offline-model': { name: 'current-offline-model', language: 'cs', description: 'Offline model', capabilities: ['tag'] } } });
 
     await flushReactUpdates(async () => {
       root.render(<ModelSelector />);
@@ -117,8 +117,9 @@ describe('ModelSelector', () => {
       });
     });
 
-    expect(useApiStore.getState().models).toEqual({});
-    expect(useApiStore.getState().selectedModel).toBeNull();
+    expect(Object.keys(useApiStore.getState().models)).toEqual(['current-offline-model']);
+    expect(useApiStore.getState().selectedModel).toBe('current-offline-model');
+    expect(MorphoDiTaAPI.getModels).toHaveBeenCalledTimes(2);
   });
 
   it('names compact mode and exposes loading and error announcements', async () => {

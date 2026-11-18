@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { DatabaseService } from '../../services/database';
 import { canEditDatabaseColumn, hasExpectedAffectedRows } from './databaseEditorContracts';
 import type { DatabaseId, DatabaseRow } from '../../types/database';
+import { Badge } from '../common/Badge';
 import { cn } from '../common/utils';
+import { previewDatabaseCell } from './databaseCellPreview';
 
 type TableType = 'sessions' | 'morphological_data';
 
@@ -221,7 +223,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
       <div className="overflow-auto max-h-[min(70vh,48rem)]">
         <table aria-label={t(`database.caption.${tableType}`)} className="w-full border-collapse">
           <caption className="sr-only">{t(`database.caption.${tableType}`)}</caption>
-          <thead className="sticky top-0 bg-background/90 backdrop-blur z-10">
+          <thead className="sticky top-0 bg-background z-10">
             <tr className="border-b border-border">
                <th scope="col" className="px-2 py-2 w-10">
                 <input
@@ -278,6 +280,8 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
                   </td>
                   {config.columns.map((column) => {
                     const value = getFieldValue(row, column.key);
+                    // Bound actual DOM text, not just its visible CSS width.
+                    const preview = previewDatabaseCell(formatCellValue(value, column.key));
                     return (
                       <td
                         key={column.key}
@@ -314,10 +318,10 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({
                             )}
                           </>
                         ) : (
-                          <span>
-                            {column.key === 'created_at' || column.key === 'completed_at'
-                              ? formatDate(value)
-                              : formatCellValue(value, column.key)}
+                          <span title={preview}>
+                            {column.key === 'status' && typeof value === 'string' && ['completed', 'failed', 'pending', 'processing'].includes(value)
+                              ? <Badge variant={value === 'completed' ? 'success' : value === 'failed' ? 'error' : 'info'}>{t(`home.status.${value}`)}</Badge>
+                              : column.key === 'created_at' || column.key === 'completed_at' ? formatDate(value) : preview}
                           </span>
                         )}
                       </td>

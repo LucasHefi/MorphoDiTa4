@@ -26,6 +26,13 @@ describe('WorkflowService.saveWizardResults', () => {
     dbStoreMock.loadSessions.mockResolvedValue(undefined);
   });
 
+  it('persists only the explicit visible rows and not the source rows', async () => {
+    const visible = [{ source_type: 'analysis', original_form: 'pes', lemma: 'pes', tag: 'N', generated_form: null }];
+    databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '7', savedCount: 1 });
+    await expect(WorkflowService.saveWizardResults(taggedTokens, generatedForms, 'model', 'input', visible)).resolves.toBe(1);
+    expect(databaseMock.saveWizardResults).toHaveBeenCalledWith(expect.anything(), visible);
+  });
+
   it('persists analysis and generation rows through the transactional database command', async () => {
     databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '7', savedCount: 2 });
 
@@ -117,7 +124,7 @@ describe('WorkflowService.saveAnalyzerResult', () => {
     expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
   });
 
-  it('persists tokenize atomically with its count and no morphology rows', async () => {
+  it('persists token groups and spacing atomically for lossless session reload', async () => {
     databaseMock.saveWizardResults.mockResolvedValue({ sessionId: '9', savedCount: 0 });
 
     await expect(
@@ -125,7 +132,7 @@ describe('WorkflowService.saveAnalyzerResult', () => {
     ).resolves.toBe(2);
 
     expect(databaseMock.saveWizardResults).toHaveBeenCalledWith(
-      expect.objectContaining({ operation: 'tokenize', result_count: 2, status: 'pending' }),
+      expect.objectContaining({ operation: 'tokenize', result_count: 2, status: 'pending', parameters: { workflow: 'analyzer', tokenization: [[{ token: 'psa', space: '' }], [{ token: 'pes', space: '' }]] } }),
       [],
     );
     expect(databaseMock.createSession).not.toHaveBeenCalled();

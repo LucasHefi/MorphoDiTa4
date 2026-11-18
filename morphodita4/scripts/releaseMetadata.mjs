@@ -82,8 +82,8 @@ export function validateReleaseMetadata(metadata) {
   if (mismatchedVersions.length > 0) {
     throw new Error(`release version mismatch: ${JSON.stringify(mismatchedVersions)}`);
   }
-  if (metadata.license !== 'MPL-2.0' || metadata.packageLicense !== 'MPL-2.0') {
-    throw new Error('application license must be MPL-2.0 in metadata and package.json');
+  if (metadata.license !== 'MIT' || metadata.packageLicense !== 'MIT') {
+    throw new Error('application license must be MIT in metadata and package.json');
   }
   if (
     metadata.modelLicenses.length !== metadata.models.length ||

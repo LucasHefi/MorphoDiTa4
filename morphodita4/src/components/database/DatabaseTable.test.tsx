@@ -129,4 +129,22 @@ describe('DatabaseTable keyboard semantics', () => {
     expect(status).toHaveBeenNthCalledWith(2, 'database.errorStatus');
   });
 
+  it('bounds large session text and tooltips while editing and saving the complete value', async () => {
+    const input = 'kočka '.repeat(276812) + 'konec';
+    const longData = [{ id: 'large', operation: 'tag', model: 'A', input_text: input, parameters: {}, result_count: 1, status: 'completed' }];
+    flushSync(() => root.render(<DatabaseTable tableType="sessions" data={longData as never[]} selectedIds={new Set()} onSelectChange={vi.fn()} onStatusChange={vi.fn()} onRefresh={vi.fn().mockResolvedValue(undefined)} />));
+    const cell = [...container.querySelectorAll('tbody td')].find(td => td.textContent?.startsWith('kočka')) as HTMLElement;
+    expect(cell.textContent!.length).toBeLessThanOrEqual(320);
+    expect(cell.querySelector('span')!.title.length).toBeLessThanOrEqual(320);
+    expect(cell.textContent).toMatch(/…$/);
+    expect(container.textContent!.length).toBeLessThan(2000);
+    flushSync(() => cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+    const editor = cell.querySelector('input')!;
+    expect(editor.value).toBe(input);
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(DatabaseService.updateRecord).toHaveBeenCalledWith('sessions', 'large', 'input_text', input);
+    expect(cell.textContent!.length).toBeLessThanOrEqual(320);
+  });
+
 });

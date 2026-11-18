@@ -1,0 +1,23 @@
+--- a/src/rest_server/microrestd/rest_server/rest_server.cpp
++++ b/src/rest_server/microrestd/rest_server/rest_server.cpp
+@@ -383,6 +383,12 @@
+ 
+   if (!microhttpd_request::initialize()) return false;
+ 
++  // MorphoDiTa Client desktop patch (2026-11-17): local processing only.
++  struct sockaddr_in loopback = {};
++  loopback.sin_family = AF_INET;
++  loopback.sin_port = htons(port);
++  loopback.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
++
+   for (int use_poll = 1; use_poll >= 0; use_poll--) {
+     MHD_OptionItem threadpool_size[] = {
+       { threads ? MHD_OPTION_THREAD_POOL_SIZE : MHD_OPTION_END, int(threads), nullptr },
+@@ -395,6 +401,7 @@
+ 
+     daemon = MHD_start_daemon((threads ? MHD_USE_SELECT_INTERNALLY : MHD_USE_THREAD_PER_CONNECTION) | (use_poll ? MHD_USE_POLL : 0) | MHD_USE_PIPE_FOR_SHUTDOWN,
+                               port, nullptr, nullptr, &handle_request, this,
++                              MHD_OPTION_SOCK_ADDR, reinterpret_cast<struct sockaddr*>(&loopback),
+                               MHD_OPTION_LISTENING_ADDRESS_REUSE, 1,
+                               MHD_OPTION_ARRAY, threadpool_size,
+                               MHD_OPTION_ARRAY, connection_limit,

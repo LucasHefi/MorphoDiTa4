@@ -129,9 +129,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
   ];
 
   return (
-    <div className="min-w-0 w-full mt-6 flex flex-col h-full">
-      <div className="flex justify-between items-center mb-4">
-         <h3 className="text-lg font-semibold text-foreground">{t('analyzer.results.title')}</h3>
+    <div className="result-panel min-w-0 w-full flex flex-col h-full">
+      <div className="flex justify-end items-center mb-4">
+
         <div className="flex gap-2">
           <Button
             variant="ghost"
@@ -142,7 +142,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
             className="h-8"
           >
             <Copy aria-hidden="true" className="w-4 h-4 mr-2" />
-             {t('analyzer.results.copy')}
+             {t('design.copyJson')}
           </Button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, operation }) =
         </div>
       )}
 
-       <div className="min-w-0 flex-1 bg-card rounded-xl border border-border shadow-sm p-4 overflow-auto">
+       <div className="min-w-0 flex-1 overflow-auto">
          <Tabs tabs={tabs} ariaLabel={t('analyzer.results.tabsLabel')} defaultTabId="table" />
       </div>
     </div>

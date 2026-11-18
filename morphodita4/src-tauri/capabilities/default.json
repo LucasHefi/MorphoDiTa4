@@ -7,17 +7,24 @@
   ],
   "permissions": [
     "core:default",
+    "core:window:allow-destroy",
     {
       "identifier": "fs:scope",
       "allow": [
-        { "path": "$APPDATA/models" },
-        { "path": "$APPDATA/models/**/*" }
+        {
+          "path": "$APPDATA/models"
+        },
+        {
+          "path": "$APPDATA/models/**/*"
+        }
       ]
     },
     "fs:allow-read-dir",
     "fs:allow-read-file",
     "fs:allow-read-text-file",
     "fs:allow-open",
+    "fs:allow-read",
+    "fs:allow-fstat",
     "fs:allow-write-file",
     "fs:allow-mkdir",
     "fs:allow-rename",
@@ -31,9 +38,19 @@
           "name": "binaries/morphodita-server",
           "sidecar": true,
           "args": [
-            { "validator": "^876[5-9]$" },
+            "--log_file=",
+            {
+              "validator": "^876[5-9]$"
+            },
             "czech-250909",
-            { "validator": "^(?:/(?:[A-Za-z0-9 _-][A-Za-z0-9._ -]*/)*models/czech-250909/czech\\.tagger|[A-Za-z]:\\\\(?:[A-Za-z0-9 _-][A-Za-z0-9._ -]*\\\\)*models\\\\czech-250909\\\\czech\\.tagger)$" },
+            {
+              "validator": "^(?:/(?:(?:[\\p{L}\\p{M}\\p{N} _-][\\p{L}\\p{M}\\p{N}._ -]*|\\.[\\p{L}\\p{M}\\p{N}_-][\\p{L}\\p{M}\\p{N}._ -]*)/)*models/czech-250909/czech\\.tagger|[A-Za-z]:\\\\(?:(?:[\\p{L}\\p{M}\\p{N} _-][\\p{L}\\p{M}\\p{N}._ -]*|\\.[\\p{L}\\p{M}\\p{N}_-][\\p{L}\\p{M}\\p{N}._ -]*)\\\\)*models\\\\czech-250909\\\\czech\\.tagger)$"
+            },
+            "https://hdl.handle.net/11234/1-5985",
+            "czech-250909-no_dia",
+            {
+              "validator": "^(?:/(?:(?:[\\p{L}\\p{M}\\p{N} _-][\\p{L}\\p{M}\\p{N}._ -]*|\\.[\\p{L}\\p{M}\\p{N}_-][\\p{L}\\p{M}\\p{N}._ -]*)/)*models/czech-250909-no_dia/czech\\.tagger|[A-Za-z]:\\\\(?:(?:[\\p{L}\\p{M}\\p{N} _-][\\p{L}\\p{M}\\p{N}._ -]*|\\.[\\p{L}\\p{M}\\p{N}_-][\\p{L}\\p{M}\\p{N}._ -]*)\\\\)*models\\\\czech-250909-no_dia\\\\czech\\.tagger)$"
+            },
             "https://hdl.handle.net/11234/1-5985"
           ]
         }

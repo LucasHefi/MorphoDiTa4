@@ -9,6 +9,7 @@ const dbStoreMock = vi.hoisted(() => ({
   loadSessions: vi.fn(),
 }));
 const apiRefreshMock = vi.hoisted(() => vi.fn());
+const appStateMock=vi.hoisted(()=>({theme:'light',language:'en',transportNotice:null as string|null,useOfflineMode:false,transportStatus:'online'}));
 const lifecycleMock = vi.hoisted(() => vi.fn());
 
 vi.mock('./store/useDbStore', () => ({
@@ -20,11 +21,7 @@ vi.mock('./store/useApiStore', () => ({
   },
 }));
 vi.mock('./store/useAppStore', () => ({
-  useAppStore: vi.fn(() => ({
-    theme: 'light',
-    language: 'en',
-    transportNotice: null,
-  })),
+  useAppStore: vi.fn(() => appStateMock),
 }));
 vi.mock('./services/appLifecycle', () => ({ registerAppCloseHook: lifecycleMock }));
 vi.mock('react-i18next', () => ({
@@ -58,6 +55,7 @@ describe('Layout startup loading', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    document.documentElement.lang = 'cs';
     dbStoreMock.loadSessions.mockResolvedValue(undefined);
     apiRefreshMock.mockResolvedValue(undefined);
     container = document.createElement('div');
@@ -70,7 +68,7 @@ describe('Layout startup loading', () => {
     container.remove();
   });
 
-  it('invokes loadSessions once during startup', async () => {
+  it('leaves large activity inputs to the dedicated dashboard endpoint', async () => {
     await flushReactUpdates(() => {
       root.render(
         <MemoryRouter>
@@ -81,10 +79,25 @@ describe('Layout startup loading', () => {
       );
     });
 
-    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
+    expect(document.documentElement.lang).toBe('en');
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
   });
 
-  it('loads activity at startup and whenever Home becomes active', async () => {
+  it('opens settings from the mode pill and omits only the redundant explicit-offline notice', async () => {
+    appStateMock.useOfflineMode=true;appStateMock.transportNotice='offline-explicit';
+    const router=createMemoryRouter([{path:'*',element:<Layout><div>content</div></Layout>}]);
+    await flushReactUpdates(()=>root.render(<RouterProvider router={router}/>));
+    const pill=container.querySelector('.mode-badge') as HTMLAnchorElement;
+    expect(pill.textContent).toContain('design.localMode');expect(pill.getAttribute('href')).toBe('/settings');
+    expect(container.querySelector('.transport-notice')).toBeNull();
+    await flushReactUpdates(()=>pill.click());expect(router.state.location.pathname).toBe('/settings');
+    appStateMock.transportNotice='offline-fallback';
+    await flushReactUpdates(()=>root.render(<MemoryRouter><Layout>fallback</Layout></MemoryRouter>));
+    expect(container.querySelector('.transport-notice')?.textContent).toBe('transport.offline-fallback');
+    appStateMock.useOfflineMode=false;appStateMock.transportNotice=null;router.dispose();
+  });
+
+  it('does not reload full session inputs when navigating to the statistics overview', async () => {
     const router = createMemoryRouter(
       [{ path: '*', element: <Layout><div>content</div></Layout> }],
       { initialEntries: ['/analyzer'] },
@@ -93,15 +106,15 @@ describe('Layout startup loading', () => {
       root.render(<RouterProvider router={router} />);
     });
 
-    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(1);
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
 
     await flushReactUpdates(() => router.navigate('/', { flushSync: true }));
-    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(2);
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
 
     await flushReactUpdates(() => router.navigate('/analyzer', { flushSync: true }));
 
     await flushReactUpdates(() => router.navigate('/', { flushSync: true }));
-    expect(dbStoreMock.loadSessions).toHaveBeenCalledTimes(3);
+    expect(dbStoreMock.loadSessions).not.toHaveBeenCalled();
     router.dispose();
   });
 });
@@ -136,6 +149,26 @@ describe('App lifecycle registration', () => {
 
     await flushReactUpdates(() => root.unmount());
     consoleError.mockRestore();
+    container.remove();
+  });
+});
+
+
+describe('Workspace navigation accessibility', () => {
+  it('keeps every route reachable and marks the active page with a skip target', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await flushReactUpdates(() => root.render(
+      <MemoryRouter initialEntries={['/analyzer']}><Layout><main>Workspace</main></Layout></MemoryRouter>,
+    ));
+    expect([...container.querySelectorAll('nav a')].map((link) => link.getAttribute('href'))).toEqual([
+      '/', '/analyzer', '/wizard', '/database', '/settings', '/about',
+    ]);
+    expect(container.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/analyzer');
+    expect(container.querySelector('a[href="#workspace"]')).not.toBeNull();
+    expect(container.querySelector('#workspace')?.getAttribute('tabindex')).toBe('-1');
+    await flushReactUpdates(() => root.unmount());
     container.remove();
   });
 });

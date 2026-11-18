@@ -28,10 +28,11 @@ export const WorkflowService = {
     generatedForms: GeneratedForm[],
     model: string,
     keywordsText: string,
+    visibleRows?: DatabasePayload[],
   ): Promise<number> {
     const morphData: DatabasePayload[] = [];
 
-    if (taggedTokens) {
+    if (!visibleRows && taggedTokens) {
       for (const token of taggedTokens) {
         morphData.push({
           session_id: null,
@@ -45,7 +46,7 @@ export const WorkflowService = {
       }
     }
 
-    if (generatedForms) {
+    if (!visibleRows && generatedForms) {
       for (const form of generatedForms) {
         morphData.push({
           session_id: null,
@@ -59,6 +60,8 @@ export const WorkflowService = {
       }
     }
 
+    if (visibleRows) morphData.push(...visibleRows);
+
     const result = await DatabaseService.saveWizardResults(
       {
         operation: 'analyze',
@@ -66,7 +69,7 @@ export const WorkflowService = {
         input_text: keywordsText || '',
         status: 'pending',
         result_count: 0,
-        parameters: {},
+        parameters: { workflow: 'wizard' },
       },
       morphData,
     );
@@ -96,7 +99,7 @@ export const WorkflowService = {
           input_text: inputText,
           status: 'pending',
           result_count: resultCount,
-          parameters: {},
+          parameters: { workflow: 'analyzer', tokenization: result },
         },
         [],
       );
@@ -137,7 +140,7 @@ export const WorkflowService = {
         input_text: inputText,
         status: 'pending',
         result_count: resultCount,
-        parameters: {},
+        parameters: { workflow: 'analyzer' },
       },
       morphData,
     );
